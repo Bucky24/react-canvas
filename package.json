@@ -1,0 +1,14 @@
+{
+  "name": "webpackBase",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "babel": "babel --presets es2015 js/main.js -o build/main.bundle.js",
+    "start": "webpack-dev-server --no-info --content-base build/",
+    "webpack": "webpack",
+    "postinstall": "mkdir node_modules ; cd node_modules ; rm .bin ; ln -s ../../node_modules/.bin ."
+  },
+  "author": "",
+  "license": "ISC"
+}
