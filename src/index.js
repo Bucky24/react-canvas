@@ -11,21 +11,25 @@ class Canvas extends React.Component {
 	getChildContext() {
 	    return { context: this.state.context };
 	}
-	componentDidUpdate() {
-		if (this.canvas) {
+	componentWillUpdate() {
+		if (this.props.width !== this.canvas.width) {
 			this.canvas.width = this.props.width;
+		}
+		if (this.props.height !== this.canvas.height) {
 			this.canvas.height = this.props.height;
 		}
 	}
-	componentDid
 	render() {
 		return <canvas
-			ref={(c) => { 
-				if (this.canvas !== c && c) {
-					this.canvas = c;
-					this.canvas.width = this.props.width;
-					this.canvas.height = this.props.height;
-					this.setState({ context: c ? c.getContext("2d") : null });
+			ref={(c) => {
+				if (c) {
+					const newContext = c.getContext('2d');
+					if (this.state.context !== newContext) {
+						this.canvas = c;
+						this.setState({
+							context: newContext
+						});
+					}
 				}
 			}}
 		>
@@ -79,6 +83,8 @@ const Shape = ({ x, y, points, color, fill }, { context }) => {
 
 Shape.contextTypes = Canvas.childContextTypes;
 
+const imageMap = {};
+
 class Image extends React.Component {
 	constructor(props) {
 		super(props);
@@ -96,19 +102,31 @@ class Image extends React.Component {
 			return null;
 		}
 		
+		let img;
+
 		const finishLoading = () => {
-			context.drawImage(img, x,y, width, height);
+			const image = imageMap[src];
+			context.drawImage(image, x,y, width, height);
 		}
 		
-		const body = document.getElementsByTagName("body")[0];
+		if (imageMap[src]) {
+			finishLoading(imageMap[src]);
+		} else {
+			const body = document.getElementsByTagName("body")[0];
 		
-		const img = document.createElement("img");
-		img.src = src;
-		img.onload = finishLoading;
-		if (img.loaded) {
-			finishLoading();
+			const img = document.createElement("img");
+			img.src = src;
+			img.onload = () => {
+				imageMap[src] = img;
+				finishLoading();
+			};
+			if (img.loaded) {
+				imageMap[src] = img;
+				finishLoading();
+			}
+			img.style.display = 'none';
+			body.append(img);
 		}
-		body.append(img);
 		
 		return null;
 	}

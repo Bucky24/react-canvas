@@ -6,7 +6,8 @@
 	"scripts": {
 		"clean": "rm -rf build",
 		"build": "babel src --out-dir build",
-		"example": "webpack-dev-server --config ./examples/basicExample/webpack.config.js"
+		"basicExample": "webpack-dev-server --config ./examples/basicExample/webpack.config.js",
+		"resizeExample": "webpack-dev-server --config ./examples/resizeExample/webpack.config.js"
 	},
 	"author": "Bucky24",
 	"license": "ISC",
