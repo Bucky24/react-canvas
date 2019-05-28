@@ -11,7 +11,6 @@ class Canvas extends React.Component {
 	getChildContext() {
 	    return { context: this.state.context };
 	}
-	
 	render() {
 		return <canvas
 			ref={(c) => { 
@@ -33,7 +32,7 @@ Canvas.childContextTypes = {
 };
 
 const Container = ({ children }) => {
-	return ({...children});
+	return [...children];
 }
 
 Container.contextTypes = Canvas.childContextTypes;

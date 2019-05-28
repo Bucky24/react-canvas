@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Text, Shape } from '../../reactCanvas';
+import { Container, Text, Shape } from 'react-canvas';
 
 const Thing = () => {
 	return (<Container>

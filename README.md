@@ -42,7 +42,7 @@ Accepts multiple children. Children should be valid ReactCanvas elements.
 ```
 	return (<div>
 		<Canvas
-			width={300}
+		width={300}
 			height={300}
 		>
 	</div>;

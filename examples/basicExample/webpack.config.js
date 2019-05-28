@@ -1,22 +1,31 @@
 var path = require('path');
 var webpack = require('webpack');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ProgressBarPlugin = require('progress-bar-webpack-plugin');
 
 module.exports = {
-	entry: './main.js',
+	entry: path.resolve(__dirname, './index.js'),
 	output: {
 		path: path.resolve(__dirname, 'build'),
 		filename: 'main.bundle.js'
 	},
-		module: {
-		loaders: [
+	resolve: {
+		alias: {
+			'react-canvas': path.resolve(__dirname, '../../src/index.js')
+		}
+	},
+	module: {
+		rules: [
 			{
 				test: /\.js$/,
-				loader: 'babel-loader',
 				exclude: /node_modules/,
-				query: {
-					presets: ['es2015', 'react', 'stage-2']
+				use: {
+					loader: 'babel-loader',
+					options: {
+						presets: [
+							require.resolve('@babel/preset-env'),
+							'@babel/preset-react'
+						]
+					}
 				}
 			},
 			{
@@ -53,8 +62,7 @@ module.exports = {
 	devtool: 'source-map',
 	plugins: [
 		new HtmlWebpackPlugin({
-			template: "index.tmpl.html"
-		}),
-		new ProgressBarPlugin()
+			template: path.resolve(__dirname, 'index.tmpl.html')
+		})
 	]
 };
