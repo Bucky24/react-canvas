@@ -11,9 +11,13 @@ var _propTypes = _interopRequireDefault(require("prop-types"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -58,22 +62,35 @@ function (_React$Component) {
       };
     }
   }, {
+    key: "componentWillUpdate",
+    value: function componentWillUpdate() {
+      if (this.props.width !== this.canvas.width) {
+        this.canvas.width = this.props.width;
+      }
+
+      if (this.props.height !== this.canvas.height) {
+        this.canvas.height = this.props.height;
+      }
+    }
+  }, {
     key: "render",
     value: function render() {
       var _this2 = this;
 
       return _react.default.createElement("canvas", {
         ref: function ref(c) {
-          if (_this2.canvas !== c && c) {
-            _this2.canvas = c;
+          if (c) {
+            var newContext = c.getContext('2d');
 
-            _this2.setState({
-              context: c ? c.getContext("2d") : null
-            });
+            if (_this2.state.context !== newContext) {
+              _this2.canvas = c;
+
+              _this2.setState({
+                context: newContext
+              });
+            }
           }
-        },
-        width: this.props.width,
-        height: this.props.height
+        }
       }, this.props.children);
     }
   }]);
@@ -89,7 +106,7 @@ Canvas.childContextTypes = {
 
 var Container = function Container(_ref) {
   var children = _ref.children;
-  return _objectSpread({}, children);
+  return _toConsumableArray(children);
 };
 
 exports.Container = Container;
@@ -145,6 +162,7 @@ var Shape = function Shape(_ref4, _ref5) {
 
 exports.Shape = Shape;
 Shape.contextTypes = Canvas.childContextTypes;
+var imageMap = {};
 
 var Image =
 /*#__PURE__*/
@@ -179,20 +197,36 @@ function (_React$Component2) {
         return null;
       }
 
+      var img;
+
       var finishLoading = function finishLoading() {
-        context.drawImage(img, x, y, width, height);
+        var image = imageMap[src];
+        context.drawImage(image, x, y, width, height);
       };
 
-      var body = document.getElementsByTagName("body")[0];
-      var img = document.createElement("img");
-      img.src = src;
-      img.onload = finishLoading;
+      if (imageMap[src]) {
+        finishLoading(imageMap[src]);
+      } else {
+        var body = document.getElementsByTagName("body")[0];
 
-      if (img.loaded) {
-        finishLoading();
+        var _img = document.createElement("img");
+
+        _img.src = src;
+
+        _img.onload = function () {
+          imageMap[src] = _img;
+          finishLoading();
+        };
+
+        if (_img.loaded) {
+          imageMap[src] = _img;
+          finishLoading();
+        }
+
+        _img.style.display = 'none';
+        body.append(_img);
       }
 
-      body.append(img);
       return null;
     }
   }]);
