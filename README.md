@@ -18,26 +18,26 @@ ReactCanvas has a peer dependency on `react` and `prop-types` but should be able
 
 The module exports a series of components that can be used in JSX.
 
-####Warning
+#### Warning
 
 These modules **must** be inside a Canvas object to work properly, and normal HTML tags cannot be used inside them. So you can't nest ReactCanvas tags, then HTML tags, then more ReactCanvas tags.
 
-####Canvas
+#### Canvas
 
 The root level element. This will actually create a &lt;canvas&gt; canvas tag on the page. However, it will also pass the 2D context object into React context of all its children. This allows the children to draw to the canvas object.
 
-#####Parameters
+#### Parameters
 
 | Parameter    | Description |
 | ----------- | ----------- |
 | width  | The width, in pixels, of the resulting canvas  |
 | height   | The height, in pixels, of the resulting canvas  |
 
-#####Children
+##### Children
 
-Accepts multple children. Children should be valid ReactCanvas elements.
+Accepts multiple children. Children should be valid ReactCanvas elements.
 
-#####Example
+##### Example
 
 ```
 	return (<div>
@@ -48,11 +48,11 @@ Accepts multple children. Children should be valid ReactCanvas elements.
 	</div>;
 ```
 
-####Shape
+#### Shape
 
 The Shape element is simple-it draws a shape centered around a given point. Note that there have to be at least 3 entries in the `points` array
 
-#####Parameters
+##### Parameters
 
 | Parameter    | Description |
 | ----------- | ----------- |
@@ -62,7 +62,7 @@ The Shape element is simple-it draws a shape centered around a given point. Note
 | color | A hex color code, which determines the color of the shape |
 | fill | a boolean value, which determines if the shape is drawn as an outline (false) or a filled in shape (true) |
 
-#####Example
+##### Example
 
 ```
 		<Canvas
@@ -83,22 +83,22 @@ The Shape element is simple-it draws a shape centered around a given point. Note
 		</Canvas>
 ```
 
-####Text
+#### Text
 
 Draws text to the screen at the given coordinates.
 
-#####Parameters
+##### Parameters
 
 | Parameter | Description |
 | ----------- | ----------- |
 | x  | The origin x coord of the text |
 | y   | The origin y coord of the text |
 
-#####Children
+##### Children
 
 Accepts a single child, which is the text to be displayed
 
-#####Example
+##### Example
 
 ```
 		<Canvas
@@ -114,11 +114,11 @@ Accepts a single child, which is the text to be displayed
 		</Canvas>
 ```
 
-####Image
+#### Image
 
 The Image element takes care of loading and displaying an image asset to the canvas. Currently it only takes in a src, similar to an &lt;img&gt; tag.
 
-#####Parameters
+##### Parameters
 
 | Parameter | Description |
 | ----------- | ----------- |
@@ -128,7 +128,7 @@ The Image element takes care of loading and displaying an image asset to the can
 | width | The width to draw the image at |
 | height | The height to draw the image at |
 
-#####Example
+##### Example
 
 ```
 		<Canvas
@@ -145,15 +145,15 @@ The Image element takes care of loading and displaying an image asset to the can
 		</Canvas>
 ```
 
-####Container
+#### Container
 
 The Container element acts as a collector. Some versions of React did not allow returning an array of elements from the `render` function. Because of this, always returning a singular &lt;div&gt; tag was a standard practice. Container takes the place of the div tag for ReactCanvas elements.
 
-#####Children
+##### Children
 
 Takes multiple children, must be ReactCanvas elements.
 
-#####Example
+##### Example
 
 ```
 	return <Container>
@@ -175,11 +175,11 @@ Takes multiple children, must be ReactCanvas elements.
 	</Container>;
 ```
 
-##Extending
+## Extending
 
 You can easily create your own elements that have access to the canvas context.
 
-#####Example
+##### Example
 
 ```
 import { Canvas } from 'react-canvas';
