@@ -4,8 +4,8 @@ import { Container, Text, Shape } from 'react-canvas';
 const Thing = () => {
 	return (<Container>
 		<Text
-			x={5}
-			y={60}
+			x={5}}
+			y={20}
 		>
 			Blah
 		</Text>

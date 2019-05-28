@@ -11,16 +11,23 @@ class Canvas extends React.Component {
 	getChildContext() {
 	    return { context: this.state.context };
 	}
+	componentDidUpdate() {
+		if (this.canvas) {
+			this.canvas.width = this.props.width;
+			this.canvas.height = this.props.height;
+		}
+	}
+	componentDid
 	render() {
 		return <canvas
 			ref={(c) => { 
 				if (this.canvas !== c && c) {
-					this.canvas = c; 
+					this.canvas = c;
+					this.canvas.width = this.props.width;
+					this.canvas.height = this.props.height;
 					this.setState({ context: c ? c.getContext("2d") : null });
 				}
 			}}
-			width={this.props.width}
-			height={this.props.height}
 		>
 			{this.props.children}
 		</canvas>;
