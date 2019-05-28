@@ -3,21 +3,9 @@ import { Container, Text, Shape } from 'react-canvas';
 
 const Thing = () => {
 	return (<Container>
-		<Text
-			x={5}
-			y={20}
-		>
-			Blah
+		<Text x={200} y={200}>
+			blah blah blah
 		</Text>
-		<Shape
-			points={[
-				{ x: 10, y: 10},
-				{ x: 100, y: 10 },
-				{ x: 10, y: 100}
-			]}
-			color="#f00"
-			fill={true}
-		/>
 	</Container>);
 };
 

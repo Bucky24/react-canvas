@@ -43,7 +43,11 @@ Canvas.childContextTypes = {
 };
 
 const Container = ({ children }) => {
-	return [...children];
+	if (Array.isArray(children)) {
+		return [...children];
+	} else {
+		return children;
+	}
 }
 
 Container.contextTypes = Canvas.childContextTypes;

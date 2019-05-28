@@ -106,7 +106,12 @@ Canvas.childContextTypes = {
 
 var Container = function Container(_ref) {
   var children = _ref.children;
-  return _toConsumableArray(children);
+
+  if (Array.isArray(children)) {
+    return _toConsumableArray(children);
+  } else {
+    return children;
+  }
 };
 
 exports.Container = Container;
