@@ -1,13 +1,14 @@
 {
 	"name": "react-canvas",
-	"version": "0.1.1",
+	"version": "0.2.0",
 	"description": "A library of components that can be used to manipulate a canvas using JSX embedded in react.",
 	"main": "build/index.js",
 	"scripts": {
 		"clean": "rm -rf build",
 		"build": "babel src --out-dir build",
 		"basicExample": "webpack-dev-server --config ./examples/basicExample/webpack.config.js",
-		"resizeExample": "webpack-dev-server --config ./examples/resizeExample/webpack.config.js"
+		"resizeExample": "webpack-dev-server --config ./examples/resizeExample/webpack.config.js",
+		"eventExample": "webpack-dev-server --config ./examples/eventExample/webpack.config.js"
 	},
 	"author": "Bucky24",
 	"license": "ISC",
@@ -18,11 +19,11 @@
 		"@babel/preset-env": "7.3.1",
 		"@babel/preset-react": "7.0.0",
 		"babel-loader": "8.0.6",
-		"css-loader": "^2.1.1",
-		"html-webpack-plugin": "^3.2.0",
-		"react": "^16.8.6",
-		"react-dom": "^16.8.6",
-		"style-loader": "^0.23.1",
+		"css-loader": "2.1.1",
+		"html-webpack-plugin": "3.2.0",
+		"react": "16.8.6",
+		"react-dom": "16.8.6",
+		"style-loader": "0.23.1",
 		"webpack": "4.32.2",
 		"webpack-cli": "3.3.2",
 		"webpack-dev-server": "3.4.1"

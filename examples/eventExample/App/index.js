@@ -1,0 +1,28 @@
+import React, { PropTypes } from 'react';
+import { Canvas } from 'react-canvas';
+import Button from '../Button';
+
+import styles from './styles.css';
+
+class App extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+	render() {
+		return (<div className={styles.appRoot}>
+			<Canvas
+				width={300}
+				height={300}
+			>
+				<Button 
+					x={100}
+					y={100}
+					width={100}
+					height={50}
+				/>
+			</Canvas>
+		</div>);
+	}
+};
+
+export default App;

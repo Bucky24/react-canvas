@@ -1,15 +1,47 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+export const EventTypes = {
+	MOVE: 'move'
+};
+
 class Canvas extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			context: null
 		};
+		
+		this.reattachListeners = this.reattachListeners.bind(this);
+		this.handleMouseMove = this.handleMouseMove.bind(this);
+		this.registerListener = this.registerListener.bind(this);
+		this.unregisterListener = this.unregisterListener.bind(this);
+		
+		// map of event to array of function callbacks
+		this.listeners = {};
+	}
+	registerListener(event, fn) {
+		if (!this.listeners[event]) {
+			this.listeners[event] = [];
+		}
+		this.listeners[event].push(fn);
+	}
+	unregisterListener(event, fn) {
+		if (!this.listeners[event]) {
+			return;
+		}
+		
+		const index = this.listeners[event].indexOf(fn);
+		
+		if (index < 0) return;
+		this.listeners[event].splice(index, 1);
 	}
 	getChildContext() {
-	    return { context: this.state.context };
+	    return {
+			context: this.state.context,
+			registerListener: this.registerListener,
+			unregisterListener: this.unregisterListener
+		};
 	}
 	componentWillUpdate() {
 		if (this.props.width !== this.canvas.width) {
@@ -18,6 +50,28 @@ class Canvas extends React.Component {
 		if (this.props.height !== this.canvas.height) {
 			this.canvas.height = this.props.height;
 		}
+	}
+	reattachListeners() {
+		// remove previous event handlers. this is so we avoid
+		// double and triple triggering events
+		this.canvas.removeEventListener('mousemove', this.handleMouseMove);
+		
+		this.canvas.addEventListener('mousemove', this.handleMouseMove);
+	}
+	handleMouseMove(event) {
+		this.triggerEvent(EventTypes.MOVE, {
+			x: event.clientX,
+			y: event.clientY
+		});
+	}
+	triggerEvent(event, data) {
+		if (!this.listeners[event]) {
+			return;
+		}
+		
+		this.listeners[event].forEach((fn) => {
+			fn(data);
+		})
 	}
 	render() {
 		return <canvas
@@ -28,6 +82,8 @@ class Canvas extends React.Component {
 						this.canvas = c;
 						this.setState({
 							context: newContext
+						}, () => {
+							this.reattachListeners();
 						});
 					}
 				}
@@ -39,7 +95,9 @@ class Canvas extends React.Component {
 };
 
 Canvas.childContextTypes = {
-  context: PropTypes.object
+ 	context: PropTypes.object,
+	registerListener: PropTypes.func,
+	unregisterListener: PropTypes.func
 };
 
 const Container = ({ children }) => {

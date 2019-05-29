@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Image = exports.Shape = exports.Text = exports.Container = exports.Canvas = void 0;
+exports.Image = exports.Shape = exports.Text = exports.Container = exports.Canvas = exports.EventTypes = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
@@ -29,13 +29,18 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var EventTypes = {
+  MOVE: 'move'
+};
+exports.EventTypes = EventTypes;
 
 var Canvas =
 /*#__PURE__*/
@@ -51,14 +56,42 @@ function (_React$Component) {
     _this.state = {
       context: null
     };
+    _this.reattachListeners = _this.reattachListeners.bind(_assertThisInitialized(_this));
+    _this.handleMouseMove = _this.handleMouseMove.bind(_assertThisInitialized(_this));
+    _this.registerListener = _this.registerListener.bind(_assertThisInitialized(_this));
+    _this.unregisterListener = _this.unregisterListener.bind(_assertThisInitialized(_this)); // map of event to array of function callbacks
+
+    _this.listeners = {};
     return _this;
   }
 
   _createClass(Canvas, [{
+    key: "registerListener",
+    value: function registerListener(event, fn) {
+      if (!this.listeners[event]) {
+        this.listeners[event] = [];
+      }
+
+      this.listeners[event].push(fn);
+    }
+  }, {
+    key: "unregisterListener",
+    value: function unregisterListener(event, fn) {
+      if (!this.listeners[event]) {
+        return;
+      }
+
+      var index = this.listeners[event].indexOf(fn);
+      if (index < 0) return;
+      this.listeners[event].splice(index, 1);
+    }
+  }, {
     key: "getChildContext",
     value: function getChildContext() {
       return {
-        context: this.state.context
+        context: this.state.context,
+        registerListener: this.registerListener,
+        unregisterListener: this.unregisterListener
       };
     }
   }, {
@@ -71,6 +104,33 @@ function (_React$Component) {
       if (this.props.height !== this.canvas.height) {
         this.canvas.height = this.props.height;
       }
+    }
+  }, {
+    key: "reattachListeners",
+    value: function reattachListeners() {
+      // remove previous event handlers. this is so we avoid
+      // double and triple triggering events
+      this.canvas.removeEventListener('mousemove', this.handleMouseMove);
+      this.canvas.addEventListener('mousemove', this.handleMouseMove);
+    }
+  }, {
+    key: "handleMouseMove",
+    value: function handleMouseMove(event) {
+      this.triggerEvent(EventTypes.MOVE, {
+        x: event.clientX,
+        y: event.clientY
+      });
+    }
+  }, {
+    key: "triggerEvent",
+    value: function triggerEvent(event, data) {
+      if (!this.listeners[event]) {
+        return;
+      }
+
+      this.listeners[event].forEach(function (fn) {
+        fn(data);
+      });
     }
   }, {
     key: "render",
@@ -87,6 +147,8 @@ function (_React$Component) {
 
               _this2.setState({
                 context: newContext
+              }, function () {
+                _this2.reattachListeners();
               });
             }
           }
@@ -101,7 +163,9 @@ function (_React$Component) {
 exports.Canvas = Canvas;
 ;
 Canvas.childContextTypes = {
-  context: _propTypes.default.object
+  context: _propTypes.default.object,
+  registerListener: _propTypes.default.func,
+  unregisterListener: _propTypes.default.func
 };
 
 var Container = function Container(_ref) {

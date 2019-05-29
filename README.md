@@ -40,12 +40,12 @@ Accepts multiple children. Children should be valid ReactCanvas elements.
 ##### Example
 
 ```
-	return (<div>
-		<Canvas
+return (<div>
+	<Canvas
 		width={300}
-			height={300}
-		>
-	</div>;
+		height={300}
+	>
+</div>;
 ```
 
 #### Shape
@@ -65,22 +65,22 @@ The Shape element is simple-it draws a shape centered around a given point. Note
 ##### Example
 
 ```
-		<Canvas
-			width={300}
-			height={300}
-		>
-			<Shape
-				x={40}
-				y={0}
-				points={[
-					{ x: 10, y: 10},
-					{ x: 100, y: 10 },
-					{ x: 10, y: 100}
-				]}
-				color="#f00"
-				fill={true}
-			/>
-		</Canvas>
+<Canvas
+	width={300}
+	height={300}
+>
+	<Shape
+		x={40}
+		y={0}
+		points={[
+			{ x: 10, y: 10},
+			{ x: 100, y: 10 },
+			{ x: 10, y: 100}
+		]}
+		color="#f00"
+		fill={true}
+	/>
+</Canvas>
 ```
 
 #### Text
@@ -101,17 +101,17 @@ Accepts a single child, which is the text to be displayed
 ##### Example
 
 ```
-		<Canvas
-			width={300}
-			height={300}
-		>
-			<Text
-				x={5}
-				y={60}
-			>
-				Some text here
-			</Text>
-		</Canvas>
+<Canvas
+	width={300}
+	height={300}
+>
+	<Text
+		x={5}
+		y={60}
+	>
+		Some text here
+	</Text>
+</Canvas>
 ```
 
 #### Image
@@ -131,18 +131,18 @@ The Image element takes care of loading and displaying an image asset to the can
 ##### Example
 
 ```
-		<Canvas
-			width={300}
-			height={300}
-		>
-			<Image
-				src="http://solumcraft.com/favicon.ico"
-				x={40}
-				y={50}
-				width={50}
-				height={50}
-			/>
-		</Canvas>
+<Canvas
+	width={300}
+	height={300}
+>
+	<Image
+		src="http://solumcraft.com/favicon.ico"
+		x={40}
+		y={50}
+		width={50}
+		height={50}
+	/>
+</Canvas>
 ```
 
 #### Container
@@ -174,6 +174,18 @@ Takes multiple children, must be ReactCanvas elements.
 		/>
 	</Container>;
 ```
+
+## Events
+
+It is possible to hook into canvas events for your component by using the `registerListener` and `unregisterListener` functions on the context.
+
+Both `registerListener` and `unregisterListener` take in two parameters: an EventType, and a closure that will be passed a data object when the event is triggered.
+
+It is recommended that your component call `registerListener` only once, and that you call `unregisterListener` when the component is about to unmount, similar to any other listeners in react.
+
+| Event Type | Triggered by | Contents of Data |
+| -- | -- | -- |
+| EventTypes.MOVE | The mouse moving across the canvas | An object containing x and y of the mouse on the canvas | 
 
 ## Extending
 
