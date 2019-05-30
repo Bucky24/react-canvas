@@ -60,7 +60,15 @@ class Canvas extends React.Component {
 			unregisterListener: this.unregisterListener
 		};
 	}
-	componentWillUpdate() {
+	componentWillUpdate(newProps) {
+		if (newProps.width !== this.canvas.width) {
+			this.canvas.width = newProps.width;
+		}
+		if (newProps.height !== this.canvas.height) {
+			this.canvas.height = newProps.height;
+		}
+	}
+	componentDidMount() {
 		if (this.props.width !== this.canvas.width) {
 			this.canvas.width = this.props.width;
 		}
