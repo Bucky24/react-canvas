@@ -2,8 +2,23 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 export const EventTypes = {
-	MOVE: 'move'
+	MOVE: 'move',
+	MOUSE_DOWN: 'down',
+	MOUSE_UP: 'up'
 };
+
+export const ButtonTypes = {
+	LEFT: 'left',
+	MIDDLE: 'middle',
+	RIGHT: 'right'
+}
+
+// 0=left, 1=middle, 2=right
+const ButtonMap = [
+	ButtonTypes.LEFT,
+	ButtonTypes.MIDDLE,
+	ButtonTypes.RIGHT
+];
 
 class Canvas extends React.Component {
 	constructor(props) {
@@ -14,6 +29,8 @@ class Canvas extends React.Component {
 		
 		this.reattachListeners = this.reattachListeners.bind(this);
 		this.handleMouseMove = this.handleMouseMove.bind(this);
+		this.handleMouseUp = this.handleMouseUp.bind(this);
+		this.handleMouseDown = this.handleMouseDown.bind(this);
 		this.registerListener = this.registerListener.bind(this);
 		this.unregisterListener = this.unregisterListener.bind(this);
 		
@@ -55,13 +72,31 @@ class Canvas extends React.Component {
 		// remove previous event handlers. this is so we avoid
 		// double and triple triggering events
 		this.canvas.removeEventListener('mousemove', this.handleMouseMove);
+		this.canvas.removeEventListener('mousedown', this.handleMouseDown);
+		this.canvas.removeEventListener('mouseup', this.handleMouseDown);
 		
 		this.canvas.addEventListener('mousemove', this.handleMouseMove);
+		this.canvas.addEventListener('mousedown', this.handleMouseDown);
+		this.canvas.addEventListener('mouseup', this.handleMouseUp);
 	}
 	handleMouseMove(event) {
 		this.triggerEvent(EventTypes.MOVE, {
 			x: event.clientX,
 			y: event.clientY
+		});
+	}
+	handleMouseDown(event) {
+		this.triggerEvent(EventTypes.MOUSE_DOWN, {
+			x: event.clientX,
+			y: event.clientY,
+			button: ButtonMap[event.button]
+		});
+	}
+	handleMouseUp(event) {
+		this.triggerEvent(EventTypes.MOUSE_UP, {
+			x: event.clientX,
+			y: event.clientY,
+			button: ButtonMap[event.button]
 		});
 	}
 	triggerEvent(event, data) {
@@ -196,10 +231,61 @@ class Image extends React.Component {
 
 Image.contextTypes = Canvas.childContextTypes;
 
+class CanvasComponent extends React.Component {
+	constructor(props) {
+		super(props);
+		
+		this.bounds = null;
+		
+		this.handleMove = this.handleMove.bind(this);
+		this.handleUp = this.handleUp.bind(this);
+		this.handleDown = this.handleDown.bind(this);
+	}
+	componentDidMount() {
+		this.context.registerListener(EventTypes.MOVE, this.handleMove);
+		this.context.registerListener(EventTypes.MOUSE_UP, this.handleUp);
+		this.context.registerListener(EventTypes.MOUSE_DOWN, this.handleDown);
+	}
+	insideMe(x, y) {
+		if (!this.bounds) {
+			return false;
+		}
+		return x > this.bounds.x && x < this.bounds.x + this.bounds.width && y > this.bounds.y && y < this.bounds.y + this.bounds.height
+	}
+	handleMove(data) {
+		let insideMe = this.insideMe(data.x, data.y);
+		
+		this.onMouseMove(data, insideMe);
+	}
+	handleUp(data) {
+		let insideMe = this.insideMe(data.x, data.y);
+		
+		this.onMouseUp(data, insideMe);
+	}
+	handleDown(data) {
+		let insideMe = this.insideMe(data.x, data.y);
+		
+		this.onMouseDown(data, insideMe);
+	}
+	componentWillUnmount() {
+		this.context.unregisterListener(EventTypes.MOVE, this.handleMove);
+		this.context.unregisterListener(EventTypes.MOUSE_UP, this.handleUp);
+		this.context.unregisterListener(EventTypes.MOUSE_DOWN, this.handleDown);
+	}
+	
+	// stubs
+	onMouseMove() {}
+	onMouseUp() {}
+	onMouseDown() {}
+}
+
+CanvasComponent.contextTypes = Canvas.childContextTypes;
+
 export {
 	Canvas,
 	Container,
 	Text,
 	Shape,
-	Image
+	Image,
+	CanvasComponent
 };

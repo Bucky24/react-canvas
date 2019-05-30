@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Image = exports.Shape = exports.Text = exports.Container = exports.Canvas = exports.EventTypes = void 0;
+exports.CanvasComponent = exports.Image = exports.Shape = exports.Text = exports.Container = exports.Canvas = exports.ButtonTypes = exports.EventTypes = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
@@ -38,9 +38,19 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
 var EventTypes = {
-  MOVE: 'move'
+  MOVE: 'move',
+  MOUSE_DOWN: 'down',
+  MOUSE_UP: 'up'
 };
 exports.EventTypes = EventTypes;
+var ButtonTypes = {
+  LEFT: 'left',
+  MIDDLE: 'middle',
+  RIGHT: 'right' // 0=left, 1=middle, 2=right
+
+};
+exports.ButtonTypes = ButtonTypes;
+var ButtonMap = [ButtonTypes.LEFT, ButtonTypes.MIDDLE, ButtonTypes.RIGHT];
 
 var Canvas =
 /*#__PURE__*/
@@ -58,6 +68,8 @@ function (_React$Component) {
     };
     _this.reattachListeners = _this.reattachListeners.bind(_assertThisInitialized(_this));
     _this.handleMouseMove = _this.handleMouseMove.bind(_assertThisInitialized(_this));
+    _this.handleMouseUp = _this.handleMouseUp.bind(_assertThisInitialized(_this));
+    _this.handleMouseDown = _this.handleMouseDown.bind(_assertThisInitialized(_this));
     _this.registerListener = _this.registerListener.bind(_assertThisInitialized(_this));
     _this.unregisterListener = _this.unregisterListener.bind(_assertThisInitialized(_this)); // map of event to array of function callbacks
 
@@ -111,7 +123,11 @@ function (_React$Component) {
       // remove previous event handlers. this is so we avoid
       // double and triple triggering events
       this.canvas.removeEventListener('mousemove', this.handleMouseMove);
+      this.canvas.removeEventListener('mousedown', this.handleMouseDown);
+      this.canvas.removeEventListener('mouseup', this.handleMouseDown);
       this.canvas.addEventListener('mousemove', this.handleMouseMove);
+      this.canvas.addEventListener('mousedown', this.handleMouseDown);
+      this.canvas.addEventListener('mouseup', this.handleMouseUp);
     }
   }, {
     key: "handleMouseMove",
@@ -119,6 +135,24 @@ function (_React$Component) {
       this.triggerEvent(EventTypes.MOVE, {
         x: event.clientX,
         y: event.clientY
+      });
+    }
+  }, {
+    key: "handleMouseDown",
+    value: function handleMouseDown(event) {
+      this.triggerEvent(EventTypes.MOUSE_DOWN, {
+        x: event.clientX,
+        y: event.clientY,
+        button: ButtonMap[event.button]
+      });
+    }
+  }, {
+    key: "handleMouseUp",
+    value: function handleMouseUp(event) {
+      this.triggerEvent(EventTypes.MOUSE_UP, {
+        x: event.clientX,
+        y: event.clientY,
+        button: ButtonMap[event.button]
       });
     }
   }, {
@@ -306,3 +340,80 @@ function (_React$Component2) {
 exports.Image = Image;
 ;
 Image.contextTypes = Canvas.childContextTypes;
+
+var CanvasComponent =
+/*#__PURE__*/
+function (_React$Component3) {
+  _inherits(CanvasComponent, _React$Component3);
+
+  function CanvasComponent(props) {
+    var _this4;
+
+    _classCallCheck(this, CanvasComponent);
+
+    _this4 = _possibleConstructorReturn(this, _getPrototypeOf(CanvasComponent).call(this, props));
+    _this4.bounds = null;
+    _this4.handleMove = _this4.handleMove.bind(_assertThisInitialized(_this4));
+    _this4.handleUp = _this4.handleUp.bind(_assertThisInitialized(_this4));
+    _this4.handleDown = _this4.handleDown.bind(_assertThisInitialized(_this4));
+    return _this4;
+  }
+
+  _createClass(CanvasComponent, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.context.registerListener(EventTypes.MOVE, this.handleMove);
+      this.context.registerListener(EventTypes.MOUSE_UP, this.handleUp);
+      this.context.registerListener(EventTypes.MOUSE_DOWN, this.handleDown);
+    }
+  }, {
+    key: "insideMe",
+    value: function insideMe(x, y) {
+      if (!this.bounds) {
+        return false;
+      }
+
+      return x > this.bounds.x && x < this.bounds.x + this.bounds.width && y > this.bounds.y && y < this.bounds.y + this.bounds.height;
+    }
+  }, {
+    key: "handleMove",
+    value: function handleMove(data) {
+      var insideMe = this.insideMe(data.x, data.y);
+      this.onMouseMove(data, insideMe);
+    }
+  }, {
+    key: "handleUp",
+    value: function handleUp(data) {
+      var insideMe = this.insideMe(data.x, data.y);
+      this.onMouseUp(data, insideMe);
+    }
+  }, {
+    key: "handleDown",
+    value: function handleDown(data) {
+      var insideMe = this.insideMe(data.x, data.y);
+      this.onMouseDown(data, insideMe);
+    }
+  }, {
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      this.context.unregisterListener(EventTypes.MOVE, this.handleMove);
+      this.context.unregisterListener(EventTypes.MOUSE_UP, this.handleUp);
+      this.context.unregisterListener(EventTypes.MOUSE_DOWN, this.handleDown);
+    } // stubs
+
+  }, {
+    key: "onMouseMove",
+    value: function onMouseMove() {}
+  }, {
+    key: "onMouseUp",
+    value: function onMouseUp() {}
+  }, {
+    key: "onMouseDown",
+    value: function onMouseDown() {}
+  }]);
+
+  return CanvasComponent;
+}(_react.default.Component);
+
+exports.CanvasComponent = CanvasComponent;
+CanvasComponent.contextTypes = Canvas.childContextTypes;

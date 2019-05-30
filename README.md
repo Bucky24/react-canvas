@@ -177,6 +177,56 @@ Takes multiple children, must be ReactCanvas elements.
 
 ## Events
 
+#### CanvasComponent
+
+The easiest way to hook into canvas events is by having your components extend `CanvasComponent`. `CanvasComponent` is a class that extends `React.Component`, but also wraps the events from the `Canvas` parent, providing helpful React-like lifecycle functions instead.
+
+If `bounds` is set on the child object (containing x, y, width, and height), the second parameter of the callback will be a boolean indicating if the operation took place within those bounds. If no bounds are set, then this boolean is always false.
+
+##### Example
+
+```
+import React from 'react';
+import { CanvasComponent } from 'react-canvas';
+
+class MyElement extends CanvasComponent {
+	constructor(props) {
+		super(props);
+		
+		this.bounds = {
+			x: 100,
+			y: 100,
+			width: 20,
+			height: 20
+		};
+	}
+	onMouseMove({ x, y }, overMe) {
+		// take some action
+	}
+	onMouseDown({ x, y, button }, overMe) {
+		// take some action
+	}
+	onMouseUp({ x, y, button }, overMe) {
+		// take some action
+	}
+	render() {
+		// some rendering here
+	}
+}
+
+export default MyElement;
+```
+
+Note in the above example, the button will be an instance of the ButtonTypes, shown below
+
+| Type |
+| -- |
+| ButtonTypes.LEFT |
+| ButtonTypes.MIDDLE |
+| ButtonTypes.RIGHT |
+
+#### Raw Event Handling
+
 It is possible to hook into canvas events for your component by using the `registerListener` and `unregisterListener` functions on the context.
 
 Both `registerListener` and `unregisterListener` take in two parameters: an EventType, and a closure that will be passed a data object when the event is triggered.
@@ -186,6 +236,8 @@ It is recommended that your component call `registerListener` only once, and tha
 | Event Type | Triggered by | Contents of Data |
 | -- | -- | -- |
 | EventTypes.MOVE | The mouse moving across the canvas | An object containing x and y of the mouse on the canvas | 
+| EventTypes.MOUSE_UP | The mouse being released | An object containing x and y of the mouse on the canvas and a button corresponding to a ButtonType above |
+| EventTypes.MOUSE_DOWN| The mouse being pressed | An object containing x and y of the mouse on the canvas and a button corresponding to a ButtonType above |
 
 ## Extending
 
@@ -194,6 +246,7 @@ You can easily create your own elements that have access to the canvas context.
 ##### Example
 
 ```
+import React from 'react';
 import { Canvas } from 'react-canvas';
 
 const MyElement = (props, { context }) => {

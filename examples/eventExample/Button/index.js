@@ -1,5 +1,5 @@
+import { CanvasComponent, Container, Text, Shape } from 'react-canvas';
 import React from 'react';
-import { Container, Text, Shape, EventTypes, Canvas } from 'react-canvas';
 import PropTypes from 'prop-types';
 
 const propTypes = {
@@ -9,7 +9,7 @@ const propTypes = {
 	height: PropTypes.number
 };
 
-class Button extends React.Component {
+class Button extends CanvasComponent {
 	constructor(props) {
 		super(props);
 		
@@ -17,24 +17,22 @@ class Button extends React.Component {
 			mouseOver: false
 		};
 		
-		this.handleMove = this.handleMove.bind(this);
+		this.bounds = {
+			x: this.props.x,
+			y: this.props.y,
+			width: this.props.width,
+			height: this.props.height
+		};
 	}
-	componentDidMount() {
-		this.context.registerListener(EventTypes.MOVE, this.handleMove);
+	onMouseMove(data, overMe) {
+		this.setState({
+			mouseOver: overMe
+		});
 	}
-	handleMove(data) {
-		if (data.x > this.props.x && data.x < this.props.x + this.props.width && data.y > this.props.y && data.y < this.props.y + this.props.height) {
-			this.setState({
-				mouseOver: true
-			});
-		} else {
-			this.setState({
-				mouseOver: false
-			});
+	onMouseUp(data, overMe) {
+		if (overMe) {
+			alert('clicked!');
 		}
-	}
-	componentWillUnmount() {
-		this.context.unregisterListener(EventTypes.MOVE, this.handleMove);
 	}
 	render() {
 		const color = this.state.mouseOver ? '#0f0' : '#f00';
@@ -58,7 +56,6 @@ class Button extends React.Component {
 	}
 };
 
-Button.contextTypes = Canvas.childContextTypes;
 Button.propTypes = propTypes;
 
 export default Button;
