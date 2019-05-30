@@ -108,7 +108,18 @@ function (_React$Component) {
     }
   }, {
     key: "componentWillUpdate",
-    value: function componentWillUpdate() {
+    value: function componentWillUpdate(newProps) {
+      if (newProps.width !== this.canvas.width) {
+        this.canvas.width = newProps.width;
+      }
+
+      if (newProps.height !== this.canvas.height) {
+        this.canvas.height = newProps.height;
+      }
+    }
+  }, {
+    key: "componentDidMount",
+    value: function componentDidMount() {
       if (this.props.width !== this.canvas.width) {
         this.canvas.width = this.props.width;
       }
