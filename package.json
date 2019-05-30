@@ -1,5 +1,5 @@
 {
-	"name": "react-canvas",
+	"name": "reactcanvas",
 	"version": "0.3.0",
 	"description": "A library of components that can be used to manipulate a canvas using JSX embedded in react.",
 	"main": "build/index.js",
