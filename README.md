@@ -239,6 +239,37 @@ It is recommended that your component call `registerListener` only once, and tha
 | EventTypes.MOUSE_UP | The mouse being released | An object containing x and y of the mouse on the canvas and a button corresponding to a ButtonType above |
 | EventTypes.MOUSE_DOWN| The mouse being pressed | An object containing x and y of the mouse on the canvas and a button corresponding to a ButtonType above |
 
+### Handling on the Canvas
+
+Any component containing a Canvas object can listen for any events it emits via callbacks. The callbacks are given the same data as examples above.
+
+```
+class MyComponent extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+	render() {
+		return (<div className={styles.appRoot}>
+			<Canvas
+				width={300}
+				height={300}
+				onMove={(data) => {
+					console.log("mouse moved to", data.x, data.y);
+				}}
+				onMouseDown={() => {
+				
+				}}
+				onMouseUp={() => {
+				
+				}}
+			>
+				{ /* some things here */ }
+			</Canvas>
+		</div>);
+	}
+};
+```
+
 ## Extending
 
 You can easily create your own elements that have access to the canvas context.

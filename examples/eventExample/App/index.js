@@ -13,6 +13,9 @@ class App extends React.Component {
 			<Canvas
 				width={300}
 				height={300}
+				onMove={(data) => {
+					console.log("mouse moved to", data);
+				}}
 			>
 				<Button 
 					x={100}

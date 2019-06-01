@@ -20,6 +20,12 @@ const ButtonMap = [
 	ButtonTypes.RIGHT
 ];
 
+const handlerToProps = {
+	[EventTypes.MOVE]: 'onMove',
+	[EventTypes.MOUSE_DOWN]: 'onMouseDown',
+	[EventTypes.MOUSE_UP]: 'onMouseUp'
+};
+
 class Canvas extends React.Component {
 	constructor(props) {
 		super(props);
@@ -108,13 +114,19 @@ class Canvas extends React.Component {
 		});
 	}
 	triggerEvent(event, data) {
-		if (!this.listeners[event]) {
-			return;
+		if (this.listeners[event]) {
+			this.listeners[event].forEach((fn) => {
+				fn(data);
+			});
 		}
 		
-		this.listeners[event].forEach((fn) => {
-			fn(data);
-		})
+		if (handlerToProps[event]) {
+			const propName = handlerToProps[event];
+			const propFn = this.props[propName];
+			if (propFn) {
+				propFn(data);
+			}
+		}
 	}
 	render() {
 		return <canvas
