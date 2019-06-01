@@ -2,6 +2,8 @@ import React, { PropTypes } from 'react';
 import { Canvas, Text, Shape, Image } from 'react-canvas';
 import Thing from '../Thing';
 
+import sampleImage from '../sampleImage.png';
+
 import styles from './styles.css';
 
 const App = ({}) => {
@@ -30,6 +32,13 @@ const App = ({}) => {
 			<Image
 				src="http://solumcraft.com/favicon.ico"
 				x={40}
+				y={50}
+				width={50}
+				height={50}
+			/>
+			<Image
+				src={sampleImage}
+				x={100}
 				y={50}
 				width={50}
 				height={50}
