@@ -247,6 +247,37 @@ It is recommended that your component call `registerListener` only once, and tha
 | EventTypes.KEY_DOWN | A key being pressed or repeated | An object containing the char value of the key and the key code |
 | EventTypes.KEY_UP | A key being released | An object containing the char value of the key and the key code |
 
+### Handling on the Canvas
+
+Any component containing a Canvas object can listen for any events it emits via callbacks. The callbacks are given the same data as examples above.
+
+```
+class MyComponent extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+	render() {
+		return (<div className={styles.appRoot}>
+			<Canvas
+				width={300}
+				height={300}
+				onMove={(data) => {
+					console.log("mouse moved to", data.x, data.y);
+				}}
+				onMouseDown={() => {
+				
+				}}
+				onMouseUp={() => {
+				
+				}}
+			>
+				{ /* some things here */ }
+			</Canvas>
+		</div>);
+	}
+};
+```
+
 ## Extending
 
 You can easily create your own elements that have access to the canvas context.
