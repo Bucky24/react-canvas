@@ -2,9 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 export const EventTypes = {
-	MOVE: 'move',
-	MOUSE_DOWN: 'down',
-	MOUSE_UP: 'up'
+	MOVE: 'mousemove',
+	MOUSE_DOWN: 'mousedown',
+	MOUSE_UP: 'mouseup',
+	KEY_DOWN: 'keydown',
+	KEY_UP: 'keyup'
 };
 
 export const ButtonTypes = {
@@ -20,6 +22,40 @@ const ButtonMap = [
 	ButtonTypes.RIGHT
 ];
 
+function drawShape(x, y, context, points, color, fill) {
+	context.save();
+	context.fillStyle = color;
+	context.strokeStyle = color;
+	context.beginPath();
+	context.moveTo(points[0].x + x,points[0].y + y);
+	for (var i=1;i<points.length;i++) {
+		context.lineTo(points[i].x + x,points[i].y + y);
+	}
+	context.closePath();
+	if (fill) context.fill();
+	context.stroke();
+	context.restore();
+}
+
+const okCodes = [
+	'Space'
+];
+
+function getChar({ key, code }) {
+	if (code.indexOf('Key') === 0) {
+		return key;
+	}
+	
+	if (okCodes[code]) {
+		return key;
+	}
+	// if not key and not in map, then no char for it
+}
+
+function getCode({ code }) {
+	return code;
+}
+
 class Canvas extends React.Component {
 	constructor(props) {
 		super(props);
@@ -31,6 +67,8 @@ class Canvas extends React.Component {
 		this.handleMouseMove = this.handleMouseMove.bind(this);
 		this.handleMouseUp = this.handleMouseUp.bind(this);
 		this.handleMouseDown = this.handleMouseDown.bind(this);
+		this.handleKeyDown = this.handleKeyDown.bind(this);
+		this.handleKeyUp = this.handleKeyUp.bind(this);
 		this.registerListener = this.registerListener.bind(this);
 		this.unregisterListener = this.unregisterListener.bind(this);
 		
@@ -82,10 +120,14 @@ class Canvas extends React.Component {
 		this.canvas.removeEventListener('mousemove', this.handleMouseMove);
 		this.canvas.removeEventListener('mousedown', this.handleMouseDown);
 		this.canvas.removeEventListener('mouseup', this.handleMouseDown);
+		window.removeEventListener('keydown', this.handleKeyDown);
+		window.removeEventListener('keyup', this.handleKeyUp);
 		
 		this.canvas.addEventListener('mousemove', this.handleMouseMove);
 		this.canvas.addEventListener('mousedown', this.handleMouseDown);
 		this.canvas.addEventListener('mouseup', this.handleMouseUp);
+		window.addEventListener('keydown', this.handleKeyDown);
+		window.addEventListener('keyup', this.handleKeyUp);
 	}
 	handleMouseMove(event) {
 		this.triggerEvent(EventTypes.MOVE, {
@@ -105,6 +147,18 @@ class Canvas extends React.Component {
 			x: event.clientX,
 			y: event.clientY,
 			button: ButtonMap[event.button]
+		});
+	}
+	handleKeyDown(event) {
+		this.triggerEvent(EventTypes.KEY_DOWN, {
+			char: getChar(event),
+			code: getCode(event)
+		});
+	}
+	handleKeyUp(event) {
+		this.triggerEvent(EventTypes.KEY_UP, {
+			char: getChar(event),
+			code: getCode(event)
 		});
 	}
 	triggerEvent(event, data) {
@@ -170,18 +224,7 @@ const Shape = ({ x, y, points, color, fill }, { context }) => {
 		return null;
 	}
 	
-	context.save();
-	context.fillStyle = color;
-	context.strokeStyle = color;
-	context.beginPath();
-	context.moveTo(points[0].x + x,points[0].y + y);
-	for (var i=1;i<points.length;i++) {
-		context.lineTo(points[i].x + x,points[i].y + y);
-	}
-	context.closePath();
-	if (fill) context.fill();
-	context.stroke();
-	context.restore();
+	drawShape(x, y, context, points, color, fill);
 	
 	return null;
 }
@@ -248,11 +291,15 @@ class CanvasComponent extends React.Component {
 		this.handleMove = this.handleMove.bind(this);
 		this.handleUp = this.handleUp.bind(this);
 		this.handleDown = this.handleDown.bind(this);
+		this.onKeyDown = this.onKeyDown.bind(this);
+		this.onKeyUp = this.onKeyUp.bind(this);
 	}
 	componentDidMount() {
 		this.context.registerListener(EventTypes.MOVE, this.handleMove);
 		this.context.registerListener(EventTypes.MOUSE_UP, this.handleUp);
 		this.context.registerListener(EventTypes.MOUSE_DOWN, this.handleDown);
+		this.context.registerListener(EventTypes.KEY_DOWN, this.onKeyDown);
+		this.context.registerListener(EventTypes.KEY_DOWN, this.onKeyUp);
 	}
 	insideMe(x, y) {
 		if (!this.bounds) {
@@ -279,12 +326,16 @@ class CanvasComponent extends React.Component {
 		this.context.unregisterListener(EventTypes.MOVE, this.handleMove);
 		this.context.unregisterListener(EventTypes.MOUSE_UP, this.handleUp);
 		this.context.unregisterListener(EventTypes.MOUSE_DOWN, this.handleDown);
+		this.context.unregisterListener(EventTypes.KEY_DOWN, this.onKeyDown);
+		this.context.unregisterListener(EventTypes.KEY_DOWN, this.onKeyUp);
 	}
 	
 	// stubs
 	onMouseMove() {}
 	onMouseUp() {}
 	onMouseDown() {}
+	onKeyDown() {}
+	onKeyUp() {}
 }
 
 CanvasComponent.contextTypes = Canvas.childContextTypes;

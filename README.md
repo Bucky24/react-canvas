@@ -209,6 +209,12 @@ class MyElement extends CanvasComponent {
 	onMouseUp({ x, y, button }, overMe) {
 		// take some action
 	}
+	onKeyDown({ char, code }) {
+		// do something
+	}
+	onKeyUp({ char, code }) {
+		// do something
+	}
 	render() {
 		// some rendering here
 	}
@@ -238,6 +244,8 @@ It is recommended that your component call `registerListener` only once, and tha
 | EventTypes.MOVE | The mouse moving across the canvas | An object containing x and y of the mouse on the canvas | 
 | EventTypes.MOUSE_UP | The mouse being released | An object containing x and y of the mouse on the canvas and a button corresponding to a ButtonType above |
 | EventTypes.MOUSE_DOWN| The mouse being pressed | An object containing x and y of the mouse on the canvas and a button corresponding to a ButtonType above |
+| EventTypes.KEY_DOWN | A key being pressed or repeated | An object containing the char value of the key and the key code |
+| EventTypes.KEY_UP | A key being released | An object containing the char value of the key and the key code |
 
 ## Extending
 
