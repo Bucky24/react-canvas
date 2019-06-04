@@ -9,6 +9,8 @@ var _react = _interopRequireDefault(require("react"));
 
 var _propTypes = _interopRequireDefault(require("prop-types"));
 
+var _handlerToProps;
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
@@ -37,10 +39,14 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 var EventTypes = {
-  MOVE: 'move',
-  MOUSE_DOWN: 'down',
-  MOUSE_UP: 'up'
+  MOVE: 'mousemove',
+  MOUSE_DOWN: 'mousedown',
+  MOUSE_UP: 'mouseup',
+  KEY_DOWN: 'keydown',
+  KEY_UP: 'keyup'
 };
 exports.EventTypes = EventTypes;
 var ButtonTypes = {
@@ -51,6 +57,46 @@ var ButtonTypes = {
 };
 exports.ButtonTypes = ButtonTypes;
 var ButtonMap = [ButtonTypes.LEFT, ButtonTypes.MIDDLE, ButtonTypes.RIGHT];
+
+function drawShape(x, y, context, points, color, fill) {
+  context.save();
+  context.fillStyle = color;
+  context.strokeStyle = color;
+  context.beginPath();
+  context.moveTo(points[0].x + x, points[0].y + y);
+
+  for (var i = 1; i < points.length; i++) {
+    context.lineTo(points[i].x + x, points[i].y + y);
+  }
+
+  context.closePath();
+  if (fill) context.fill();
+  context.stroke();
+  context.restore();
+}
+
+var okCodes = ['Space'];
+
+function getChar(_ref) {
+  var key = _ref.key,
+      code = _ref.code;
+
+  if (code.indexOf('Key') === 0) {
+    return key;
+  }
+
+  if (okCodes[code]) {
+    return key;
+  } // if not key and not in map, then no char for it
+
+}
+
+function getCode(_ref2) {
+  var code = _ref2.code;
+  return code;
+}
+
+var handlerToProps = (_handlerToProps = {}, _defineProperty(_handlerToProps, EventTypes.MOVE, 'onMove'), _defineProperty(_handlerToProps, EventTypes.MOUSE_DOWN, 'onMouseDown'), _defineProperty(_handlerToProps, EventTypes.MOUSE_UP, 'onMouseUp'), _handlerToProps);
 
 var Canvas =
 /*#__PURE__*/
@@ -70,6 +116,8 @@ function (_React$Component) {
     _this.handleMouseMove = _this.handleMouseMove.bind(_assertThisInitialized(_this));
     _this.handleMouseUp = _this.handleMouseUp.bind(_assertThisInitialized(_this));
     _this.handleMouseDown = _this.handleMouseDown.bind(_assertThisInitialized(_this));
+    _this.handleKeyDown = _this.handleKeyDown.bind(_assertThisInitialized(_this));
+    _this.handleKeyUp = _this.handleKeyUp.bind(_assertThisInitialized(_this));
     _this.registerListener = _this.registerListener.bind(_assertThisInitialized(_this));
     _this.unregisterListener = _this.unregisterListener.bind(_assertThisInitialized(_this)); // map of event to array of function callbacks
 
@@ -136,9 +184,13 @@ function (_React$Component) {
       this.canvas.removeEventListener('mousemove', this.handleMouseMove);
       this.canvas.removeEventListener('mousedown', this.handleMouseDown);
       this.canvas.removeEventListener('mouseup', this.handleMouseDown);
+      window.removeEventListener('keydown', this.handleKeyDown);
+      window.removeEventListener('keyup', this.handleKeyUp);
       this.canvas.addEventListener('mousemove', this.handleMouseMove);
       this.canvas.addEventListener('mousedown', this.handleMouseDown);
       this.canvas.addEventListener('mouseup', this.handleMouseUp);
+      window.addEventListener('keydown', this.handleKeyDown);
+      window.addEventListener('keyup', this.handleKeyUp);
     }
   }, {
     key: "handleMouseMove",
@@ -167,15 +219,38 @@ function (_React$Component) {
       });
     }
   }, {
+    key: "handleKeyDown",
+    value: function handleKeyDown(event) {
+      this.triggerEvent(EventTypes.KEY_DOWN, {
+        char: getChar(event),
+        code: getCode(event)
+      });
+    }
+  }, {
+    key: "handleKeyUp",
+    value: function handleKeyUp(event) {
+      this.triggerEvent(EventTypes.KEY_UP, {
+        char: getChar(event),
+        code: getCode(event)
+      });
+    }
+  }, {
     key: "triggerEvent",
     value: function triggerEvent(event, data) {
-      if (!this.listeners[event]) {
-        return;
+      if (this.listeners[event]) {
+        this.listeners[event].forEach(function (fn) {
+          fn(data);
+        });
       }
 
-      this.listeners[event].forEach(function (fn) {
-        fn(data);
-      });
+      if (handlerToProps[event]) {
+        var propName = handlerToProps[event];
+        var propFn = this.props[propName];
+
+        if (propFn) {
+          propFn(data);
+        }
+      }
     }
   }, {
     key: "render",
@@ -213,8 +288,8 @@ Canvas.childContextTypes = {
   unregisterListener: _propTypes.default.func
 };
 
-var Container = function Container(_ref) {
-  var children = _ref.children;
+var Container = function Container(_ref3) {
+  var children = _ref3.children;
 
   if (Array.isArray(children)) {
     return _toConsumableArray(children);
@@ -226,11 +301,11 @@ var Container = function Container(_ref) {
 exports.Container = Container;
 Container.contextTypes = Canvas.childContextTypes;
 
-var Text = function Text(_ref2, _ref3) {
-  var children = _ref2.children,
-      x = _ref2.x,
-      y = _ref2.y;
-  var context = _ref3.context;
+var Text = function Text(_ref4, _ref5) {
+  var children = _ref4.children,
+      x = _ref4.x,
+      y = _ref4.y;
+  var context = _ref5.context;
 
   if (!context) {
     return null;
@@ -245,32 +320,19 @@ var Text = function Text(_ref2, _ref3) {
 exports.Text = Text;
 Text.contextTypes = Canvas.childContextTypes;
 
-var Shape = function Shape(_ref4, _ref5) {
-  var x = _ref4.x,
-      y = _ref4.y,
-      points = _ref4.points,
-      color = _ref4.color,
-      fill = _ref4.fill;
-  var context = _ref5.context;
+var Shape = function Shape(_ref6, _ref7) {
+  var x = _ref6.x,
+      y = _ref6.y,
+      points = _ref6.points,
+      color = _ref6.color,
+      fill = _ref6.fill;
+  var context = _ref7.context;
 
   if (points.length < 3 || !context) {
     return null;
   }
 
-  context.save();
-  context.fillStyle = color;
-  context.strokeStyle = color;
-  context.beginPath();
-  context.moveTo(points[0].x + x, points[0].y + y);
-
-  for (var i = 1; i < points.length; i++) {
-    context.lineTo(points[i].x + x, points[i].y + y);
-  }
-
-  context.closePath();
-  if (fill) context.fill();
-  context.stroke();
-  context.restore();
+  drawShape(x, y, context, points, color, fill);
   return null;
 };
 
@@ -367,6 +429,8 @@ function (_React$Component3) {
     _this4.handleMove = _this4.handleMove.bind(_assertThisInitialized(_this4));
     _this4.handleUp = _this4.handleUp.bind(_assertThisInitialized(_this4));
     _this4.handleDown = _this4.handleDown.bind(_assertThisInitialized(_this4));
+    _this4.onKeyDown = _this4.onKeyDown.bind(_assertThisInitialized(_this4));
+    _this4.onKeyUp = _this4.onKeyUp.bind(_assertThisInitialized(_this4));
     return _this4;
   }
 
@@ -376,6 +440,8 @@ function (_React$Component3) {
       this.context.registerListener(EventTypes.MOVE, this.handleMove);
       this.context.registerListener(EventTypes.MOUSE_UP, this.handleUp);
       this.context.registerListener(EventTypes.MOUSE_DOWN, this.handleDown);
+      this.context.registerListener(EventTypes.KEY_DOWN, this.onKeyDown);
+      this.context.registerListener(EventTypes.KEY_DOWN, this.onKeyUp);
     }
   }, {
     key: "insideMe",
@@ -410,6 +476,8 @@ function (_React$Component3) {
       this.context.unregisterListener(EventTypes.MOVE, this.handleMove);
       this.context.unregisterListener(EventTypes.MOUSE_UP, this.handleUp);
       this.context.unregisterListener(EventTypes.MOUSE_DOWN, this.handleDown);
+      this.context.unregisterListener(EventTypes.KEY_DOWN, this.onKeyDown);
+      this.context.unregisterListener(EventTypes.KEY_DOWN, this.onKeyUp);
     } // stubs
 
   }, {
@@ -421,6 +489,12 @@ function (_React$Component3) {
   }, {
     key: "onMouseDown",
     value: function onMouseDown() {}
+  }, {
+    key: "onKeyDown",
+    value: function onKeyDown() {}
+  }, {
+    key: "onKeyUp",
+    value: function onKeyUp() {}
   }]);
 
   return CanvasComponent;
