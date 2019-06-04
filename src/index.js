@@ -58,7 +58,9 @@ function getCode({ code }) {
 const handlerToProps = {
 	[EventTypes.MOVE]: 'onMove',
 	[EventTypes.MOUSE_DOWN]: 'onMouseDown',
-	[EventTypes.MOUSE_UP]: 'onMouseUp'
+	[EventTypes.MOUSE_UP]: 'onMouseUp',
+	[EventTypes.KEY_DOWN]: 'onKeyDown',
+	[EventTypes.KEY_UP]: 'onKeyUp'
 };
 class Canvas extends React.Component {
 	constructor(props) {
