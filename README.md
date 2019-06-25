@@ -1,6 +1,6 @@
 ## React-Canvas
 
-This module is intended to be a library that allows an HTML5 &lt;canvas&gt; element to exist seamlessly with a React application.
+This module is intended to be a library that allows an HTML5 &lt;canvas&gt; element to exist seamlessly with a React application, using React-like components to allow drawing onto the canvas using JSX.
 
 ## Installation
 
@@ -12,17 +12,19 @@ With Yarn
 
     yarn install react-canvas
 
-ReactCanvas has a peer dependency on `react` and `prop-types` but should be able to use whatever you have installed for your main project.
+ReactCanvas has a peer dependency on `react` and `prop-types` but should be able to use whatever you have installed for your main project. It does require the use of the child context apis, so React 16 is recommended at minimum.
 
 ## Usage
 
-The module exports a series of components that can be used in JSX.
+The module exports a series of components that can be used in JSX. To use, declare a canvas of specific width and height inside your React app, then use the same nesting syntax as the rest of React to draw various elements. The components register and behave (with some exceptions) as normal React components, so most standard behaviors with components should work for them.
 
 #### Warning
 
 These modules **must** be inside a Canvas object to work properly, and normal HTML tags cannot be used inside them. So you can't nest ReactCanvas tags, then HTML tags, then more ReactCanvas tags.
 
-#### Canvas
+## Available Elements
+
+### Canvas
 
 The root level element. This will actually create a &lt;canvas&gt; canvas tag on the page. However, it will also pass the 2D context object into React context of all its children. This allows the children to draw to the canvas object.
 
@@ -45,10 +47,12 @@ return (<div>
 		width={300}
 		height={300}
 	>
+	
+	</Canvas>
 </div>;
 ```
 
-#### Shape
+### Shape
 
 The Shape element is simple-it draws a shape centered around a given point. Note that there have to be at least 3 entries in the `points` array
 
@@ -83,7 +87,7 @@ The Shape element is simple-it draws a shape centered around a given point. Note
 </Canvas>
 ```
 
-#### Text
+### Text
 
 Draws text to the screen at the given coordinates.
 
@@ -114,9 +118,11 @@ Accepts a single child, which is the text to be displayed
 </Canvas>
 ```
 
-#### Image
+### Image
 
 The Image element takes care of loading and displaying an image asset to the canvas. Currently it only takes in a src, similar to an &lt;img&gt; tag.
+
+Images are cached after first load, so re-using the same src will not cause the image to be loaded from the server again.
 
 ##### Parameters
 
@@ -145,7 +151,71 @@ The Image element takes care of loading and displaying an image asset to the can
 </Canvas>
 ```
 
-#### Container
+### Line
+
+The Line element draws a line of a specific color between two given points.
+
+##### Parameters
+
+| Parameter    | Description |
+| ----------- | ----------- |
+| x | The origin x coord of the line |
+| y | The origin y coord of the line  |
+| x2 | The destination x coord of the line |
+| y2 | The destination y coord of the line  |
+| color | A hex color code, which determines the color of the line |
+
+##### Example
+
+```
+<Canvas
+	width={300}
+	height={300}
+>
+	<Line
+		x={40}
+		y={0}
+		x2={100}
+		y2={150}
+		color="#f00"
+	/>
+</Canvas>
+```
+
+### Rect
+
+The Rect element is just a wrapper around Shape that returns a rectangle drawn between two points.
+
+##### Parameters
+
+| Parameter    | Description |
+| ----------- | ----------- |
+| x | The first x coord of the rectangle |
+| y | The second y coord of the rectangle |
+| x2 | The second x coord of the rectangle |
+| y2 | The second y coord of the rectangle |
+| color | A hex color code, which determines the color of the rectangle |
+| fill | Boolean, indicates if the rectangle should be filled or an outline |
+
+##### Example
+
+```
+<Canvas
+	width={300}
+	height={300}
+>
+	<Rect
+		x={40}
+		y={0}
+		x2={100}
+		y2={150}
+		color="#f00"
+		fill={false}
+	/>
+</Canvas>
+```
+
+### Container
 
 The Container element acts as a collector. Some versions of React did not allow returning an array of elements from the `render` function. Because of this, always returning a singular &lt;div&gt; tag was a standard practice. Container takes the place of the div tag for ReactCanvas elements.
 
@@ -177,11 +247,13 @@ Takes multiple children, must be ReactCanvas elements.
 
 ## Events
 
-#### CanvasComponent
+### CanvasComponent
 
 The easiest way to hook into canvas events is by having your components extend `CanvasComponent`. `CanvasComponent` is a class that extends `React.Component`, but also wraps the events from the `Canvas` parent, providing helpful React-like lifecycle functions instead.
 
 If `bounds` is set on the child object (containing x, y, width, and height), the second parameter of the callback will be a boolean indicating if the operation took place within those bounds. If no bounds are set, then this boolean is always false.
+
+Note that if you make a component a CanvasComponent but it is not nested inside a Canvas element, it will throw an error to your console because the child context doesn't exist.
 
 ##### Example
 
@@ -231,7 +303,7 @@ Note in the above example, the button will be an instance of the ButtonTypes, sh
 | ButtonTypes.MIDDLE |
 | ButtonTypes.RIGHT |
 
-#### Raw Event Handling
+### Raw Event Handling
 
 It is possible to hook into canvas events for your component by using the `registerListener` and `unregisterListener` functions on the context.
 

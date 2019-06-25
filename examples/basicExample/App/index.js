@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { Canvas, Text, Shape, Image } from 'react-canvas';
+import { Canvas, Text, Shape, Image, Line, Rect } from 'react-canvas';
 import Thing from '../Thing';
 
 import sampleImage from '../sampleImage.png';
@@ -42,6 +42,21 @@ const App = ({}) => {
 				y={50}
 				width={50}
 				height={50}
+			/>
+			<Line
+				x={0}
+				y={0}
+				x2={300}
+				y2={10}
+				color="#555"
+			/>
+			<Rect
+				x={200}
+				y={50}
+				x2={250}
+				y2={100}
+				color="#bcd"
+				fill={false}
 			/>
 			<Thing />
 		</Canvas>

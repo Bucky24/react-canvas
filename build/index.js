@@ -96,7 +96,7 @@ function getCode(_ref2) {
   return code;
 }
 
-var handlerToProps = (_handlerToProps = {}, _defineProperty(_handlerToProps, EventTypes.MOVE, 'onMove'), _defineProperty(_handlerToProps, EventTypes.MOUSE_DOWN, 'onMouseDown'), _defineProperty(_handlerToProps, EventTypes.MOUSE_UP, 'onMouseUp'), _handlerToProps);
+var handlerToProps = (_handlerToProps = {}, _defineProperty(_handlerToProps, EventTypes.MOVE, 'onMove'), _defineProperty(_handlerToProps, EventTypes.MOUSE_DOWN, 'onMouseDown'), _defineProperty(_handlerToProps, EventTypes.MOUSE_UP, 'onMouseUp'), _defineProperty(_handlerToProps, EventTypes.KEY_DOWN, 'onKeyDown'), _defineProperty(_handlerToProps, EventTypes.KEY_UP, 'onKeyUp'), _handlerToProps);
 
 var Canvas =
 /*#__PURE__*/

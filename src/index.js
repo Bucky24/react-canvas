@@ -75,6 +75,7 @@ class Canvas extends React.Component {
 		this.handleMouseDown = this.handleMouseDown.bind(this);
 		this.handleKeyDown = this.handleKeyDown.bind(this);
 		this.handleKeyUp = this.handleKeyUp.bind(this);
+		this.handleContextMenu = this.handleContextMenu.bind(this);
 		this.registerListener = this.registerListener.bind(this);
 		this.unregisterListener = this.unregisterListener.bind(this);
 		
@@ -126,12 +127,14 @@ class Canvas extends React.Component {
 		this.canvas.removeEventListener('mousemove', this.handleMouseMove);
 		this.canvas.removeEventListener('mousedown', this.handleMouseDown);
 		this.canvas.removeEventListener('mouseup', this.handleMouseDown);
+		this.canvas.removeEventListener('contextmenu', this.handleContextMenu);
 		window.removeEventListener('keydown', this.handleKeyDown);
 		window.removeEventListener('keyup', this.handleKeyUp);
 		
 		this.canvas.addEventListener('mousemove', this.handleMouseMove);
 		this.canvas.addEventListener('mousedown', this.handleMouseDown);
 		this.canvas.addEventListener('mouseup', this.handleMouseUp);
+		this.canvas.addEventListener('contextmenu', this.handleContextMenu);
 		window.addEventListener('keydown', this.handleKeyDown);
 		window.addEventListener('keyup', this.handleKeyUp);
 	}
@@ -140,6 +143,7 @@ class Canvas extends React.Component {
 			x: event.clientX,
 			y: event.clientY
 		});
+		event.preventDefault();
 	}
 	handleMouseDown(event) {
 		this.triggerEvent(EventTypes.MOUSE_DOWN, {
@@ -147,6 +151,7 @@ class Canvas extends React.Component {
 			y: event.clientY,
 			button: ButtonMap[event.button]
 		});
+		event.preventDefault();
 	}
 	handleMouseUp(event) {
 		this.triggerEvent(EventTypes.MOUSE_UP, {
@@ -154,18 +159,24 @@ class Canvas extends React.Component {
 			y: event.clientY,
 			button: ButtonMap[event.button]
 		});
+		event.preventDefault();
 	}
 	handleKeyDown(event) {
 		this.triggerEvent(EventTypes.KEY_DOWN, {
 			char: getChar(event),
 			code: getCode(event)
 		});
+		event.preventDefault();
 	}
 	handleKeyUp(event) {
 		this.triggerEvent(EventTypes.KEY_UP, {
 			char: getChar(event),
 			code: getCode(event)
 		});
+		event.preventDefault();
+	}
+	handleContextMenu(event) {
+		event.preventDefault();
 	}
 	triggerEvent(event, data) {
 		if (this.listeners[event]) {
@@ -231,6 +242,23 @@ const Text = ({ children, x, y }, { context }) => {
 
 Text.contextTypes = Canvas.childContextTypes;
 
+const Line = ({ x, y, x2, y2, color }, { context }) => {
+	if (!context) {
+		return null;
+	}
+	context.save();
+	context.strokeStyle = color;
+	context.beginPath();
+	context.moveTo(x, y);
+	context.lineTo(x2, y2);
+	context.closePath();
+	context.stroke();
+	context.restore();
+	return null;
+}
+
+Line.contextTypes = Canvas.childContextTypes;
+
 const Shape = ({ x, y, points, color, fill }, { context }) => {
 	if (points.length < 3 || !context) {
 		return null;
@@ -242,6 +270,25 @@ const Shape = ({ x, y, points, color, fill }, { context }) => {
 }
 
 Shape.contextTypes = Canvas.childContextTypes;
+
+const Rect = ({ x, y, x2, y2, color, fill}, { context }) => {
+	const width = Math.abs(x2 - x);
+	const height = Math.abs(y2 - y);
+	return <Shape
+		x={x}
+		y={y}
+		points={[
+			{ x: 0, y: 0 },
+			{ x: 0, y: height },
+			{ x: width, y: height},
+			{ x: width, y: 0 }
+		]}
+		color={color}
+		fill={fill}
+	/>;
+}
+
+Rect.contextTypes = Canvas.childContextTypes;
 
 const imageMap = {};
 
@@ -307,6 +354,10 @@ class CanvasComponent extends React.Component {
 		this.onKeyUp = this.onKeyUp.bind(this);
 	}
 	componentDidMount() {
+		if (!this.context.registerListener) {
+			console.error('Unable to get child context for CanvasComponent-likely it is not nested inside a Canvas');
+			return;
+		}
 		this.context.registerListener(EventTypes.MOVE, this.handleMove);
 		this.context.registerListener(EventTypes.MOUSE_UP, this.handleUp);
 		this.context.registerListener(EventTypes.MOUSE_DOWN, this.handleDown);
@@ -335,6 +386,10 @@ class CanvasComponent extends React.Component {
 		this.onMouseDown(data, insideMe);
 	}
 	componentWillUnmount() {
+		if (!this.context.unregisterListener) {
+			console.error('Unable to get child context for CanvasComponent-likely it is not nested inside a Canvas');
+			return;
+		}
 		this.context.unregisterListener(EventTypes.MOVE, this.handleMove);
 		this.context.unregisterListener(EventTypes.MOUSE_UP, this.handleUp);
 		this.context.unregisterListener(EventTypes.MOUSE_DOWN, this.handleDown);
@@ -358,5 +413,7 @@ export {
 	Text,
 	Shape,
 	Image,
-	CanvasComponent
+	CanvasComponent,
+	Line,
+	Rect
 };
