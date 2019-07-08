@@ -75,19 +75,24 @@ function drawShape(x, y, context, points, color, fill) {
   context.restore();
 }
 
-var okCodes = ['Space'];
+var okCodes = ['Space', 'Backslash', 'BracketLeft', 'BracketRight', 'Quote', 'Semicolon', 'Period', 'Comma', 'Slash', 'Backquote', 'Minus', 'Equal'];
 
 function getChar(_ref) {
   var key = _ref.key,
       code = _ref.code;
+  console.log('key', key, 'code', code);
 
-  if (code.indexOf('Key') === 0) {
-    return key;
+  if (code.indexOf('Key') === 0 || code.indexOf('Digit') === 0 || code.indexOf('Numpad') === 0) {
+    // some though we don't want
+    if (code !== 'NumpadEnter') {
+      return key;
+    }
   }
 
-  if (okCodes[code]) {
+  if (okCodes.includes(code)) {
+    console.log('code ok');
     return key;
-  } // if not key and not in map, then no char for it
+  } // if not key and not [in map, then no char for it
 
 }
 

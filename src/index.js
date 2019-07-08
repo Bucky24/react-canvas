@@ -53,7 +53,6 @@ const okCodes = [
 ];
 
 function getChar({ key, code }) {
-	console.log('key', key, 'code', code);
 	if (code.indexOf('Key') === 0
 		|| code.indexOf('Digit') === 0
 		|| code.indexOf('Numpad') === 0
@@ -65,7 +64,6 @@ function getChar({ key, code }) {
 	}
 	
 	if (okCodes.includes(code)) {
-		console.log('code ok');
 		return key;
 	}
 	// if not key and not [in map, then no char for it
