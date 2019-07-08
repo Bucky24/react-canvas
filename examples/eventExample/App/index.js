@@ -14,9 +14,6 @@ class App extends React.Component {
 			<Canvas
 				width={300}
 				height={300}
-				onKeyUp={({ code, char }) => {
-					console.log(code, char);
-				}}
 			>
 				<Button 
 					x={100}

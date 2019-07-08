@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.CanvasComponent = exports.Image = exports.Shape = exports.Text = exports.Container = exports.Canvas = exports.ButtonTypes = exports.EventTypes = void 0;
+exports.Rect = exports.Line = exports.CanvasComponent = exports.Image = exports.Shape = exports.Text = exports.Container = exports.Canvas = exports.ButtonTypes = exports.EventTypes = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
@@ -118,6 +118,7 @@ function (_React$Component) {
     _this.handleMouseDown = _this.handleMouseDown.bind(_assertThisInitialized(_this));
     _this.handleKeyDown = _this.handleKeyDown.bind(_assertThisInitialized(_this));
     _this.handleKeyUp = _this.handleKeyUp.bind(_assertThisInitialized(_this));
+    _this.handleContextMenu = _this.handleContextMenu.bind(_assertThisInitialized(_this));
     _this.registerListener = _this.registerListener.bind(_assertThisInitialized(_this));
     _this.unregisterListener = _this.unregisterListener.bind(_assertThisInitialized(_this)); // map of event to array of function callbacks
 
@@ -184,11 +185,13 @@ function (_React$Component) {
       this.canvas.removeEventListener('mousemove', this.handleMouseMove);
       this.canvas.removeEventListener('mousedown', this.handleMouseDown);
       this.canvas.removeEventListener('mouseup', this.handleMouseDown);
+      this.canvas.removeEventListener('contextmenu', this.handleContextMenu);
       window.removeEventListener('keydown', this.handleKeyDown);
       window.removeEventListener('keyup', this.handleKeyUp);
       this.canvas.addEventListener('mousemove', this.handleMouseMove);
       this.canvas.addEventListener('mousedown', this.handleMouseDown);
       this.canvas.addEventListener('mouseup', this.handleMouseUp);
+      this.canvas.addEventListener('contextmenu', this.handleContextMenu);
       window.addEventListener('keydown', this.handleKeyDown);
       window.addEventListener('keyup', this.handleKeyUp);
     }
@@ -199,6 +202,7 @@ function (_React$Component) {
         x: event.clientX,
         y: event.clientY
       });
+      event.preventDefault();
     }
   }, {
     key: "handleMouseDown",
@@ -208,6 +212,7 @@ function (_React$Component) {
         y: event.clientY,
         button: ButtonMap[event.button]
       });
+      event.preventDefault();
     }
   }, {
     key: "handleMouseUp",
@@ -217,6 +222,7 @@ function (_React$Component) {
         y: event.clientY,
         button: ButtonMap[event.button]
       });
+      event.preventDefault();
     }
   }, {
     key: "handleKeyDown",
@@ -225,6 +231,7 @@ function (_React$Component) {
         char: getChar(event),
         code: getCode(event)
       });
+      event.preventDefault();
     }
   }, {
     key: "handleKeyUp",
@@ -233,6 +240,12 @@ function (_React$Component) {
         char: getChar(event),
         code: getCode(event)
       });
+      event.preventDefault();
+    }
+  }, {
+    key: "handleContextMenu",
+    value: function handleContextMenu(event) {
+      event.preventDefault();
     }
   }, {
     key: "triggerEvent",
@@ -320,13 +333,39 @@ var Text = function Text(_ref4, _ref5) {
 exports.Text = Text;
 Text.contextTypes = Canvas.childContextTypes;
 
-var Shape = function Shape(_ref6, _ref7) {
+var Line = function Line(_ref6, _ref7) {
   var x = _ref6.x,
       y = _ref6.y,
-      points = _ref6.points,
-      color = _ref6.color,
-      fill = _ref6.fill;
+      x2 = _ref6.x2,
+      y2 = _ref6.y2,
+      color = _ref6.color;
   var context = _ref7.context;
+
+  if (!context) {
+    return null;
+  }
+
+  context.save();
+  context.strokeStyle = color;
+  context.beginPath();
+  context.moveTo(x, y);
+  context.lineTo(x2, y2);
+  context.closePath();
+  context.stroke();
+  context.restore();
+  return null;
+};
+
+exports.Line = Line;
+Line.contextTypes = Canvas.childContextTypes;
+
+var Shape = function Shape(_ref8, _ref9) {
+  var x = _ref8.x,
+      y = _ref8.y,
+      points = _ref8.points,
+      color = _ref8.color,
+      fill = _ref8.fill;
+  var context = _ref9.context;
 
   if (points.length < 3 || !context) {
     return null;
@@ -338,6 +377,40 @@ var Shape = function Shape(_ref6, _ref7) {
 
 exports.Shape = Shape;
 Shape.contextTypes = Canvas.childContextTypes;
+
+var Rect = function Rect(_ref10, _ref11) {
+  var x = _ref10.x,
+      y = _ref10.y,
+      x2 = _ref10.x2,
+      y2 = _ref10.y2,
+      color = _ref10.color,
+      fill = _ref10.fill;
+  var context = _ref11.context;
+  var width = Math.abs(x2 - x);
+  var height = Math.abs(y2 - y);
+  return _react.default.createElement(Shape, {
+    x: x,
+    y: y,
+    points: [{
+      x: 0,
+      y: 0
+    }, {
+      x: 0,
+      y: height
+    }, {
+      x: width,
+      y: height
+    }, {
+      x: width,
+      y: 0
+    }],
+    color: color,
+    fill: fill
+  });
+};
+
+exports.Rect = Rect;
+Rect.contextTypes = Canvas.childContextTypes;
 var imageMap = {};
 
 var Image =
@@ -437,6 +510,11 @@ function (_React$Component3) {
   _createClass(CanvasComponent, [{
     key: "componentDidMount",
     value: function componentDidMount() {
+      if (!this.context.registerListener) {
+        console.error('Unable to get child context for CanvasComponent-likely it is not nested inside a Canvas');
+        return;
+      }
+
       this.context.registerListener(EventTypes.MOVE, this.handleMove);
       this.context.registerListener(EventTypes.MOUSE_UP, this.handleUp);
       this.context.registerListener(EventTypes.MOUSE_DOWN, this.handleDown);
@@ -473,6 +551,11 @@ function (_React$Component3) {
   }, {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
+      if (!this.context.unregisterListener) {
+        console.error('Unable to get child context for CanvasComponent-likely it is not nested inside a Canvas');
+        return;
+      }
+
       this.context.unregisterListener(EventTypes.MOVE, this.handleMove);
       this.context.unregisterListener(EventTypes.MOUSE_UP, this.handleUp);
       this.context.unregisterListener(EventTypes.MOUSE_DOWN, this.handleDown);

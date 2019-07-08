@@ -130,7 +130,7 @@ Images are cached after first load, so re-using the same src will not cause the 
 | ----------- | ----------- |
 | x  | The origin x coord to draw the image at |
 | y   | The origin y coord to draw the image at |
-| src | The URL that the image can be found at |
+| src | The URL that the image can be found at. This can also be base-64 encoded image data |
 | width | The width to draw the image at |
 | height | The height to draw the image at |
 
@@ -149,6 +149,24 @@ Images are cached after first load, so re-using the same src will not cause the 
 		height={50}
 	/>
 </Canvas>
+```
+
+##### Base64 Encoded Example
+
+```
+const imageData = "data:image/png;base64,<some base 64 encoded data here>";
+return <Canvas
+	width={300}
+	height={300}
+>
+	<Image
+		src={imageData}
+		x={40}
+		y={50}
+		width={50}
+		height={50}
+	/>
+</Canvas>;
 ```
 
 ### Line
