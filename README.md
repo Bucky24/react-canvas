@@ -97,6 +97,8 @@ Draws text to the screen at the given coordinates.
 | ----------- | ----------- |
 | x  | The origin x coord of the text |
 | y   | The origin y coord of the text |
+| color | the color for the text (default black) |
+| font | the font for the text (default 12px Arial) |
 
 ##### Children
 
@@ -114,6 +116,14 @@ Accepts a single child, which is the text to be displayed
 		y={60}
 	>
 		Some text here
+	</Text>
+	<Text
+		x={5}
+		y={80}
+		color="#00f"
+		font="18px Times New Roman"
+	>
+		Blue Text
 	</Text>
 </Canvas>
 ```

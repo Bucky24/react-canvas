@@ -29,6 +29,14 @@ const App = ({}) => {
 			>
 				Some text here
 			</Text>
+			<Text
+				x={5}
+				y={80}
+				font="24px Times New Roman"
+				color="#00f"
+			>
+				Big Text
+			</Text>
 			<Image
 				src="http://solumcraft.com/favicon.ico"
 				x={40}

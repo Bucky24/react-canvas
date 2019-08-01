@@ -155,25 +155,27 @@ class Canvas extends React.Component {
 		window.addEventListener('keydown', this.handleKeyDown);
 		window.addEventListener('keyup', this.handleKeyUp);
 	}
+	getRealCoords(event) {
+	    const rect = this.canvas.getBoundingClientRect();
+		return {
+			x: event.clientX - rect.left,
+			y: event.clientY - rect.top
+		};
+	}
 	handleMouseMove(event) {
-		this.triggerEvent(EventTypes.MOVE, {
-			x: event.clientX,
-			y: event.clientY
-		});
+		this.triggerEvent(EventTypes.MOVE, this.getRealCoords(event));
 		event.preventDefault();
 	}
 	handleMouseDown(event) {
 		this.triggerEvent(EventTypes.MOUSE_DOWN, {
-			x: event.clientX,
-			y: event.clientY,
+			...this.getRealCoords(event),
 			button: ButtonMap[event.button]
 		});
 		event.preventDefault();
 	}
 	handleMouseUp(event) {
 		this.triggerEvent(EventTypes.MOUSE_UP, {
-			x: event.clientX,
-			y: event.clientY,
+			...this.getRealCoords(event),
 			button: ButtonMap[event.button]
 		});
 		event.preventDefault();
@@ -247,11 +249,19 @@ const Container = ({ children }) => {
 
 Container.contextTypes = Canvas.childContextTypes;
 
-const Text = ({ children, x, y }, { context }) => {
+const Text = ({ children, x, y, color, font }, { context }) => {
 	if (!context) {
 		return null;
 	}
+	if (!color) {
+		color = "#000";
+	}
+	if (!font) {
+		font = "12px Arial";
+	}
 	context.save();
+	context.font = font;
+	context.fillStyle = color;
 	context.fillText(children, x, y);
 	context.restore();
 	return null;

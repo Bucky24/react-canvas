@@ -80,7 +80,6 @@ var okCodes = ['Space', 'Backslash', 'BracketLeft', 'BracketRight', 'Quote', 'Se
 function getChar(_ref) {
   var key = _ref.key,
       code = _ref.code;
-  console.log('key', key, 'code', code);
 
   if (code.indexOf('Key') === 0 || code.indexOf('Digit') === 0 || code.indexOf('Numpad') === 0) {
     // some though we don't want
@@ -90,7 +89,6 @@ function getChar(_ref) {
   }
 
   if (okCodes.includes(code)) {
-    console.log('code ok');
     return key;
   } // if not key and not [in map, then no char for it
 

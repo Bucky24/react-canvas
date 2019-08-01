@@ -11,6 +11,7 @@ class App extends React.Component {
 	}
 	render() {
 		return (<div className={styles.appRoot}>
+			<div className={styles.topBar}></div>
 			<Canvas
 				width={300}
 				height={300}
