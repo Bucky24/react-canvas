@@ -34,6 +34,7 @@ The root level element. This will actually create a &lt;canvas&gt; canvas tag on
 | ----------- | ----------- |
 | width  | The width, in pixels, of the resulting canvas  |
 | height   | The height, in pixels, of the resulting canvas  |
+| captureAllKeyEvents | If this is set to false, any events not originating from the body (which is the default when no input field is selected) will be ignored. If this is set to true or not given, all key events will be captured. You should set this to true if you have any dom elements outside of the canvas that need to handle key events.
 
 ##### Children
 

@@ -11,12 +11,15 @@ class App extends React.Component {
 	}
 	render() {
 		return (<div className={styles.appRoot}>
-			<div className={styles.topBar}></div>
+			<div className={styles.topBar}>
+				<input type='text'/>
+			</div>
 			<Canvas
 				width={300}
 				height={300}
+				captureAllKeyEvents={false}
 			>
-				<Button 
+				<Button
 					x={100}
 					y={100}
 					width={100}

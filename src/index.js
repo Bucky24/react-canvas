@@ -86,6 +86,16 @@ const CanvasContext = React.createContext({
 	unregisterListener: null
 });
 
+const canvasProps = {
+	width: PropTypes.number.isRequired,
+	height: PropTypes.number.isRequired,
+	captureAllKeyEvents: PropTypes.bool
+}
+
+const canvasDefaultProps = {
+	captureAllKeyEvents: true
+}
+
 class Canvas extends React.Component {
 	constructor(props) {
 		super(props);
@@ -94,6 +104,7 @@ class Canvas extends React.Component {
 		};
 		
 		this.reattachListeners = this.reattachListeners.bind(this);
+		this.removeListeners = this.removeListeners.bind(this);
 		this.handleMouseMove = this.handleMouseMove.bind(this);
 		this.handleMouseUp = this.handleMouseUp.bind(this);
 		this.handleMouseDown = this.handleMouseDown.bind(this);
@@ -145,16 +156,22 @@ class Canvas extends React.Component {
 			this.canvas.height = this.props.height;
 		}
 	}
-	reattachListeners() {
-		// remove previous event handlers. this is so we avoid
-		// double and triple triggering events
+	componentWillUnmount() {
+		this.removeListeners();
+	}
+	removeListeners() {
 		this.canvas.removeEventListener('mousemove', this.handleMouseMove);
 		this.canvas.removeEventListener('mousedown', this.handleMouseDown);
 		this.canvas.removeEventListener('mouseup', this.handleMouseDown);
 		this.canvas.removeEventListener('contextmenu', this.handleContextMenu);
 		window.removeEventListener('keydown', this.handleKeyDown);
 		window.removeEventListener('keyup', this.handleKeyUp);
-		
+	}
+	reattachListeners() {
+		// remove previous event handlers. this is so we avoid
+		// double and triple triggering events
+		this.removeListeners();
+
 		this.canvas.addEventListener('mousemove', this.handleMouseMove);
 		this.canvas.addEventListener('mousedown', this.handleMouseDown);
 		this.canvas.addEventListener('mouseup', this.handleMouseUp);
@@ -178,16 +195,21 @@ class Canvas extends React.Component {
 			...this.getRealCoords(event),
 			button: ButtonMap[event.button]
 		});
-		event.preventDefault();
 	}
 	handleMouseUp(event) {
 		this.triggerEvent(EventTypes.MOUSE_UP, {
 			...this.getRealCoords(event),
 			button: ButtonMap[event.button]
 		});
-		event.preventDefault();
 	}
 	handleKeyDown(event) {
+		const bodyEvent = event.target.tagName === 'BODY';
+		if (!bodyEvent && !this.props.captureAllKeyEvents) {
+			// if this event did not come from the body, check if
+			// we want to capture all events. If we do, capture it
+			// if not, ignore it
+			return;
+		}
 		this.triggerEvent(EventTypes.KEY_DOWN, {
 			char: getChar(event),
 			code: getCode(event)
@@ -195,6 +217,13 @@ class Canvas extends React.Component {
 		event.preventDefault();
 	}
 	handleKeyUp(event) {
+		const bodyEvent = event.target.tagName === 'BODY';
+		if (!bodyEvent && !this.props.captureAllKeyEvents) {
+			// if this event did not come from the body, check if
+			// we want to capture all events. If we do, capture it
+			// if not, ignore it
+			return;
+		}
 		this.triggerEvent(EventTypes.KEY_UP, {
 			char: getChar(event),
 			code: getCode(event)
@@ -241,6 +270,9 @@ class Canvas extends React.Component {
 		</CanvasContext.Provider>;
 	}
 };
+
+Canvas.propTypes = canvasProps;
+Canvas.defaultProps = canvasDefaultProps;
 
 const Container = ({ children }) => {
 	if (Array.isArray(children)) {
