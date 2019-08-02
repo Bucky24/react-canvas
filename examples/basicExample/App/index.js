@@ -1,5 +1,5 @@
-import React, { PropTypes } from 'react';
-import { Canvas, Text, Shape, Image, Line, Rect } from 'react-canvas';
+import React, { useState } from 'react';
+import { Canvas, Text, Shape, Image, Line, Rect, Container } from 'react-canvas';
 import Thing from '../Thing';
 
 import sampleImage from '../sampleImage.png';
@@ -12,23 +12,25 @@ const App = ({}) => {
 			width={300}
 			height={300}
 		>
-			<Shape
-				x={40}
-				y={0}
-				points={[
-					{ x: 10, y: 10},
-					{ x: 100, y: 10 },
-					{ x: 10, y: 100}
-				]}
-				color="#f00"
-				fill={true}
-			/>
-			<Text
-				x={5}
-				y={60}
-			>
-				Some text here
-			</Text>
+			<Container>
+				<Shape
+					x={40}
+					y={0}
+					points={[
+						{ x: 10, y: 10},
+						{ x: 100, y: 10 },
+						{ x: 10, y: 100}
+					]}
+					color="#f00"
+					fill={true}
+				/>
+				<Text
+					x={5}
+					y={60}
+				>
+					Some text here
+				</Text>
+			</Container>
 			<Text
 				x={5}
 				y={80}

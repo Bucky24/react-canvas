@@ -79,6 +79,13 @@ const handlerToProps = {
 	[EventTypes.KEY_DOWN]: 'onKeyDown',
 	[EventTypes.KEY_UP]: 'onKeyUp'
 };
+
+const CanvasContext = React.createContext({
+	context: null,
+	registerListener: null,
+	unregisterListener: null
+});
+
 class Canvas extends React.Component {
 	constructor(props) {
 		super(props);
@@ -115,7 +122,7 @@ class Canvas extends React.Component {
 		if (index < 0) return;
 		this.listeners[event].splice(index, 1);
 	}
-	getChildContext() {
+	getMyContext() {
 	    return {
 			context: this.state.context,
 			registerListener: this.registerListener,
@@ -213,30 +220,26 @@ class Canvas extends React.Component {
 		}
 	}
 	render() {
-		return <canvas
-			ref={(c) => {
-				if (c) {
-					const newContext = c.getContext('2d');
-					if (this.state.context !== newContext) {
-						this.canvas = c;
-						this.setState({
-							context: newContext
-						}, () => {
-							this.reattachListeners();
-						});
+		return <CanvasContext.Provider value={this.getMyContext()}>		
+			<canvas
+				ref={(c) => {
+					if (c) {
+						const newContext = c.getContext('2d');
+						if (this.state.context !== newContext) {
+							this.canvas = c;
+							this.setState({
+								context: newContext
+							}, () => {
+								this.reattachListeners();
+							});
+						}
 					}
-				}
-			}}
-		>
-			{this.props.children}
-		</canvas>;
+				}}
+			>
+				{this.props.children}
+			</canvas>
+		</CanvasContext.Provider>;
 	}
-};
-
-Canvas.childContextTypes = {
- 	context: PropTypes.object,
-	registerListener: PropTypes.func,
-	unregisterListener: PropTypes.func
 };
 
 const Container = ({ children }) => {
@@ -247,56 +250,56 @@ const Container = ({ children }) => {
 	}
 }
 
-Container.contextTypes = Canvas.childContextTypes;
-
-const Text = ({ children, x, y, color, font }, { context }) => {
-	if (!context) {
-		return null;
-	}
-	if (!color) {
-		color = "#000";
-	}
-	if (!font) {
-		font = "12px Arial";
-	}
-	context.save();
-	context.font = font;
-	context.fillStyle = color;
-	context.fillText(children, x, y);
-	context.restore();
-	return null;
+const Text = ({ children, x, y, color, font }) => {
+	return <CanvasContext.Consumer>
+		{({ context }) => {
+			if (!context) {
+				return null;
+			}
+			if (!color) {
+				color = "#000";
+			}
+			if (!font) {
+				font = "12px Arial";
+			}
+			context.save();
+			context.font = font;
+			context.fillStyle = color;
+			context.fillText(children, x, y);
+			context.restore();
+		}}
+	</CanvasContext.Consumer>;
 }
 
-Text.contextTypes = Canvas.childContextTypes;
-
-const Line = ({ x, y, x2, y2, color }, { context }) => {
-	if (!context) {
-		return null;
-	}
-	context.save();
-	context.strokeStyle = color;
-	context.beginPath();
-	context.moveTo(x, y);
-	context.lineTo(x2, y2);
-	context.closePath();
-	context.stroke();
-	context.restore();
-	return null;
+const Line = ({ x, y, x2, y2, color }) => {
+	return <CanvasContext.Consumer>
+		{({ context }) => {
+			if (!context) {
+				return null;
+			}
+			context.save();
+			context.strokeStyle = color;
+			context.beginPath();
+			context.moveTo(x, y);
+			context.lineTo(x2, y2);
+			context.closePath();
+			context.stroke();
+			context.restore();
+		}}
+	</CanvasContext.Consumer>;
 }
 
-Line.contextTypes = Canvas.childContextTypes;
+const Shape = ({ x, y, points, color, fill }) => {
+	return <CanvasContext.Consumer>
+		{({ context }) => {
+			if (!context) {
+				return null;
+			}
 
-const Shape = ({ x, y, points, color, fill }, { context }) => {
-	if (points.length < 3 || !context) {
-		return null;
-	}
-	
-	drawShape(x, y, context, points, color, fill);
-	
-	return null;
+			drawShape(x, y, context, points, color, fill);
+		}}
+	</CanvasContext.Consumer>;
 }
-
-Shape.contextTypes = Canvas.childContextTypes;
 
 const Rect = ({ x, y, x2, y2, color, fill}, { context }) => {
 	const width = Math.abs(x2 - x);
@@ -315,11 +318,11 @@ const Rect = ({ x, y, x2, y2, color, fill}, { context }) => {
 	/>;
 }
 
-Rect.contextTypes = Canvas.childContextTypes;
-
 const imageMap = {};
 
 class Image extends React.Component {
+	static contextType = CanvasContext;
+
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -366,9 +369,9 @@ class Image extends React.Component {
 	}
 };
 
-Image.contextTypes = Canvas.childContextTypes;
-
 class CanvasComponent extends React.Component {
+	static contextType = CanvasContext;
+
 	constructor(props) {
 		super(props);
 		
@@ -432,7 +435,7 @@ class CanvasComponent extends React.Component {
 	onKeyUp() {}
 }
 
-CanvasComponent.contextTypes = Canvas.childContextTypes;
+CanvasComponent.contextType = CanvasContext;
 
 export {
 	Canvas,

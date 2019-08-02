@@ -23,6 +23,8 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -199,32 +201,34 @@ function (_React$Component) {
       window.addEventListener('keyup', this.handleKeyUp);
     }
   }, {
+    key: "getRealCoords",
+    value: function getRealCoords(event) {
+      var rect = this.canvas.getBoundingClientRect();
+      return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+      };
+    }
+  }, {
     key: "handleMouseMove",
     value: function handleMouseMove(event) {
-      this.triggerEvent(EventTypes.MOVE, {
-        x: event.clientX,
-        y: event.clientY
-      });
+      this.triggerEvent(EventTypes.MOVE, this.getRealCoords(event));
       event.preventDefault();
     }
   }, {
     key: "handleMouseDown",
     value: function handleMouseDown(event) {
-      this.triggerEvent(EventTypes.MOUSE_DOWN, {
-        x: event.clientX,
-        y: event.clientY,
+      this.triggerEvent(EventTypes.MOUSE_DOWN, _objectSpread({}, this.getRealCoords(event), {
         button: ButtonMap[event.button]
-      });
+      }));
       event.preventDefault();
     }
   }, {
     key: "handleMouseUp",
     value: function handleMouseUp(event) {
-      this.triggerEvent(EventTypes.MOUSE_UP, {
-        x: event.clientX,
-        y: event.clientY,
+      this.triggerEvent(EventTypes.MOUSE_UP, _objectSpread({}, this.getRealCoords(event), {
         button: ButtonMap[event.button]
-      });
+      }));
       event.preventDefault();
     }
   }, {
@@ -320,14 +324,26 @@ Container.contextTypes = Canvas.childContextTypes;
 var Text = function Text(_ref4, _ref5) {
   var children = _ref4.children,
       x = _ref4.x,
-      y = _ref4.y;
+      y = _ref4.y,
+      color = _ref4.color,
+      font = _ref4.font;
   var context = _ref5.context;
 
   if (!context) {
     return null;
   }
 
+  if (!color) {
+    color = "#000";
+  }
+
+  if (!font) {
+    font = "12px Arial";
+  }
+
   context.save();
+  context.font = font;
+  context.fillStyle = color;
   context.fillText(children, x, y);
   context.restore();
   return null;

@@ -1,2 +1,3 @@
 * Some very basic UI components that can be re-used
 * Ability to do global transforms (x shift, scale, etc)
+* Canvas can resize dynamically based on percentages
