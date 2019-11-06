@@ -297,7 +297,10 @@ const Text = ({ children, x, y, color, font }) => {
 			context.save();
 			context.font = font;
 			context.fillStyle = color;
-			context.fillText(children, x, y);
+			if (!Array.isArray(children)) {
+				children = [children];
+			}
+			context.fillText(children.join(''), x, y);
 			context.restore();
 		}}
 	</CanvasContext.Consumer>;

@@ -2,12 +2,13 @@ import React from 'react';
 import { Container, Text, Shape } from 'react-canvas';
 
 const Thing = () => {
+	const foo = 'bar';
 	return (<Container>
 		<Text
 			x={5}
 			y={20}
 		>
-			Blah
+			Blah {foo}
 		</Text>
 		<Shape
 			points={[
