@@ -405,3 +405,7 @@ MyElement.contextTypes = Canvas.childContextTypes;
 
 export default MyElement;
 ```
+
+##### Rerendering
+
+The canvas context also provides a function `forceRerender` which will essentially call `this.forceUpdate()` on the top level canvas. This can be useful in some situations to force the canvas to redraw.

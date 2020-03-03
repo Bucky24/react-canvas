@@ -113,6 +113,7 @@ class Canvas extends React.Component {
 		this.handleContextMenu = this.handleContextMenu.bind(this);
 		this.registerListener = this.registerListener.bind(this);
 		this.unregisterListener = this.unregisterListener.bind(this);
+		this.forceRerender = this.forceRerender.bind(this);
 		
 		// map of event to array of function callbacks
 		this.listeners = {};
@@ -133,11 +134,15 @@ class Canvas extends React.Component {
 		if (index < 0) return;
 		this.listeners[event].splice(index, 1);
 	}
+	forceRerender() {
+		this.forceUpdate();
+	}
 	getMyContext() {
 	    return {
 			context: this.state.context,
 			registerListener: this.registerListener,
-			unregisterListener: this.unregisterListener
+			unregisterListener: this.unregisterListener,
+			forceRerender: this.forceRerender
 		};
 	}
 	componentWillUpdate(newProps) {
@@ -368,7 +373,7 @@ class Image extends React.Component {
 	
 	render() {
 		const { src, x, y, width, height } = this.props;
-		const { context } = this.context;
+		const { context, forceRerender } = this.context;
 		
 		if (!context) {
 			return null;
@@ -390,7 +395,7 @@ class Image extends React.Component {
 			img.src = src;
 			img.onload = () => {
 				imageMap[src] = img;
-				finishLoading();
+				forceRerender();
 			};
 			if (img.loaded) {
 				imageMap[src] = img;
