@@ -358,6 +358,7 @@ const Rect = ({ x, y, x2, y2, color, fill}, { context }) => {
 	/>;
 }
 
+const loadingMap = {};
 const imageMap = {};
 
 class Image extends React.Component {
@@ -386,6 +387,12 @@ class Image extends React.Component {
 			context.drawImage(image, x,y, width, height);
 		}
 		
+		// if we're already loading this image, give up for now. Once it's
+		// loading, we will get a redraw of the canvas.
+		if (loadingMap[src]) {
+			return null;
+		}
+		
 		if (imageMap[src]) {
 			finishLoading(imageMap[src]);
 		} else {
@@ -395,11 +402,14 @@ class Image extends React.Component {
 			img.src = src;
 			img.onload = () => {
 				imageMap[src] = img;
+				delete loadingMap[src];
 				forceRerender();
 			};
 			if (img.loaded) {
 				imageMap[src] = img;
 				finishLoading();
+			} else {
+				loadingMap[src] = img;
 			}
 			img.style.display = 'none';
 			body.append(img);
