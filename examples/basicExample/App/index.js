@@ -92,9 +92,21 @@ const App = ({}) => {
 				radius={20}
 				color="#0f0"
 				fill={false}
-				startAngle={Math.PI/4}
-				endAngle={Math.PI + Math.PI/4}
+				startAngle={120*Math.PI/180}
+				endAngle={240*Math.PI/180}
 				fill={true}
+				sector={false}
+			/>
+			<Arc
+				x={230}
+				y={70}
+				radius={20}
+				color="#0f0"
+				fill={false}
+				startAngle={0}
+				endAngle={120*Math.PI/180}
+				fill={true}
+				sector={true}
 			/>
 		</Canvas>
 	</div>);

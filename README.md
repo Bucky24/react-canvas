@@ -277,7 +277,7 @@ Draws a circle with a specific position and radius.
 
 ### Arc
 
-Draws a semi-circle between to angles with a specific position and radius.
+Draws a semi-circle between two angles with a specific position and radius.
 
 ##### Parameters
 
@@ -287,7 +287,8 @@ Draws a semi-circle between to angles with a specific position and radius.
 | y | The y position of the arc center |
 | radius | The radius of the arc |
 | startAngle | The start angle in radians of the arc |
-| endAngle | The eng angle in radians of the arc
+| endAngle | The eng angle in radians of the arc |
+| sector | Boolean, indicates if the drawn shape should be a slice of pie (true) or just the outer part of the circle (false) |
 | color | A hex color code, which determines the color of the arc |
 | fill | Boolean, indicates if the arc should be filled or an outline |
 
@@ -306,6 +307,7 @@ Draws a semi-circle between to angles with a specific position and radius.
 		endAngl={Math.PI}
 		color="#f00"
 		fill={false}
+		sector={false}
 	/>
 </Canvas>
 ```
