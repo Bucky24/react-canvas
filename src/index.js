@@ -419,6 +419,38 @@ class Image extends React.Component {
 	}
 };
 
+const Arc = ({ x, y, radius, startAngle, endAngle, color, fill }) => {
+	return <CanvasContext.Consumer>
+		{({ context }) => {
+			if (!context) {
+				return null;
+			}
+
+			context.strokeStyle = color;
+			context.fillStyle = color;
+			context.beginPath();
+			context.arc(x, y, radius, startAngle, endAngle);
+			if (!fill) {
+				context.stroke();
+			} else {
+				context.fill();
+			}
+		}}
+	</CanvasContext.Consumer>;
+}
+
+const Circle = ({ x, y, radius, color, fill }) => {
+	return <Arc
+		x={x}
+		y={y}
+		radius={radius}
+		startAngle={0}
+		endAngle={2 * Math.PI}
+		color={color}
+		fill={fill}
+	/>;
+}
+
 class CanvasComponent extends React.Component {
 	static contextType = CanvasContext;
 
@@ -495,5 +527,7 @@ export {
 	Image,
 	CanvasComponent,
 	Line,
-	Rect
+	Rect,
+	Circle,
+	Arc,
 };

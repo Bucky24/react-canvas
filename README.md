@@ -244,6 +244,72 @@ The Rect element is just a wrapper around Shape that returns a rectangle drawn b
 </Canvas>
 ```
 
+### Circle
+
+Draws a circle with a specific position and radius.
+
+##### Parameters
+
+| Parameter    | Description |
+| ----------- | ----------- |
+| x | The x position of the circle center |
+| y | The y position of the circle center |
+| radius | The radius of the circle |
+| color | A hex color code, which determines the color of the circle |
+| fill | Boolean, indicates if the circle should be filled or an outline |
+
+##### Example
+
+```
+<Canvas
+	width={300}
+	height={300}
+>
+	<Circle
+		x={40}
+		y={0}
+		radius={10}
+		color="#f00"
+		fill={false}
+	/>
+</Canvas>
+```
+
+### Arc
+
+Draws a semi-circle between to angles with a specific position and radius.
+
+##### Parameters
+
+| Parameter    | Description |
+| ----------- | ----------- |
+| x | The x position of the arc center |
+| y | The y position of the arc center |
+| radius | The radius of the arc |
+| startAngle | The start angle in radians of the arc |
+| endAngle | The eng angle in radians of the arc
+| color | A hex color code, which determines the color of the arc |
+| fill | Boolean, indicates if the arc should be filled or an outline |
+
+##### Example
+
+```
+<Canvas
+	width={300}
+	height={300}
+>
+	<Arc
+		x={40}
+		y={0}
+		radius={10}
+		startAngle={0}
+		endAngl={Math.PI}
+		color="#f00"
+		fill={false}
+	/>
+</Canvas>
+```
+
 ### Container
 
 The Container element acts as a collector. Some versions of React did not allow returning an array of elements from the `render` function. Because of this, always returning a singular &lt;div&gt; tag was a standard practice. Container takes the place of the div tag for ReactCanvas elements.

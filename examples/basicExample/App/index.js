@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { Canvas, Text, Shape, Image, Line, Rect, Container } from 'react-canvas';
+import {
+	Canvas,
+	Text,
+	Shape,
+	Image,
+	Line,
+	Rect,
+	Container,
+	Circle,
+	Arc,
+} from 'react-canvas';
 import Thing from '../Thing';
 
 import sampleImage from '../sampleImage.png';
@@ -69,6 +79,23 @@ const App = ({}) => {
 				fill={false}
 			/>
 			<Thing />
+			<Circle
+				x={130}
+				y={85}
+				radius={50}
+				color="#0f0"
+				fill={false}
+			/>
+			<Arc
+				x={230}
+				y={70}
+				radius={20}
+				color="#0f0"
+				fill={false}
+				startAngle={Math.PI/4}
+				endAngle={Math.PI + Math.PI/4}
+				fill={true}
+			/>
 		</Canvas>
 	</div>);
 };
