@@ -481,7 +481,7 @@ class CanvasComponent extends React.Component {
 		this.handleDown = this.handleDown.bind(this);
 		this.onKeyDown = this.onKeyDown.bind(this);
 		this.onKeyUp = this.onKeyUp.bind(this);
-		this.onWheel = this.onWheel.bind(this);
+		this.handleWheel = this.handleWheel.bind(this);
 	}
 	componentDidMount() {
 		if (!this.context.registerListener) {
@@ -493,7 +493,7 @@ class CanvasComponent extends React.Component {
 		this.context.registerListener(EventTypes.MOUSE_DOWN, this.handleDown);
 		this.context.registerListener(EventTypes.KEY_DOWN, this.onKeyDown);
 		this.context.registerListener(EventTypes.KEY_DOWN, this.onKeyUp);
-		this.context.registerListener(EventTypes.WHEEL, this.onWheel);
+		this.context.registerListener(EventTypes.WHEEL, this.handleWheel);
 	}
 	insideMe(x, y) {
 		if (!this.bounds) {
