@@ -6,7 +6,8 @@ export const EventTypes = {
 	MOUSE_DOWN: 'mousedown',
 	MOUSE_UP: 'mouseup',
 	KEY_DOWN: 'keydown',
-	KEY_UP: 'keyup'
+	KEY_UP: 'keyup',
+	WHEEL: 'wheel',
 };
 
 export const ButtonTypes = {
@@ -77,7 +78,8 @@ const handlerToProps = {
 	[EventTypes.MOUSE_DOWN]: 'onMouseDown',
 	[EventTypes.MOUSE_UP]: 'onMouseUp',
 	[EventTypes.KEY_DOWN]: 'onKeyDown',
-	[EventTypes.KEY_UP]: 'onKeyUp'
+	[EventTypes.KEY_UP]: 'onKeyUp',
+	[EventTypes.WHEEL]: 'onWheel',
 };
 
 const CanvasContext = React.createContext({
@@ -111,6 +113,7 @@ class Canvas extends React.Component {
 		this.handleKeyDown = this.handleKeyDown.bind(this);
 		this.handleKeyUp = this.handleKeyUp.bind(this);
 		this.handleContextMenu = this.handleContextMenu.bind(this);
+		this.handleWheel = this.handleWheel.bind(this);
 		this.registerListener = this.registerListener.bind(this);
 		this.unregisterListener = this.unregisterListener.bind(this);
 		this.forceRerender = this.forceRerender.bind(this);
@@ -171,6 +174,7 @@ class Canvas extends React.Component {
 		this.canvas.removeEventListener('contextmenu', this.handleContextMenu);
 		window.removeEventListener('keydown', this.handleKeyDown);
 		window.removeEventListener('keyup', this.handleKeyUp);
+		this.canvas.removeEventListener('wheel', this.handleWheel);
 	}
 	reattachListeners() {
 		// remove previous event handlers. this is so we avoid
@@ -183,6 +187,7 @@ class Canvas extends React.Component {
 		this.canvas.addEventListener('contextmenu', this.handleContextMenu);
 		window.addEventListener('keydown', this.handleKeyDown);
 		window.addEventListener('keyup', this.handleKeyUp);
+		this.canvas.addEventListener('wheel', this.handleWheel);
 	}
 	getRealCoords(event) {
 	    const rect = this.canvas.getBoundingClientRect();
@@ -237,6 +242,12 @@ class Canvas extends React.Component {
 	}
 	handleContextMenu(event) {
 		event.preventDefault();
+	}
+	handleWheel(event) {
+		this.triggerEvent(EventTypes.WHEEL, {
+			...this.getRealCoords(event),
+			up: event.wheelDelta > 0,
+		});
 	}
 	triggerEvent(event, data) {
 		if (this.listeners[event]) {
@@ -470,6 +481,7 @@ class CanvasComponent extends React.Component {
 		this.handleDown = this.handleDown.bind(this);
 		this.onKeyDown = this.onKeyDown.bind(this);
 		this.onKeyUp = this.onKeyUp.bind(this);
+		this.onWheel = this.onWheel.bind(this);
 	}
 	componentDidMount() {
 		if (!this.context.registerListener) {
@@ -481,6 +493,7 @@ class CanvasComponent extends React.Component {
 		this.context.registerListener(EventTypes.MOUSE_DOWN, this.handleDown);
 		this.context.registerListener(EventTypes.KEY_DOWN, this.onKeyDown);
 		this.context.registerListener(EventTypes.KEY_DOWN, this.onKeyUp);
+		this.context.registerListener(EventTypes.WHEEL, this.onWheel);
 	}
 	insideMe(x, y) {
 		if (!this.bounds) {
@@ -503,6 +516,11 @@ class CanvasComponent extends React.Component {
 		
 		this.onMouseDown(data, insideMe);
 	}
+	handleWheel(data) {
+		let insideMe = this.insideMe(data.x, data.y);
+		
+		this.onWheel(data, insideMe);
+	}
 	componentWillUnmount() {
 		if (!this.context.unregisterListener) {
 			console.error('Unable to get child context for CanvasComponent-likely it is not nested inside a Canvas');
@@ -513,6 +531,7 @@ class CanvasComponent extends React.Component {
 		this.context.unregisterListener(EventTypes.MOUSE_DOWN, this.handleDown);
 		this.context.unregisterListener(EventTypes.KEY_DOWN, this.onKeyDown);
 		this.context.unregisterListener(EventTypes.KEY_DOWN, this.onKeyUp);
+		this.context.unregisterListener(EventTypes.WHEEL, this.handleWheel);
 	}
 	
 	// stubs
@@ -521,6 +540,7 @@ class CanvasComponent extends React.Component {
 	onMouseDown() {}
 	onKeyDown() {}
 	onKeyUp() {}
+	onWheel() {}
 }
 
 CanvasComponent.contextType = CanvasContext;

@@ -21,6 +21,9 @@ const App = ({}) => {
 		<Canvas
 			width={300}
 			height={300}
+			onWheel={({x, y}) => {
+				console.log('wheel', x, y);
+			}}
 		>
 			<Container>
 				<Shape

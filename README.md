@@ -384,6 +384,9 @@ class MyElement extends CanvasComponent {
 	onKeyUp({ char, code }) {
 		// do something
 	}
+	onWheel({ x, y, up }, overMe) {
+		// take action
+	}
 	render() {
 		// some rendering here
 	}
@@ -415,6 +418,7 @@ It is recommended that your component call `registerListener` only once, and tha
 | EventTypes.MOUSE_DOWN| The mouse being pressed | An object containing x and y of the mouse on the canvas and a button corresponding to a ButtonType above |
 | EventTypes.KEY_DOWN | A key being pressed or repeated | An object containing the char value of the key and the key code |
 | EventTypes.KEY_UP | A key being released | An object containing the char value of the key and the key code |
+| EventTypes.WHEEL | The scroll wheel being spun | An object containing x and y of the mouse on the canvas, and a boolean "up" which indicates if the wheel is spinning up or down |
 
 ### Handling on the Canvas
 
