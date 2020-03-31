@@ -312,6 +312,32 @@ Draws a semi-circle between two angles with a specific position and radius.
 </Canvas>
 ```
 
+### Raw
+
+Sometimes the basic elements contained in react-canvas aren't enough. For example, if you need to do a very complex shape with semi-circles and lines, currently there's no way to to do that, except creating a custom component with access to the raw canvas context.
+
+That's where the Raw component comes in. It takes in a single prop, which is a callback it will call with the context as the first parameter, allowing you to access any low level functions or complex operations you need to.
+
+
+##### Parameters
+
+| Parameter    | Description |
+| ----------- | ----------- |
+| drawFn | A callback that will be called on-render with a single param, which will be the context of the canvas. |
+
+##### Example
+
+```
+<Canvas
+	width={300}
+	height={300}
+>
+	<Raw drawFn={(context) => {
+		// do any low level canvas code here
+	}}
+</Canvas>
+```
+
 ### Container
 
 The Container element acts as a collector. Some versions of React did not allow returning an array of elements from the `render` function. Because of this, always returning a singular &lt;div&gt; tag was a standard practice. Container takes the place of the div tag for ReactCanvas elements.
@@ -459,23 +485,25 @@ You can easily create your own elements that have access to the canvas context.
 
 ```
 import React from 'react';
-import { Canvas } from 'react-canvas';
+import { CanvasContext } from 'react-canvas';
 
-const MyElement = (props, { context }) => {
-	if (!context) {
-		return null;
-	}
-	context.save();
+const MyElement = (props) => {
+	return <CanvasContext.Consumer>
+		{({ context }) => {
+			if (!context) {
+				return null;
+			}
+			context.save();
 	
-	// take some actions with the context
+			// do context things here
 	
-	context.restore();
-	return null;
+			context.restore();
+		}}
+	</CanvasContext.Consumer>
 }
 
-MyElement.contextTypes = Canvas.childContextTypes;
-
 export default MyElement;
+
 ```
 
 ##### Rerendering

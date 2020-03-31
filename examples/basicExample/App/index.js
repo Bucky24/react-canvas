@@ -9,6 +9,7 @@ import {
 	Container,
 	Circle,
 	Arc,
+	Raw,
 } from 'react-canvas';
 import Thing from '../Thing';
 
@@ -19,7 +20,7 @@ import styles from './styles.css';
 const App = ({}) => {
 	return (<div className={styles.appRoot}>
 		<Canvas
-			width={300}
+			width={400}
 			height={300}
 			onWheel={({x, y}) => {
 				console.log('wheel', x, y);
@@ -111,6 +112,14 @@ const App = ({}) => {
 				fill={true}
 				sector={true}
 			/>
+			<Raw drawFn={(context) => {
+				context.fillStyle = "#0ff";
+				context.beginPath();
+				context.arc(300, 100, 40, 0, Math.PI/2, false);
+				context.arc(300, 100, 30, Math.PI/2, 0, true);
+				context.closePath();
+				context.fill();
+			}}/>
 		</Canvas>
 	</div>);
 };

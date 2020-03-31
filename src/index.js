@@ -437,6 +437,7 @@ const Arc = ({ x, y, radius, startAngle, endAngle, color, fill, sector }) => {
 				return null;
 			}
 
+			context.save();
 			context.strokeStyle = color;
 			context.fillStyle = color;
 			context.beginPath();
@@ -447,11 +448,13 @@ const Arc = ({ x, y, radius, startAngle, endAngle, color, fill, sector }) => {
 			if (sector) {
 				context.moveTo(x, y);
 			}
+			context.closePath();
 			if (!fill) {
 				context.stroke();
 			} else {
 				context.fill();
 			}
+			context.restore();
 		}}
 	</CanvasContext.Consumer>;
 }
@@ -466,6 +469,20 @@ const Circle = ({ x, y, radius, color, fill }) => {
 		color={color}
 		fill={fill}
 	/>;
+}
+
+const Raw = ({ drawFn }) => {
+	return <CanvasContext.Consumer>
+		{({ context }) => {
+			if (!context) {
+				return null;
+			}
+
+			context.save();
+			drawFn(context);
+			context.restore();
+		}}
+	</CanvasContext.Consumer>;
 }
 
 class CanvasComponent extends React.Component {
@@ -556,4 +573,6 @@ export {
 	Rect,
 	Circle,
 	Arc,
+	Raw,
+	CanvasContext,
 };
