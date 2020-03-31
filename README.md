@@ -291,6 +291,7 @@ Draws a semi-circle between two angles with a specific position and radius.
 | sector | Boolean, indicates if the drawn shape should be a slice of pie (true) or just the outer part of the circle (false) |
 | color | A hex color code, which determines the color of the arc |
 | fill | Boolean, indicates if the arc should be filled or an outline |
+| closed | Boolean, determines if the arc should close its path (draw a line back to the start) or not |
 
 ##### Example
 

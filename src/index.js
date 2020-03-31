@@ -430,7 +430,7 @@ class Image extends React.Component {
 	}
 };
 
-const Arc = ({ x, y, radius, startAngle, endAngle, color, fill, sector }) => {
+const Arc = ({ x, y, radius, startAngle, endAngle, color, fill, sector, closed }) => {
 	return <CanvasContext.Consumer>
 		{({ context }) => {
 			if (!context) {
@@ -448,7 +448,9 @@ const Arc = ({ x, y, radius, startAngle, endAngle, color, fill, sector }) => {
 			if (sector) {
 				context.moveTo(x, y);
 			}
-			context.closePath();
+			if (closed) {
+				context.closePath();
+			}
 			if (!fill) {
 				context.stroke();
 			} else {
