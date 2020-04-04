@@ -197,6 +197,28 @@ class Canvas extends React.Component {
 	}
 	getRealCoords(event) {
 	    const rect = this.canvas.getBoundingClientRect();
+		
+		// if this is a touch event, handle it specially
+		if (event.touches) {
+			const handledTouches = [];
+			for (const touch of event.touches) {
+				handledTouches.push({
+					x: touch.clientX - rect.left,
+					y: touch.clientY - rect.top,
+				});
+			}
+			
+			if (handledTouches.length === 0) {
+				// shouldn't happen but just in case
+				return {};
+			}
+			
+			return {
+				x: handledTouches[0].x,
+				y: handledTouches[0].y,
+				touches: handledTouches,
+			}
+		}
 		return {
 			x: event.clientX - rect.left,
 			y: event.clientY - rect.top

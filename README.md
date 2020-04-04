@@ -440,7 +440,7 @@ It is recommended that your component call `registerListener` only once, and tha
 
 | Event Type | Triggered by | Contents of Data |
 | -- | -- | -- |
-| EventTypes.MOVE | The mouse moving across the canvas | An object containing x and y of the mouse on the canvas | 
+| EventTypes.MOVE | The mouse moving across the canvas | An object containing x and y of the mouse on the canvas. May also contain a "touches" key if on a multi-touch device, which contains the x and y of all touches detected | 
 | EventTypes.MOUSE_UP | The mouse being released | An object containing x and y of the mouse on the canvas and a button corresponding to a ButtonType above |
 | EventTypes.MOUSE_DOWN| The mouse being pressed | An object containing x and y of the mouse on the canvas and a button corresponding to a ButtonType above |
 | EventTypes.KEY_DOWN | A key being pressed or repeated | An object containing the char value of the key and the key code |
