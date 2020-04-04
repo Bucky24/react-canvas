@@ -168,9 +168,9 @@ class Canvas extends React.Component {
 		this.removeListeners();
 	}
 	removeListeners() {
-		this.canvas.removeEventListener('mousemove', this.handleMouseMove);
-		this.canvas.removeEventListener('mousedown', this.handleMouseDown);
-		this.canvas.removeEventListener('mouseup', this.handleMouseDown);
+		this.canvas.removeEventListener('touchmove', this.handleMouseMove);
+		this.canvas.removeEventListener('touchstart', this.handleMouseDown);
+		this.canvas.removeEventListener('touchend', this.handleMouseDown);
 		this.canvas.removeEventListener('contextmenu', this.handleContextMenu);
 		window.removeEventListener('keydown', this.handleKeyDown);
 		window.removeEventListener('keyup', this.handleKeyUp);

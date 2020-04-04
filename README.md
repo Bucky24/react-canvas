@@ -6,11 +6,11 @@ This module is intended to be a library that allows an HTML5 &lt;canvas&gt; elem
 
 With NPM
 
-    npm install --save react-canvas
+    npm install --save @bucky24/react-canvas
 
 With Yarn
 
-    yarn install react-canvas
+    yarn install @bucky24/react-canvas
 
 ReactCanvas has a peer dependency on `react` and `prop-types` but should be able to use whatever you have installed for your main project. It does require the use of the child context apis, so React 16 is recommended at minimum.
 
