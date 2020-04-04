@@ -209,6 +209,16 @@ class Canvas extends React.Component {
 			}
 			
 			if (handledTouches.length === 0) {
+				// touchend only has changedTouches
+				for (const touch of event.changedTouches) {
+					handledTouches.push({
+						x: touch.clientX - rect.left,
+						y: touch.clientY - rect.top,
+					});
+				}
+			}
+			
+			if (handledTouches.length === 0) {
 				// shouldn't happen but just in case
 				return {};
 			}
@@ -233,12 +243,14 @@ class Canvas extends React.Component {
 			...this.getRealCoords(event),
 			button: ButtonMap[event.button]
 		});
+		event.preventDefault();
 	}
 	handleMouseUp(event) {
 		this.triggerEvent(EventTypes.MOUSE_UP, {
 			...this.getRealCoords(event),
 			button: ButtonMap[event.button]
 		});
+		event.preventDefault();
 	}
 	handleKeyDown(event) {
 		const bodyEvent = event.target.tagName === 'BODY';
