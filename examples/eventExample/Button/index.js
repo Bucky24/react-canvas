@@ -25,14 +25,19 @@ class Button extends CanvasComponent {
 		};
 	}
 	onMouseMove(data, overMe) {
+		console.log('mouse moved');
 		this.setState({
 			mouseOver: overMe
 		});
 	}
 	onMouseUp(data, overMe) {
+		console.log('mouse up');
 		if (overMe) {
 			alert('clicked!');
 		}
+	}
+	onMouseDown(data) {
+		console.log('mouse down');
 	}
 	render() {
 		const color = this.state.mouseOver ? '#0f0' : '#f00';

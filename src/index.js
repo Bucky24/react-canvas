@@ -181,9 +181,9 @@ class Canvas extends React.Component {
 		// double and triple triggering events
 		this.removeListeners();
 
-		this.canvas.addEventListener('mousemove', this.handleMouseMove);
-		this.canvas.addEventListener('mousedown', this.handleMouseDown);
-		this.canvas.addEventListener('mouseup', this.handleMouseUp);
+		this.canvas.addEventListener('touchmove', this.handleMouseMove);
+		this.canvas.addEventListener('touchdown', this.handleMouseDown);
+		this.canvas.addEventListener('touchup', this.handleMouseUp);
 		this.canvas.addEventListener('contextmenu', this.handleContextMenu);
 		window.addEventListener('keydown', this.handleKeyDown);
 		window.addEventListener('keyup', this.handleKeyUp);
