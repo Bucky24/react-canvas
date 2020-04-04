@@ -25,7 +25,7 @@ class Button extends CanvasComponent {
 		};
 	}
 	onMouseMove(data, overMe) {
-		console.log('mouse moved', data);
+		//console.log('mouse moved', data);
 		this.setState({
 			mouseOver: overMe
 		});
