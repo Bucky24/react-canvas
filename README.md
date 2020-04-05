@@ -66,6 +66,7 @@ The Shape element is simple-it draws a shape centered around a given point. Note
 | points | An array containing objects with x and y parameters. This will form the body of the shape. |
 | color | A hex color code, which determines the color of the shape |
 | fill | a boolean value, which determines if the shape is drawn as an outline (false) or a filled in shape (true) |
+| close | A boolean value (default true) which determines if the shape's path is closed before drawing, or left empty |
 
 ##### Example
 

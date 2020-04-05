@@ -37,6 +37,18 @@ const App = ({}) => {
 					]}
 					color="#f00"
 					fill={true}
+				/>	
+				<Shape
+					x={300}
+					y={0}
+					points={[
+						{ x: 10, y: 10},
+						{ x: 100, y: 10 },
+						{ x: 10, y: 100}
+					]}
+					color="#f00"
+					fill={false}
+					close={false}
 				/>
 				<Text
 					x={5}

@@ -23,7 +23,7 @@ const ButtonMap = [
 	ButtonTypes.RIGHT
 ];
 
-function drawShape(x, y, context, points, color, fill) {
+function drawShape(x, y, context, points, color, fill, close) {
 	context.save();
 	context.fillStyle = color;
 	context.strokeStyle = color;
@@ -32,7 +32,9 @@ function drawShape(x, y, context, points, color, fill) {
 	for (var i=1;i<points.length;i++) {
 		context.lineTo(points[i].x + x,points[i].y + y);
 	}
-	context.closePath();
+	if (close) {
+		context.closePath();
+	}
 	if (fill) context.fill();
 	context.stroke();
 	context.restore();
@@ -380,14 +382,17 @@ const Line = ({ x, y, x2, y2, color }) => {
 	</CanvasContext.Consumer>;
 }
 
-const Shape = ({ x, y, points, color, fill }) => {
+const Shape = ({ x, y, points, color, fill, close }) => {
+	if (close === undefined) {
+		close = true;
+	}
 	return <CanvasContext.Consumer>
 		{({ context }) => {
 			if (!context) {
 				return null;
 			}
 
-			drawShape(x, y, context, points, color, fill);
+			drawShape(x, y, context, points, color, fill, close);
 		}}
 	</CanvasContext.Consumer>;
 }
