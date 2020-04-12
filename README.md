@@ -520,12 +520,13 @@ In order to potentially fix this, you can use z-indexing on your components. Wha
 
 This feature bypasses React rendering and as such is experimental and may not work as expected. Use at your own risk. Also the feature only pays attention to z-index on the element that caused the redraw and the direct children of the Canvas. So if you have a grandchild that is z-index 5, the child on the Canvas is z-index 2, and the element that triggered the redraw is z-index 4, then that grandchild will not be redrawn.
 
-To use, you must make two changes. First, add a z-index to the components to indicate which ones should be redrawn.
+To use, you must make two changes. First, add a z-index to the components to indicate which ones should be redrawn, as well as set the `enableExperimental` flag on the Canvas object.
 
 ```
 	return <Canvas
 		width={300}
 		height={300}
+		enableExperimental={true}
 	>
 		<Text
 			x={5}

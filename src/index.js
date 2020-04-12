@@ -357,22 +357,37 @@ class Canvas extends React.Component {
 	}
 	render() {
 		this.indexList = [];
-		const newChildren = this.props.children.map((child) => {
-       	 	if (!child || typeof child !== "object" || Array.isArray(child)) {
-				return child;
+		
+		let newChildren = this.props.children;
+
+		if (this.props.enableExperimental) {
+			const handleChild = (child) => {
+	       	 	if (!child || typeof child !== "object" || Array.isArray(child)) {
+					return child;
+				}
+				const props = child.props || {};
+				const workingIndex = props.zIndex === undefined ? 1 : props.zIndex;
+				const newProps = {
+					...props,
+					zIndex: workingIndex,
+				};
+				if (!this.indexList[workingIndex]) {
+					this.indexList[workingIndex] = [];
+				}
+				this.indexList[workingIndex].push(child);
+				return React.cloneElement(child, newProps);
 			}
-			const props = child.props || {};
-			const workingIndex = props.zIndex === undefined ? 1 : props.zIndex;
-			const newProps = {
-				...props,
-				zIndex: workingIndex,
-			};
-			if (!this.indexList[workingIndex]) {
-				this.indexList[workingIndex] = [];
-			}
-			this.indexList[workingIndex].push(child);
-			return React.cloneElement(child, newProps);
-		});
+		
+			newChildren = this.props.children.map((child) => {
+				if (Array.isArray(child)) {
+					return child.map((innerChild) => {
+						return handleChild(innerChild);
+					});
+				}
+			
+				return handleChild(child);
+			});
+		}
 		return <CanvasContext.Provider value={this.getMyContext()}>		
 			<canvas
 				ref={(c) => {

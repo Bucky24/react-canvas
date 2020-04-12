@@ -13,6 +13,7 @@ const App = ({}) => {
 		<Canvas
 			width={400}
 			height={300}
+			enableExperimental={true}
 		>
 			<Component2/>
 			<Rect
