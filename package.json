@@ -1,6 +1,6 @@
 {
 	"name": "@bucky24/react-canvas",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "A library of components that can be used to manipulate a canvas using JSX embedded in react.",
 	"main": "build/index.js",
 	"scripts": {
@@ -35,5 +35,12 @@
 		"webpack": "4.32.2",
 		"webpack-cli": "3.3.2",
 		"webpack-dev-server": "3.4.1"
-	}
+	},
+	"keywords": [
+		"react",
+		"canvas",
+		"react-canvas",
+		"drawing",
+		"html5"
+	]
 }

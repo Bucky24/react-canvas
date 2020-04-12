@@ -29,6 +29,7 @@ const App = ({}) => {
 				y={50}
 				zIndex={7}
 			/>
+			null,
 		</Canvas>
 	</div>);
 };
