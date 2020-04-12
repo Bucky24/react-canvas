@@ -358,7 +358,7 @@ class Canvas extends React.Component {
 	render() {
 		this.indexList = [];
 		const newChildren = this.props.children.map((child) => {
-			if (!child || typeof child === "string") {
+       	 	if (!child || typeof child !== "object" || Array.isArray(child)) {
 				return child;
 			}
 			const props = child.props || {};
