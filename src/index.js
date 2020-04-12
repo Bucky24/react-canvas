@@ -87,7 +87,8 @@ const handlerToProps = {
 const CanvasContext = React.createContext({
 	context: null,
 	registerListener: null,
-	unregisterListener: null
+	unregisterListener: null,
+	triggerRender: null,
 });
 
 const canvasProps = {
@@ -100,12 +101,41 @@ const canvasDefaultProps = {
 	captureAllKeyEvents: true
 }
 
+const doRender = (element,  context) => {
+	let children = [];
+	if (element.type.length === 1) {
+		children = element.type(element.props);
+	} else if (element.type._context) {
+		// in this case the only child is the function to call with context
+		children = element.props.children(context);
+	} else {
+		// we've got a class component
+		// this is kinda awful for a variety of reasons
+		// and I imagine will cause a lot of bugs.
+		const inst = new element.type(element.props);
+		children = inst.render();
+	}
+	
+	if (!Array.isArray(children)) {
+		children = [children];
+	}
+	
+	children.forEach((child) => {
+		if (!child) {
+			return;
+		}
+		doRender(child, context);
+	});
+}
+
 class Canvas extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			context: null
 		};
+		
+		this.indexList = [];
 		
 		this.reattachListeners = this.reattachListeners.bind(this);
 		this.removeListeners = this.removeListeners.bind(this);
@@ -119,6 +149,7 @@ class Canvas extends React.Component {
 		this.registerListener = this.registerListener.bind(this);
 		this.unregisterListener = this.unregisterListener.bind(this);
 		this.forceRerender = this.forceRerender.bind(this);
+		this.triggerRender = this.triggerRender.bind(this);
 		
 		// map of event to array of function callbacks
 		this.listeners = {};
@@ -147,7 +178,8 @@ class Canvas extends React.Component {
 			context: this.state.context,
 			registerListener: this.registerListener,
 			unregisterListener: this.unregisterListener,
-			forceRerender: this.forceRerender
+			forceRerender: this.forceRerender,
+			triggerRender: this.triggerRender,
 		};
 	}
 	componentWillUpdate(newProps) {
@@ -306,7 +338,38 @@ class Canvas extends React.Component {
 			}
 		}
 	}
+	triggerRender(component) {
+		if (!component || !component.props || component.props.zIndex === undefined) {
+			return;
+		}
+		const zIndex = component.props.zIndex;
+		
+		for (let i=zIndex+1;i<this.indexList.length;i++) {
+			const list = this.indexList[i];
+			if (!list) {
+				// this can happen if we have a gap in the zindex
+				continue;
+			}
+			list.forEach((element) => {
+				doRender(element, this.getMyContext());
+			});
+		}
+	}
 	render() {
+		this.indexList = [];
+		const newChildren = this.props.children.map((child) => {
+			const props = child.props;
+			const workingIndex = props.zIndex === undefined ? 1 : props.zIndex;
+			const newProps = {
+				...props,
+				zIndex: workingIndex,
+			};
+			if (!this.indexList[workingIndex]) {
+				this.indexList[workingIndex] = [];
+			}
+			this.indexList[workingIndex].push(child);
+			return React.cloneElement(child, newProps);
+		});
 		return <CanvasContext.Provider value={this.getMyContext()}>		
 			<canvas
 				ref={(c) => {
@@ -323,7 +386,7 @@ class Canvas extends React.Component {
 					}
 				}}
 			>
-				{this.props.children}
+				{newChildren}
 			</canvas>
 		</CanvasContext.Provider>;
 	}
@@ -397,7 +460,7 @@ const Shape = ({ x, y, points, color, fill, close }) => {
 	</CanvasContext.Consumer>;
 }
 
-const Rect = ({ x, y, x2, y2, color, fill}, { context }) => {
+const Rect = ({ x, y, x2, y2, color, fill}) => {
 	const width = Math.abs(x2 - x);
 	const height = Math.abs(y2 - y);
 	return <Shape
@@ -605,6 +668,14 @@ class CanvasComponent extends React.Component {
 	onKeyDown() {}
 	onKeyUp() {}
 	onWheel() {}
+	
+	render() {
+		if (this.context.triggerRender) {
+			setTimeout(() => {
+				this.context.triggerRender(this);
+			},0);
+		}
+	}
 }
 
 CanvasComponent.contextType = CanvasContext;

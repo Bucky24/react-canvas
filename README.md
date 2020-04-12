@@ -511,3 +511,44 @@ export default MyElement;
 ##### Rerendering
 
 The canvas context also provides a function `forceRerender` which will essentially call `this.forceUpdate()` on the top level canvas. This can be useful in some situations to force the canvas to redraw.
+
+## Z Index (Experimental)
+
+Sometimes you can run into the situation where some parts of your canvas will redraw and others will not. For example, let's say you're drawing a map, but drawing parts of the UI on top of it. If you have the map in a specific CanvasComponent and UI pieces in other components, when your map redraws, you may find that your UI components do not. This is because React is trying to ease the load on the browser by only updating dom elements that have changed. While this works really well for a dom, where making sure dom elements are rerendered properly is taken care of by the browser, we're dealing with a canvas, where this is not the case.
+
+In order to potentially fix this, you can use z-indexing on your components. What this will do is detect when a component has re-rendered, and at that point, force render every component with a higher z-index.
+
+This feature bypasses React rendering and as such is experimental and may not work as expected. Use at your own risk. Also the feature only pays attention to z-index on the element that caused the redraw and the direct children of the Canvas. So if you have a grandchild that is z-index 5, the child on the Canvas is z-index 2, and the element that triggered the redraw is z-index 4, then that grandchild will not be redrawn.
+
+To use, you must make two changes. First, add a z-index to the components to indicate which ones should be redrawn.
+
+```
+	return <Canvas
+		width={300}
+		height={300}
+	>
+		<Text
+			x={5}
+			y={60}
+			zIndex={3}
+		>
+			Blah
+		</Text>
+		<Shape
+			zIndex={2}
+			points={[
+				{ x: 10, y: 10},
+				{ x: 100, y: 10 },
+				{ x: 10, y: 100}
+			]}
+			color="#f00"
+			fill={true}
+		/>
+	</Container>;
+```
+
+The following example sets up the Text to be redrawn whenever something with a z-index of less than 3 is redrawn, and the Shape to be redrawn whenever something with a z-index of less than 2 is redrawn. Note that the default z-index is 1
+
+The second thing you must do is indicate which components should trigger a redraw. This can be done on CanvasComponents by calling `super.render()` inside the render function, and also by calling `triggerRedraw` on the CanvasContext object, if you have one.
+
+See the `overlapExample` in the examples directory for more information on how to make this work.
