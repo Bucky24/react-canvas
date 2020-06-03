@@ -1,20 +1,89 @@
 import React from 'react';
-import { Canvas, Shape, Image } from 'react-canvas';
+import { Canvas, Shape, Image, Images } from 'react-canvas';
 
 import sampleImage from './sampleImage.png';
 
 const App = ({}) => {
 	return (<div>
 		<Canvas
-			width={300}
+			width={600}
 			height={300}
 		>
 			<Image
 				src={sampleImage}
 				x={0}
 				y={0}
-				width={300}
-				height={300}
+				width={200}
+				height={200}
+			/>
+			<Image
+				src={sampleImage}
+				x={200}
+				y={0}
+				width={200}
+				height={200}
+				clip={{
+					x: 100,
+					y: 100,
+					width: 50,
+					height: 100,
+				}}
+			/>
+			<Images
+				images={[
+					{
+						src: sampleImage,
+						x: 400,
+						y: 0,
+						width: 100,
+						height: 100,
+						clip: {
+							x: 50,
+							y: 50,
+							height: 50,
+							width: 50,
+						},
+					},
+					{
+						src: sampleImage,
+						x: 500,
+						y: 0,
+						width: 100,
+						height: 100,
+						clip: {
+							x: 0,
+							y: 50,
+							height: 50,
+							width: 50,
+						},
+					},
+					{
+						src: sampleImage,
+						x: 400,
+						y: 100,
+						width: 100,
+						height: 100,
+						clip: {
+							x: 50,
+							y: 0,
+							height: 50,
+							width: 50,
+						},
+					},
+					{
+						src: sampleImage,
+						x: 500,
+						y: 100,
+						width: 100,
+						height: 100,
+						clip: {
+							x: 0,
+							y: 0,
+							height: 50,
+							width: 50,
+						},
+					},
+				]}
 			/>
 			<Shape
 				x={40}

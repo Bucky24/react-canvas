@@ -132,7 +132,7 @@ Accepts a single child, which is the text to be displayed
 
 ### Image
 
-The Image element takes care of loading and displaying an image asset to the canvas. Currently it only takes in a src, similar to an &lt;img&gt; tag.
+The Image element takes care of loading and displaying an image asset to the canvas.
 
 Images are cached after first load, so re-using the same src will not cause the image to be loaded from the server again.
 
@@ -145,6 +145,7 @@ Images are cached after first load, so re-using the same src will not cause the 
 | src | The URL that the image can be found at. This can also be base-64 encoded image data |
 | width | The width to draw the image at |
 | height | The height to draw the image at |
+| clip | See Image Clipping below |
 
 ##### Example
 
@@ -154,7 +155,7 @@ Images are cached after first load, so re-using the same src will not cause the 
 	height={300}
 >
 	<Image
-		src="http://solumcraft.com/favicon.ico"
+		src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
 		x={40}
 		y={50}
 		width={50}
@@ -179,6 +180,71 @@ return <Canvas
 		height={50}
 	/>
 </Canvas>;
+```
+
+##### Image Clipping
+
+The clip parameter allows drawing of only part of the image. It takes in the following parameters:
+
+| Parameter | Description |
+| ----------- | ----------- |
+| x  | X coord of where to start the clip |
+| y   | Y coord of where to start the clip |
+| width | The width of the clip |
+| height | The height of the clip |
+
+Note that these parameters are all translated into image space from draw space. So for example, if I had an image that was 50x50, but I was drawing it like this:
+
+```
+	<Image
+		src={src}
+		x={40}
+		y={50}
+		width={200}
+		height={200}
+		clip={{
+			x: 100,
+			y: 100,
+			width: 50,
+			height: 50,
+		}}
+	/>
+</Canvas>;
+```
+
+The x coordinate is 50% of the final width of the image, meaning that when it is translated, it translates into half of the image width, so it becomes 25. This is to avoid the developer needing to know the size of the image before it's loaded (and becomes important because the Image component does not expose the image data). So when using clip, just use the width and height that you're passing into the Image component to make your calculations about how much to clip.
+
+You can also observe the imageExample in the source to see how this is used.
+
+### Images
+
+The Images element draws multiple images to the screen. This can be helpful when you need to draw a lot of images but don't want to have the overhead of a lot of React components. In general this component behaves exactly like the Image component.
+
+##### Parameters
+
+| Parameter | Description |
+| ----------- | ----------- |
+| images | A list containing objects that conform to the parameters for the Image component |
+
+##### Example
+
+```
+<Canvas
+	width={300}
+	height={300}
+>
+	<Images
+		images={[
+			{
+				src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
+				x={40}
+				y={50}
+				width={50}
+				height={50}
+			}
+		]}
+	/>
+</Canvas>
 ```
 
 ### Line

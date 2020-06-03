@@ -89,6 +89,7 @@ const CanvasContext = React.createContext({
 	registerListener: null,
 	unregisterListener: null,
 	triggerRender: null,
+	loadImage: null,
 });
 
 const canvasProps = {
@@ -99,6 +100,43 @@ const canvasProps = {
 
 const canvasDefaultProps = {
 	captureAllKeyEvents: true
+}
+
+const loadingMap = {};
+const imageMap = {};
+
+function loadImage(src, cb) {
+	if (imageMap[src]) {
+		return imageMap[src];
+	}
+	
+	// else load it
+	const body = document.getElementsByTagName("body")[0];
+
+	const img = document.createElement("img");
+	img.src = src;
+	img.onload = () => {
+		imageMap[src] = img;
+		if (src in loadingMap) {
+			loadingMap[src].forEach((cb) => {
+				cb(img);
+			});
+		}
+		delete loadingMap[src];
+	};
+	if (img.loaded) {
+		imageMap[src] = img;
+		return img;
+	} else {
+		if (!(src in loadingMap)) {
+			loadingMap[src] = []
+		}
+		loadingMap[src].push(cb);
+	}
+	img.style.display = 'none';
+	body.append(img);
+	
+	return null;
 }
 
 const doRender = (element,  context) => {
@@ -180,6 +218,7 @@ class Canvas extends React.Component {
 			unregisterListener: this.unregisterListener,
 			forceRerender: this.forceRerender,
 			triggerRender: this.triggerRender,
+			getImage: loadImage,
 		};
 	}
 	componentWillUpdate(newProps) {
@@ -495,66 +534,116 @@ const Rect = ({ x, y, x2, y2, color, fill}) => {
 	/>;
 }
 
-const loadingMap = {};
-const imageMap = {};
+const imagePropTypes = {
+	src: PropTypes.string.isRequired,
+	x: PropTypes.number.isRequired,
+	y: PropTypes.number.isRequired,
+	width: PropTypes.number.isRequired,
+	height: PropTypes.number.isRequired,
+	clip: PropTypes.shape({
+		x: PropTypes.number.isRequired,
+		y: PropTypes.number.isRequired,
+		width: PropTypes.number.isRequired,
+		height: PropTypes.number.isRequired,
+	}),
+}
 
 class Image extends React.Component {
 	static contextType = CanvasContext;
-
-	constructor(props) {
-		super(props);
-		this.state = {
-			loaded: false,
-			imageHandle: null
-		};
-	}
 	
 	render() {
-		const { src, x, y, width, height } = this.props;
-		const { context, forceRerender } = this.context;
+		const { src, x, y, width, height, clip } = this.props;
+		const { context, forceRerender, getImage } = this.context;
 		
 		if (!context) {
 			return null;
 		}
 		
-		let img;
-
-		const finishLoading = () => {
-			const image = imageMap[src];
-			context.drawImage(image, x,y, width, height);
-		}
+		const img = getImage(src, forceRerender);
 		
-		// if we're already loading this image, give up for now. Once it's
-		// loading, we will get a redraw of the canvas.
-		if (loadingMap[src]) {
+		if (!img) {
 			return null;
 		}
 		
-		if (imageMap[src]) {
-			finishLoading(imageMap[src]);
+		if (clip) {
+			const { x: sx, y: sy, width: sw, height: sh } = clip;
+			const iw = img.width;
+			const ih = img.height;
+			
+			// basically convert the clip coords from draw space to image space
+			const rw = iw / width;
+			const rh = ih / height;
+			const finalX = sx * rw;
+			const finalY = sy * rh;
+			context.drawImage(img, finalX, finalY, sw * rw, sh * rh, x, y, width, height);
 		} else {
-			const body = document.getElementsByTagName("body")[0];
-		
-			const img = document.createElement("img");
-			img.src = src;
-			img.onload = () => {
-				imageMap[src] = img;
-				delete loadingMap[src];
-				forceRerender();
-			};
-			if (img.loaded) {
-				imageMap[src] = img;
-				finishLoading();
-			} else {
-				loadingMap[src] = img;
-			}
-			img.style.display = 'none';
-			body.append(img);
+			context.drawImage(img, x, y, width, height);
 		}
 		
 		return null;
 	}
 };
+
+Image.propTypes = imagePropTypes;
+
+const imagesPropTypes = {
+	images: PropTypes.arrayOf(PropTypes.shape({
+		src: PropTypes.string.isRequired,
+		x: PropTypes.number.isRequired,
+		y: PropTypes.number.isRequired,
+		width: PropTypes.number.isRequired,
+		height: PropTypes.number.isRequired,
+		clip: PropTypes.shape({
+			x: PropTypes.number.isRequired,
+			y: PropTypes.number.isRequired,
+			width: PropTypes.number.isRequired,
+			height: PropTypes.number.isRequired,
+		}),
+	})),
+}
+
+class Images extends React.Component {
+	static contextType = CanvasContext;
+	
+	render() {
+		const { images } = this.props;
+		const { context, forceRerender, getImage } = this.context;
+		
+		if (!context) {
+			return null;
+		}
+		
+		for (const image of images) {
+			const { src, x, y, width, height, clip } = image;
+			
+			const img = getImage(src, forceRerender);
+			
+			if (!img) {
+				continue;
+			}
+			
+			if (clip) {
+				const { x: sx, y: sy, width: sw, height: sh } = clip;
+				const iw = img.width;
+				const ih = img.height;
+				
+				// basically convert the clip coords from draw space to image space
+				const rw = iw / width;
+				const rh = ih / height;
+				const finalX = sx * rw;
+				const finalY = sy * rh;
+				context.drawImage(img, finalX, finalY, sw * rw, sh * rh, x, y, width, height);
+			} else {
+				context.drawImage(img, x, y, width, height);
+			}
+			
+		}
+
+		return null;
+	}
+};
+
+Images.propTypes = imagesPropTypes;
 
 const Arc = ({ x, y, radius, startAngle, endAngle, color, fill, sector, closed }) => {
 	return <CanvasContext.Consumer>
@@ -711,4 +800,5 @@ export {
 	Arc,
 	Raw,
 	CanvasContext,
+	Images,
 };
