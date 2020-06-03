@@ -236,12 +236,12 @@ The Images element draws multiple images to the screen. This can be helpful when
 	<Images
 		images={[
 			{
-				src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
-				x={40}
-				y={50}
-				width={50}
-				height={50}
-			}
+				src:"https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png",
+				x:40,
+				y:50,
+				width:50,
+				height:50,
+			},
 		]}
 	/>
 </Canvas>
