@@ -110,6 +110,15 @@ function loadImage(src, cb) {
 		return imageMap[src];
 	}
 	
+    if (loadingMap[src]) {
+		// if we've already registered this function, don't register it again
+  		if (loadingMap[src].includes(cb)) {
+  			return null;
+  	  	}
+  	  	loadingMap[src].push(cb);
+  	  	return null;
+    }
+	
 	// else load it
 	const body = document.getElementsByTagName("body")[0];
 
