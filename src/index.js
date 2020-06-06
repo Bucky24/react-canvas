@@ -357,9 +357,11 @@ class Canvas extends React.Component {
 		event.preventDefault();
 	}
 	handleWheel(event) {
+		// Firefox uses deltaY
+		const delta = event.wheelDelta || event.deltaY;
 		this.triggerEvent(EventTypes.WHEEL, {
 			...this.getRealCoords(event),
-			up: event.wheelDelta > 0,
+			up: delta > 0,
 		});
 	}
 	triggerEvent(event, data) {
