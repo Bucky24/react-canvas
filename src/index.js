@@ -357,8 +357,8 @@ class Canvas extends React.Component {
 		event.preventDefault();
 	}
 	handleWheel(event) {
-		// Firefox uses deltaY
-		const delta = event.wheelDelta || event.deltaY;
+		// Firefox uses deltaY, but it's opposite of the normal wheel delta
+		const delta = event.wheelDelta || -event.deltaY;
 		this.triggerEvent(EventTypes.WHEEL, {
 			...this.getRealCoords(event),
 			up: delta > 0,
