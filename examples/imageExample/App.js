@@ -1,5 +1,5 @@
 import React from 'react';
-import { Canvas, Shape, Image, Images } from 'react-canvas';
+import { Canvas, Shape, Image, Images, Pattern } from 'react-canvas';
 
 import sampleImage from './sampleImage.png';
 
@@ -7,7 +7,7 @@ const App = ({}) => {
 	return (<div>
 		<Canvas
 			width={600}
-			height={300}
+			height={400}
 		>
 			<Image
 				src={sampleImage}
@@ -95,6 +95,13 @@ const App = ({}) => {
 				]}
 				color="#f00"
 				fill={true}
+			/>
+			<Pattern
+				x={200}
+				y={200}
+				width={200}
+				height={200}
+				src={sampleImage}
 			/>
 		</Canvas>
 	</div>);

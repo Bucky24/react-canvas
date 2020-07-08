@@ -436,6 +436,33 @@ Takes multiple children, must be ReactCanvas elements.
 	</Container>;
 ```
 
+### Pattern
+
+The Pattern element allows drawing an image in a repeated pattern in a rectangle.
+
+##### Parameters
+
+| Parameter    | Description |
+| ----------- | ----------- |
+| x | X position to start the draw at |
+| y | Y position to start the draw at |
+| width | Width of the rectangle |
+| height | Height of the rectangle |
+| src | Similar to image, a url, or raw image data to tile |
+
+##### Example
+
+```
+<Canvas
+	width={300}
+	height={300}
+>
+	<Raw drawFn={(context) => {
+		// do any low level canvas code here
+	}}
+</Canvas>
+```
+
 ## Events
 
 ### CanvasComponent
@@ -548,6 +575,18 @@ class MyComponent extends React.Component {
 ## Extending
 
 You can easily create your own elements that have access to the canvas context.
+
+### Context
+
+The following properties are available from the CanvasContext:
+
+| Name | Purpose |
+| ---- | --- |
+| context | The raw canvas context |
+| registerListener | Function for event handling. See above for usage |
+| unregisterListener | Function for event handling. See above for usage |
+| loadImage | Function that takes in a src and a cb function. If the image is already loaded, it will return the img object. If not, the cb function is called when the image is loaded |
+| loadPattern | Function that takes in a src and a cb function. If the pattern is already loaded, it will return the canvas pattern object. If not, the cb function is called when the pattern is loaded |
 
 ##### Example
 

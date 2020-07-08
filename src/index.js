@@ -23,6 +23,17 @@ const ButtonMap = [
 	ButtonTypes.RIGHT
 ];
 
+// from https://stackoverflow.com/a/7616484/8346513
+function hashString(str) {
+	var hash = 0, i, chr;
+	for (i = 0; i < str.length; i++) {
+		chr   = str.charCodeAt(i);
+		hash  = ((hash << 5) - hash) + chr;
+		hash |= 0; // Convert to 32bit integer
+	}
+	return (hash >>> 0);
+}
+
 function drawShape(x, y, context, points, color, fill, close) {
 	context.save();
 	context.fillStyle = color;
@@ -90,6 +101,7 @@ const CanvasContext = React.createContext({
 	unregisterListener: null,
 	triggerRender: null,
 	loadImage: null,
+	loadPattern: null,
 });
 
 const canvasProps = {
@@ -144,6 +156,37 @@ function loadImage(src, cb) {
 	}
 	img.style.display = 'none';
 	body.append(img);
+	
+	return null;
+}
+
+const patternMap = {};
+const patternLoadingMap = {};
+
+function loadPattern(src, context, cb) {
+	const hash = hashString(src);
+	if (patternMap[hash]) {
+		return patternMap[hash];
+	}
+	
+	if (!patternLoadingMap[hash]) {
+		patternLoadingMap[hash] = [];
+		console.log("setting pattern map", hash, patternLoadingMap[hash])
+	}
+	
+	if (patternLoadingMap[hash].includes(cb)) {
+		return null;
+	}
+	
+	patternLoadingMap[hash].push(cb);
+
+	loadImage(src, (img) => {
+		const pattern = context.createPattern(img, 'repeat');
+		patternMap[hash] = pattern;
+		patternLoadingMap[hash].forEach((cb) => {
+			cb(img);
+		});
+	});
 	
 	return null;
 }
@@ -227,7 +270,8 @@ class Canvas extends React.Component {
 			unregisterListener: this.unregisterListener,
 			forceRerender: this.forceRerender,
 			triggerRender: this.triggerRender,
-			getImage: loadImage,
+			loadImage: loadImage,
+			loadPattern: loadPattern,
 		};
 	}
 	componentWillUpdate(newProps) {
@@ -713,6 +757,27 @@ const Raw = ({ drawFn }) => {
 	</CanvasContext.Consumer>;
 }
 
+const Pattern = ({ x, y, width, height, src }) => {
+	return <CanvasContext.Consumer>
+		{({ context, forceRerender }) => {
+			if (!context) {
+				return null;
+			}
+			
+			const pattern = loadPattern(src, context, forceRerender);
+			
+			if (!pattern) {
+				return null;
+			}
+			
+			context.save();
+			context.fillStyle = pattern;
+			context.fillRect(x, y, width, height);
+			context.restore();
+		}}
+	</CanvasContext.Consumer>;
+}
+
 class CanvasComponent extends React.Component {
 	static contextType = CanvasContext;
 
@@ -812,4 +877,5 @@ export {
 	Raw,
 	CanvasContext,
 	Images,
+	Pattern,
 };
