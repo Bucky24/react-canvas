@@ -100,7 +100,7 @@ const CanvasContext = React.createContext({
 	registerListener: null,
 	unregisterListener: null,
 	triggerRender: null,
-	loadImage: null,
+	getImage: null,
 	loadPattern: null,
 });
 
@@ -270,7 +270,7 @@ class Canvas extends React.Component {
 			unregisterListener: this.unregisterListener,
 			forceRerender: this.forceRerender,
 			triggerRender: this.triggerRender,
-			loadImage: loadImage,
+			getImage: loadImage,
 			loadPattern: loadPattern,
 		};
 	}
