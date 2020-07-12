@@ -146,6 +146,7 @@ Images are cached after first load, so re-using the same src will not cause the 
 | width | The width to draw the image at |
 | height | The height to draw the image at |
 | clip | See Image Clipping below |
+| rot | Rotation angle in degrees |
 
 ##### Example
 

@@ -1,9 +1,26 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Canvas, Shape, Image, Images, Pattern } from 'react-canvas';
 
 import sampleImage from './sampleImage.png';
 
 const App = ({}) => {
+	const [rot, setRot] = useState(0);
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			let newRot = rot + 10;
+			if (newRot >= 360) {
+				newRot -= 360;
+			}
+
+			setRot(newRot);
+		}, 500);
+
+		return () => {
+			clearInterval(interval);
+		}
+	})
+
 	return (<div>
 		<Canvas
 			width={600}
@@ -12,9 +29,10 @@ const App = ({}) => {
 			<Image
 				src={sampleImage}
 				x={0}
-				y={0}
+				y={200}
 				width={200}
 				height={200}
+				rot={rot}
 			/>
 			<Image
 				src={sampleImage}
@@ -22,6 +40,20 @@ const App = ({}) => {
 				y={0}
 				width={200}
 				height={200}
+				clip={{
+					x: 100,
+					y: 100,
+					width: 50,
+					height: 100,
+				}}
+			/>
+			<Image
+				src={sampleImage}
+				x={400}
+				y={200}
+				width={200}
+				height={200}
+				rot={rot}
 				clip={{
 					x: 100,
 					y: 100,
@@ -50,6 +82,7 @@ const App = ({}) => {
 						y: 0,
 						width: 100,
 						height: 100,
+						rot,
 						clip: {
 							x: 0,
 							y: 50,

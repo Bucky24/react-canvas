@@ -607,7 +607,7 @@ class Image extends React.Component {
 	static contextType = CanvasContext;
 	
 	render() {
-		const { src, x, y, width, height, clip } = this.props;
+		const { src, x, y, width, height, clip, rot } = this.props;
 		const { context, forceRerender, getImage } = this.context;
 		
 		if (!context) {
@@ -619,6 +619,8 @@ class Image extends React.Component {
 		if (!img) {
 			return null;
 		}
+
+		context.save();
 		
 		if (clip) {
 			const { x: sx, y: sy, width: sw, height: sh } = clip;
@@ -630,10 +632,24 @@ class Image extends React.Component {
 			const rh = ih / height;
 			const finalX = sx * rw;
 			const finalY = sy * rh;
+			context.translate(x+width/2, y+height/2);
+			if (rot) {
+				const rotRad = rot * Math.PI/180;
+				context.rotate(rotRad);
+			}
+			context.translate(-x-width/2, -y-height/2);
 			context.drawImage(img, finalX, finalY, sw * rw, sh * rh, x, y, width, height);
 		} else {
+			context.translate(x+width/2, y+height/2);
+			if (rot) {
+				const rotRad = rot * Math.PI/180;
+				context.rotate(rotRad);
+			}
+			context.translate(-x-width/2, -y-height/2);
 			context.drawImage(img, x, y, width, height);
 		}
+
+		context.restore();
 		
 		return null;
 	}
@@ -648,6 +664,7 @@ const imagesPropTypes = {
 		y: PropTypes.number.isRequired,
 		width: PropTypes.number.isRequired,
 		height: PropTypes.number.isRequired,
+		rot: PropTypes.number,
 		clip: PropTypes.shape({
 			x: PropTypes.number.isRequired,
 			y: PropTypes.number.isRequired,
@@ -669,9 +686,11 @@ class Images extends React.Component {
 		}
 		
 		for (const image of images) {
-			const { src, x, y, width, height, clip } = image;
+			const { src, x, y, width, height, clip, rot } = image;
 			
 			const img = getImage(src, forceRerender);
+
+			context.save();
 			
 			if (!img) {
 				continue;
@@ -687,10 +706,24 @@ class Images extends React.Component {
 				const rh = ih / height;
 				const finalX = sx * rw;
 				const finalY = sy * rh;
+				context.translate(x+width/2, y+height/2);
+				if (rot) {
+					const rotRad = rot * Math.PI/180;
+					context.rotate(rotRad);
+				}
+				context.translate(-x-width/2, -y-height/2);
 				context.drawImage(img, finalX, finalY, sw * rw, sh * rh, x, y, width, height);
 			} else {
+				context.translate(x+width/2, y+height/2);
+				if (rot) {
+					const rotRad = rot * Math.PI/180;
+					context.rotate(rotRad);
+				}
+				context.translate(-x-width/2, -y-height/2);
 				context.drawImage(img, x, y, width, height);
 			}
+
+			context.restore();
 			
 		}
 
