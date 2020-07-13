@@ -171,7 +171,6 @@ function loadPattern(src, context, cb) {
 	
 	if (!patternLoadingMap[hash]) {
 		patternLoadingMap[hash] = [];
-		console.log("setting pattern map", hash, patternLoadingMap[hash])
 	}
 	
 	if (patternLoadingMap[hash].includes(cb)) {
@@ -603,98 +602,20 @@ const imagePropTypes = {
 	}),
 }
 
-class Image extends React.Component {
-	static contextType = CanvasContext;
-	
-	render() {
-		const { src, x, y, width, height, clip, rot } = this.props;
-		const { context, forceRerender, getImage } = this.context;
-		
-		if (!context) {
-			return null;
-		}
-		
-		const img = getImage(src, forceRerender);
-		
-		if (!img) {
-			return null;
-		}
-
-		context.save();
-		
-		if (clip) {
-			const { x: sx, y: sy, width: sw, height: sh } = clip;
-			const iw = img.width;
-			const ih = img.height;
-			
-			// basically convert the clip coords from draw space to image space
-			const rw = iw / width;
-			const rh = ih / height;
-			const finalX = sx * rw;
-			const finalY = sy * rh;
-			context.translate(x+width/2, y+height/2);
-			if (rot) {
-				const rotRad = rot * Math.PI/180;
-				context.rotate(rotRad);
+const Image = ({ src, x, y, width, height, clip, rot }) => {
+	return <CanvasContext.Consumer>
+		{({ context, forceRerender, getImage }) => {
+			if (!context) {
+				return null;
 			}
-			context.translate(-x-width/2, -y-height/2);
-			context.drawImage(img, finalX, finalY, sw * rw, sh * rh, x, y, width, height);
-		} else {
-			context.translate(x+width/2, y+height/2);
-			if (rot) {
-				const rotRad = rot * Math.PI/180;
-				context.rotate(rotRad);
-			}
-			context.translate(-x-width/2, -y-height/2);
-			context.drawImage(img, x, y, width, height);
-		}
-
-		context.restore();
-		
-		return null;
-	}
-};
-
-Image.propTypes = imagePropTypes;
-
-const imagesPropTypes = {
-	images: PropTypes.arrayOf(PropTypes.shape({
-		src: PropTypes.string.isRequired,
-		x: PropTypes.number.isRequired,
-		y: PropTypes.number.isRequired,
-		width: PropTypes.number.isRequired,
-		height: PropTypes.number.isRequired,
-		rot: PropTypes.number,
-		clip: PropTypes.shape({
-			x: PropTypes.number.isRequired,
-			y: PropTypes.number.isRequired,
-			width: PropTypes.number.isRequired,
-			height: PropTypes.number.isRequired,
-		}),
-	})),
-}
-
-class Images extends React.Component {
-	static contextType = CanvasContext;
-	
-	render() {
-		const { images } = this.props;
-		const { context, forceRerender, getImage } = this.context;
-		
-		if (!context) {
-			return null;
-		}
-		
-		for (const image of images) {
-			const { src, x, y, width, height, clip, rot } = image;
 			
 			const img = getImage(src, forceRerender);
-
-			context.save();
 			
 			if (!img) {
-				continue;
+				return null;
 			}
+
+			context.save();
 			
 			if (clip) {
 				const { x: sx, y: sy, width: sw, height: sh } = clip;
@@ -725,10 +646,82 @@ class Images extends React.Component {
 
 			context.restore();
 			
-		}
+			return null;
+		}}
+	</CanvasContext.Consumer>
+};
 
-		return null;
-	}
+Image.propTypes = imagePropTypes;
+
+const imagesPropTypes = {
+	images: PropTypes.arrayOf(PropTypes.shape({
+		src: PropTypes.string.isRequired,
+		x: PropTypes.number.isRequired,
+		y: PropTypes.number.isRequired,
+		width: PropTypes.number.isRequired,
+		height: PropTypes.number.isRequired,
+		rot: PropTypes.number,
+		clip: PropTypes.shape({
+			x: PropTypes.number.isRequired,
+			y: PropTypes.number.isRequired,
+			width: PropTypes.number.isRequired,
+			height: PropTypes.number.isRequired,
+		}),
+	})),
+}
+
+const Images = ({ images }) => {
+	return <CanvasContext.Consumer>
+		{({ context, forceRerender, getImage }) => {
+			if (!context) {
+				return null;
+			}
+			
+			for (const image of images) {
+				const { src, x, y, width, height, clip, rot } = image;
+				
+				const img = getImage(src, forceRerender);
+
+				context.save();
+				
+				if (!img) {
+					continue;
+				}
+				
+				if (clip) {
+					const { x: sx, y: sy, width: sw, height: sh } = clip;
+					const iw = img.width;
+					const ih = img.height;
+					
+					// basically convert the clip coords from draw space to image space
+					const rw = iw / width;
+					const rh = ih / height;
+					const finalX = sx * rw;
+					const finalY = sy * rh;
+					context.translate(x+width/2, y+height/2);
+					if (rot) {
+						const rotRad = rot * Math.PI/180;
+						context.rotate(rotRad);
+					}
+					context.translate(-x-width/2, -y-height/2);
+					context.drawImage(img, finalX, finalY, sw * rw, sh * rh, x, y, width, height);
+				} else {
+					context.translate(x+width/2, y+height/2);
+					if (rot) {
+						const rotRad = rot * Math.PI/180;
+						context.rotate(rotRad);
+					}
+					context.translate(-x-width/2, -y-height/2);
+					context.drawImage(img, x, y, width, height);
+				}
+
+				context.restore();
+				
+			}
+
+			return null;
+		}}
+	</CanvasContext.Consumer>
 };
 
 Images.propTypes = imagesPropTypes;
@@ -807,6 +800,43 @@ const Pattern = ({ x, y, width, height, src }) => {
 			context.fillStyle = pattern;
 			context.fillRect(x, y, width, height);
 			context.restore();
+		}}
+	</CanvasContext.Consumer>;
+}
+
+const Clip = ({ x, y, width, height, children }) =>{
+	return <CanvasContext.Consumer>
+		{(canvasContext) => {
+			const { context } = canvasContext;
+			if (!context) {
+				return null;
+			}
+			
+			context.save();
+			context.beginPath();
+			context.rect(x, y, width, height);
+			context.clip();
+
+			let childList = children;
+			if (!Array.isArray(childList)) {
+				childList = [childList];
+			}
+
+			for (const child of childList) {
+				const { type, props } = child;
+				const result = type(props);
+				if (result.type._context) {
+					if (!result.props.children || !(result.props.children instanceof Function)) {
+						throw new Exception("Child of Clip did not return a CanvasContext.consumer as expected. Clip can currently only handle bottom level React Canvas components");
+					}
+					result.props.children(canvasContext);
+				} else {
+					throw new Exception("Child of Clip did not return a CanvasContext.consumer as expected. Clip can currently only handle bottom level React Canvas components");
+				}
+			}
+
+			context.restore();
+			return null;
 		}}
 	</CanvasContext.Consumer>;
 }
@@ -911,4 +941,5 @@ export {
 	CanvasContext,
 	Images,
 	Pattern,
+	Clip,
 };
