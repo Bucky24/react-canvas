@@ -273,12 +273,12 @@ class Canvas extends React.Component {
 			loadPattern: loadPattern,
 		};
 	}
-	componentWillUpdate(newProps) {
-		if (newProps.width !== this.canvas.width) {
-			this.canvas.width = newProps.width;
+	componentDidUpdate() {
+		if (this.props.width !== this.canvas.width) {
+			this.canvas.width = this.props.width;
 		}
-		if (newProps.height !== this.canvas.height) {
-			this.canvas.height = newProps.height;
+		if (this.props.height !== this.canvas.height) {
+			this.canvas.height = this.props.height;
 		}
 	}
 	componentDidMount() {

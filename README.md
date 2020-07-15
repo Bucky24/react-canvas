@@ -516,6 +516,8 @@ If `bounds` is set on the child object (containing x, y, width, and height), the
 
 Note that if you make a component a CanvasComponent but it is not nested inside a Canvas element, it will throw an error to your console because the child context doesn't exist.
 
+Another thing of note: CanvasComponent has event handling in `componentDidMount`. If you are using `componentDidMount` in your custom component, be sure to call `super.componentDidMount()` or else event handling will not work.
+
 ##### Example
 
 ```

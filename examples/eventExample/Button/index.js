@@ -31,7 +31,6 @@ class Button extends CanvasComponent {
 		});
 	}
 	onMouseUp(data, overMe) {
-		console.log('mouse up', data);
 		if (overMe) {
 			alert('clicked!');
 		}
