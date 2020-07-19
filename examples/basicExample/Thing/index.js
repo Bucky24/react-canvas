@@ -3,14 +3,10 @@ import { Container, Text, Shape } from 'react-canvas';
 
 const Thing = () => {
 	const foo = 'bar';
-	return (<Container>
-		<Text
-			x={5}
-			y={20}
-		>
-			Blah {foo}
-		</Text>
+	return (<>
 		<Shape
+            x={200}
+            y={200}
 			points={[
 				{ x: 10, y: 10},
 				{ x: 100, y: 10 },
@@ -19,7 +15,13 @@ const Thing = () => {
 			color="#f00"
 			fill={true}
 		/>
-	</Container>);
+		<Text
+			x={205}
+			y={220}
+		>
+			Blah {foo}
+		</Text>
+	</>);
 };
 
 export default Thing;

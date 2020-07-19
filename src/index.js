@@ -190,6 +190,15 @@ function loadPattern(src, context, cb) {
 	return null;
 }
 
+function isClass(func) {
+	if (typeof func !== 'function') {
+		return false;
+	}
+	const funcStr = Function.prototype.toString.call(func);
+	// not sure if this is best, but classes seem to have this
+	return funcStr.includes("_classCallCheck");
+}
+
 const doRender = (element,  context) => {
 	let children = [];
 	if (element.type.length === 1) {
@@ -197,14 +206,23 @@ const doRender = (element,  context) => {
 	} else if (element.type._context) {
 		// in this case the only child is the function to call with context
 		children = element.props.children(context);
-	} else {
+	} else if (isClass(element.type)) {
 		// we've got a class component
 		// this is kinda awful for a variety of reasons
 		// and I imagine will cause a lot of bugs.
 		const inst = new element.type(element.props);
 		children = inst.render();
+	} else if (element.type instanceof Function) {
+		children = element.type(element.props);
+	} else if (typeof element.type === "symbol") {
+		// this is the react <> thing
+		children = element.props.children;
+	} else {
+		console.log(element.type.valueOf(), element.type.valueOf() == "react.fragment")
+		console.error("No idea how to handle", element);
+		return;	
 	}
-	
+
 	if (!Array.isArray(children)) {
 		children = [children];
 	}
@@ -481,21 +499,46 @@ class Canvas extends React.Component {
 				return handleChild(child);
 			});
 		}
+
+		if (!Array.isArray(newChildren)) {
+			newChildren = [newChildren];
+		}
+
+		const finishRender = () => {
+			if (this.props.customRender) {
+				const context = this.getMyContext();
+				newChildren.forEach((child) => {
+					doRender(child, context);
+				});
+			}
+		}
+
+		const refFunc = (c) => {
+			if (c) {
+				const newContext = c.getContext('2d');
+				if (this.state.context !== newContext) {
+					this.canvas = c;
+					this.setState({
+						context: newContext
+					}, () => {
+						this.reattachListeners();
+						finishRender();
+					});
+				} else {
+					finishRender();
+				}
+			}
+		}
+
+		if (this.props.customRender) {
+			return <canvas
+				ref={refFunc}
+			/>
+		}
+
 		return <CanvasContext.Provider value={this.getMyContext()}>		
 			<canvas
-				ref={(c) => {
-					if (c) {
-						const newContext = c.getContext('2d');
-						if (this.state.context !== newContext) {
-							this.canvas = c;
-							this.setState({
-								context: newContext
-							}, () => {
-								this.reattachListeners();
-							});
-						}
-					}
-				}}
+				ref={refFunc}
 			>
 				{newChildren}
 			</canvas>

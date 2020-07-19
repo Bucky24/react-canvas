@@ -12,6 +12,7 @@ import {
 	Raw,
 } from 'react-canvas';
 import Thing from '../Thing';
+import Thing2 from '../Thing2';
 
 import sampleImage from '../sampleImage.png';
 
@@ -95,6 +96,10 @@ const App = ({}) => {
 				fill={false}
 			/>
 			<Thing />
+			<Thing2
+				x={0}
+				y={200}
+			/>
 			<Circle
 				x={130}
 				y={85}

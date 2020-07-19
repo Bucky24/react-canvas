@@ -662,6 +662,20 @@ export default MyElement;
 
 The canvas context also provides a function `forceRerender` which will essentially call `this.forceUpdate()` on the top level canvas. This can be useful in some situations to force the canvas to redraw.
 
+## Direct Render (Experimental)
+
+In some cases, it's useful to completely bypass React's rendering (which, as described in the Z Index section, is not always great for Canvas). In order to do this, you can use the `customRender` flag on the Canvas object. This is experimental, and does not really work very well with Class components, but may be necessary for other experimental features.
+
+```
+	return <Canvas
+		width={300}
+		height={300}
+		customRender={true}
+	>
+		{ children }
+	</Canvas>;
+```
+
 ## Z Index (Experimental)
 
 Sometimes you can run into the situation where some parts of your canvas will redraw and others will not. For example, let's say you're drawing a map, but drawing parts of the UI on top of it. If you have the map in a specific CanvasComponent and UI pieces in other components, when your map redraws, you may find that your UI components do not. This is because React is trying to ease the load on the browser by only updating dom elements that have changed. While this works really well for a dom, where making sure dom elements are rerendered properly is taken care of by the browser, we're dealing with a canvas, where this is not the case.
@@ -695,7 +709,7 @@ To use, you must make two changes. First, add a z-index to the components to ind
 			color="#f00"
 			fill={true}
 		/>
-	</Container>;
+	</Canvas>;
 ```
 
 The following example sets up the Text to be redrawn whenever something with a z-index of less than 3 is redrawn, and the Shape to be redrawn whenever something with a z-index of less than 2 is redrawn. Note that the default z-index is 1
