@@ -717,3 +717,11 @@ The following example sets up the Text to be redrawn whenever something with a z
 The second thing you must do is indicate which components should trigger a redraw. This can be done on CanvasComponents by calling `super.render()` inside the render function, and also by calling `triggerRedraw` on the CanvasContext object, if you have one.
 
 See the `overlapExample` in the examples directory for more information on how to make this work.
+
+## Double Buffering (Experimental)
+
+Double Buffering is the process of rendering to an off-screen canvas, then drawing that canvas as an image onto the main screen.
+
+To use double buffering, pass the `doubleBuffer` flag to the Canvas object.
+
+Note: Direct Rendering must be enabled for double buffering to have any effect.

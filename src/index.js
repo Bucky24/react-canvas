@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import equal from 'fast-deep-equal/es6/react';
 
 export const EventTypes = {
 	MOVE: 'mousemove',
@@ -292,19 +293,31 @@ class Canvas extends React.Component {
 		};
 	}
 	componentDidUpdate() {
-		if (this.props.width !== this.canvas.width) {
-			this.canvas.width = this.props.width;
-		}
-		if (this.props.height !== this.canvas.height) {
-			this.canvas.height = this.props.height;
-		}
+		this.processChanges();
 	}
 	componentDidMount() {
+		this.processChanges();
+	}
+	processChanges() {
 		if (this.props.width !== this.canvas.width) {
 			this.canvas.width = this.props.width;
+			if (this.secondCanvas) {
+				this.secondCanvas.width = this.props.width;
+			}
 		}
 		if (this.props.height !== this.canvas.height) {
 			this.canvas.height = this.props.height;
+			if (this.secondCanvas) {
+				this.secondCanvas.height = this.props.height;
+			}
+		}
+
+		if (this.props.doubleBuffer && !this.secondCanvas) {
+			this.secondCanvas = document.createElement("canvas");
+		} else if (!this.props.doubleBuffer) {
+			// should auto-delete the canvas element because of
+			// garbage collector
+			this.secondCanvas = null;
 		}
 	}
 	componentWillUnmount() {
@@ -461,9 +474,34 @@ class Canvas extends React.Component {
 				// this can happen if we have a gap in the zindex
 				continue;
 			}
-			list.forEach((element) => {
-				doRender(element, this.getMyContext());
+			this.handleRender(list);
+		}
+	}
+	handleRender(elements, reRender=true) {
+		const context = this.getMyContext();
+		const primaryContext = context.context;
+		if (this.props.doubleBuffer) {
+			context.context = this.secondCanvas.getContext("2d");
+		}
+
+		if (reRender) {
+			elements.forEach((element) => {
+				doRender(element, context);
 			});
+		}
+
+		if (this.props.doubleBuffer) {
+			primaryContext.save();
+			primaryContext.fillStyle = "#fff";
+			primaryContext.beginPath();
+			primaryContext.rect(0, 0, this.canvas.width, this.canvas.height);
+			primaryContext.fill();
+			primaryContext.restore();
+			primaryContext.drawImage(
+				this.secondCanvas,
+				0,
+				0,
+			);
 		}
 	}
 	render() {
@@ -506,10 +544,7 @@ class Canvas extends React.Component {
 
 		const finishRender = () => {
 			if (this.props.customRender) {
-				const context = this.getMyContext();
-				newChildren.forEach((child) => {
-					doRender(child, context);
-				});
+				this.handleRender(newChildren);
 			}
 		}
 
@@ -529,6 +564,8 @@ class Canvas extends React.Component {
 				}
 			}
 		}
+
+		this.lastChildren = newChildren;
 
 		if (this.props.customRender) {
 			return <canvas
