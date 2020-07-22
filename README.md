@@ -725,3 +725,49 @@ Double Buffering is the process of rendering to an off-screen canvas, then drawi
 To use double buffering, pass the `doubleBuffer` flag to the Canvas object.
 
 Note: Direct Rendering must be enabled for double buffering to have any effect.
+
+## renderToImage (Experimental)
+
+React Canvas exports a method, `renderToImage`, that can take in a series of React Canvas components, and a width and height, then return a data string that represents the image from that canvas.
+
+This bypasses React rendering, so it may not work as expected for some situations.
+
+However, because of this, `renderToImage` does not need to be called from inside a component's render method.
+
+```
+import React from 'react';
+import {
+    Line,
+    renderToImage,
+} from 'react-canvas';
+
+const App() {
+    const width = 300;
+    const height = 100;
+
+	const components = <>
+		<Line
+			x={10}
+			y={10}
+			x2={100}
+			y2={10}
+			color="#888"
+		/>
+		<Line
+			x={10}
+			y={10}
+			x2={10}
+			y2={100}
+			color="#888"
+		/>
+	</>;
+
+	const imageSource = renderToImage(components, width, height);
+
+	return (<div>
+		<img src={imageSource}>
+	</div>);
+};
+
+export default App;
+```

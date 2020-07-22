@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import equal from 'fast-deep-equal/es6/react';
 
 export const EventTypes = {
 	MOVE: 'mousemove',
@@ -201,8 +200,13 @@ function isClass(func) {
 }
 
 const doRender = (element,  context) => {
+	if (!element) {
+		return;
+	}
 	let children = [];
-	if (element.type.length === 1) {
+	if (Array.isArray(element)) {
+		children = element;
+	} else if (element.type.length === 1) {
 		children = element.type(element.props);
 	} else if (element.type._context) {
 		// in this case the only child is the function to call with context
@@ -1006,6 +1010,25 @@ class CanvasComponent extends React.Component {
 
 CanvasComponent.contextType = CanvasContext;
 
+function renderToImage(elements, width=300, height=300) {
+	const canvas = document.createElement("canvas");
+	canvas.width = width;
+	canvas.height = height;
+	const context = canvas.getContext("2d");
+
+	let resolvedElements = elements;
+	if (!Array.isArray(resolvedElements)) {
+		resolvedElements = [resolvedElements];
+	}
+
+	for (const element of resolvedElements) {
+		doRender(element, { context });
+	}
+
+	const image = canvas.toDataURL("image/png");
+	return image;
+}
+
 export {
 	Canvas,
 	Container,
@@ -1022,4 +1045,5 @@ export {
 	Images,
 	Pattern,
 	Clip,
+	renderToImage,
 };
