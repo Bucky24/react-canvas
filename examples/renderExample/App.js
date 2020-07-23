@@ -3,10 +3,13 @@ import {
 	Canvas,
     Line,
     renderToImage,
+    Image
 } from 'react-canvas';
 
 import styles from '../styles.css';
 import { Rect } from '../../src';
+
+import SampleImage from "./sampleImage.png";
 
 // from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
 function getRandomInt(min, max) {
@@ -20,7 +23,7 @@ class App extends React.Component {
         super(props);
         this.state = {
             image: null,
-            x: [10, 10, 10, 10, 10, 10, 10]
+            x: [10, 10, 10, 10, 10, 10, 10],
         };
     }
     componentDidMount() {
@@ -46,7 +49,7 @@ class App extends React.Component {
     }
     render() {
         const width = 300;
-        const height = 100;
+        const height = 200;
 
         const components = <>
             <Rect
@@ -67,6 +70,13 @@ class App extends React.Component {
                     color="#888"
                 />
             })}
+            <Image
+                src={SampleImage}
+                x={10}
+                y={100}
+                width={50}
+                height={50}
+            />
         </>;
 
         return (<div className={styles.appRoot}>

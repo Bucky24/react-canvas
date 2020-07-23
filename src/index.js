@@ -1022,7 +1022,15 @@ function renderToImage(elements, width=300, height=300) {
 	}
 
 	for (const element of resolvedElements) {
-		doRender(element, { context });
+		doRender(element, {
+			context,
+			getImage: loadImage,
+			loadPattern: loadPattern,
+			registerListener: () => {},
+			unregisterListener: () => {},
+			forceRerender: () => {},
+			triggerRender: () => {},
+		});
 	}
 
 	const image = canvas.toDataURL("image/png");
