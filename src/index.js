@@ -901,9 +901,19 @@ const Clip = ({ x, y, width, height, children }) =>{
 			context.rect(x, y, width, height);
 			context.clip();
 
-			let childList = children;
-			if (!Array.isArray(childList)) {
-				childList = [childList];
+			const childList = [];
+			if (!Array.isArray(children)) {
+				childList.push(children);
+			} else {
+				children.forEach((child) => {
+					if (Array.isArray(child)) {
+						child.forEach((subChild) => {
+							childList.push(subChild);
+						})
+					} else {
+						childList.push(child);
+					}
+				})
 			}
 
 			for (const child of childList) {

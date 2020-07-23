@@ -9,6 +9,16 @@ import {
 } from 'react-canvas';
 
 const App = ({}) => {
+    const lines = [
+        <Line
+            x={150}
+            y={170}
+            x2={150}
+            y2={300}
+            color="#f00"
+            key="line1"
+        />
+    ]
 	return (<div>
 		<Canvas
 			width={400}
@@ -26,6 +36,7 @@ const App = ({}) => {
                 width={100}
                 height={100}
             >
+                { lines }
                 <Text
                     x={150}
                     y={130}
