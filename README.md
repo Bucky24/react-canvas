@@ -147,7 +147,7 @@ Images are cached after first load, so re-using the same src will not cause the 
 | height | The height to draw the image at |
 | clip | See Image Clipping below |
 | rot | Rotation angle in degrees |
-| onLoad | Function that is called when the image loads. If the image is already loaded, the function will not be called |
+| onLoad | Function that is called when any images load. If all images are already loaded, the function will not be called. The callback function will be given a single param: the src of the image that was loaded. If the same image is listed multiple times in 'images', the callback will be called multiple times for the same src. Note that normally, the image loading causes the canvas to force re-render. If this param is given, this will not happen. |
 
 ##### Example
 
@@ -227,7 +227,7 @@ The Images element draws multiple images to the screen. This can be helpful when
 | Parameter | Description |
 | ----------- | ----------- |
 | images | A list containing objects that conform to the parameters for the Image component |
-| onLoad | Function that is called when any images load. If all images are already loaded, the function will not be called. The callback function will be given a single param: the src of the image that was loaded. If the same image is listed multiple times in 'images', the callback will be called multiple times for the same src. |
+| onLoad | Function that is called when any images load. If all images are already loaded, the function will not be called. The callback function will be given a single param: the src of the image that was loaded. If the same image is listed multiple times in 'images', the callback will be called multiple times for the same src. Note that normally, the image loading causes the canvas to force re-render. If this param is given, this will not happen. |
 
 ##### Example
 

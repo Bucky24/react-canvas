@@ -697,8 +697,11 @@ const Image = ({
 			}
 			
 			const img = getImage(src, () => {
-				if (onLoad) onLoad();
-				forceRerender();
+				if (onLoad) {
+					onLoad(src);
+				} else {
+					forceRerender();
+				}
 			});
 			
 			if (!img) {
@@ -772,8 +775,11 @@ const Images = ({ images, onLoad }) => {
 				const { src, x, y, width, height, clip, rot } = image;
 				
 				const img = getImage(src, () => {
-					if (onLoad) onLoad(src);
-					forceRerender();
+					if (onLoad) {
+						onLoad(src);
+					} else {
+						forceRerender();
+					}
 				});
 
 				context.save();

@@ -3,8 +3,18 @@ import { Canvas, Shape, Image, Images, Pattern } from 'react-canvas';
 
 import sampleImage from './sampleImage.png';
 
+function useForceUpdate() {
+	const [update, setUpdate] = useState(0);
+	return () => {
+		setUpdate((update) => {
+			return update + 1;
+		});
+	};
+}
+
 const App = ({}) => {
 	const [rot, setRot] = useState(0);
+	const forceUpdate = useForceUpdate();
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -60,8 +70,9 @@ const App = ({}) => {
 					width: 50,
 					height: 100,
 				}}
-				onLoad={() => {
-					console.log('sample image loaded');
+				onLoad={(src) => {
+					console.log('sample image loaded', src);
+					forceUpdate();
 				}}
 			/>
 			<Images
@@ -122,6 +133,7 @@ const App = ({}) => {
 				]}
 				onLoad={(src) => {
 					console.log("loaded", src);
+					forceUpdate();
 				}}
 			/>
 			<Shape
