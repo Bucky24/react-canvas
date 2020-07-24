@@ -127,7 +127,7 @@ function loadImage(src, cb) {
 		// if we've already registered this function, don't register it again
   		if (loadingMap[hash].includes(cb)) {
   			return null;
-  	  	}
+		}
   	  	loadingMap[hash].push(cb);
   	  	return null;
     }
@@ -139,7 +139,7 @@ function loadImage(src, cb) {
 	img.src = src;
 	img.onload = () => {
 		imageMap[hash] = img;
-		if (src in loadingMap) {
+		if (hash in loadingMap) {
 			loadingMap[hash].forEach((cb) => {
 				cb(img);
 			});
