@@ -60,6 +60,9 @@ const App = ({}) => {
 					width: 50,
 					height: 100,
 				}}
+				onLoad={() => {
+					console.log('sample image loaded');
+				}}
 			/>
 			<Images
 				images={[
@@ -117,6 +120,9 @@ const App = ({}) => {
 						},
 					},
 				]}
+				onLoad={(src) => {
+					console.log("loaded", src);
+				}}
 			/>
 			<Shape
 				x={40}

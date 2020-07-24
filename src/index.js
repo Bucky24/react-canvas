@@ -684,16 +684,22 @@ const imagePropTypes = {
 		width: PropTypes.number.isRequired,
 		height: PropTypes.number.isRequired,
 	}),
+	onLoad: PropTypes.func,
 }
 
-const Image = ({ src, x, y, width, height, clip, rot }) => {
+const Image = ({
+	src, x, y, width, height, clip, rot, onLoad,
+}) => {
 	return <CanvasContext.Consumer>
 		{({ context, forceRerender, getImage }) => {
 			if (!context) {
 				return null;
 			}
 			
-			const img = getImage(src, forceRerender);
+			const img = getImage(src, () => {
+				if (onLoad) onLoad();
+				forceRerender();
+			});
 			
 			if (!img) {
 				return null;
@@ -752,9 +758,10 @@ const imagesPropTypes = {
 			height: PropTypes.number.isRequired,
 		}),
 	})),
+	onLoad: PropTypes.func,
 }
 
-const Images = ({ images }) => {
+const Images = ({ images, onLoad }) => {
 	return <CanvasContext.Consumer>
 		{({ context, forceRerender, getImage }) => {
 			if (!context) {
@@ -764,7 +771,10 @@ const Images = ({ images }) => {
 			for (const image of images) {
 				const { src, x, y, width, height, clip, rot } = image;
 				
-				const img = getImage(src, forceRerender);
+				const img = getImage(src, () => {
+					if (onLoad) onLoad(src);
+					forceRerender();
+				});
 
 				context.save();
 				
@@ -917,7 +927,13 @@ const Clip = ({ x, y, width, height, children }) =>{
 			}
 
 			for (const child of childList) {
+				if (!child) {
+					continue;
+				}
 				const { type, props } = child;
+				if (!type) {
+					continue;
+				}
 				const result = type(props);
 				if (result.type._context) {
 					if (!result.props.children || !(result.props.children instanceof Function)) {
