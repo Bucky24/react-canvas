@@ -118,16 +118,17 @@ const loadingMap = {};
 const imageMap = {};
 
 function loadImage(src, cb) {
-	if (imageMap[src]) {
-		return imageMap[src];
+	const hash = hashString(src);
+	if (imageMap[hash]) {
+		return imageMap[hash];
 	}
 	
-    if (loadingMap[src]) {
+    if (loadingMap[hash]) {
 		// if we've already registered this function, don't register it again
-  		if (loadingMap[src].includes(cb)) {
+  		if (loadingMap[hash].includes(cb)) {
   			return null;
   	  	}
-  	  	loadingMap[src].push(cb);
+  	  	loadingMap[hash].push(cb);
   	  	return null;
     }
 	
@@ -137,22 +138,22 @@ function loadImage(src, cb) {
 	const img = document.createElement("img");
 	img.src = src;
 	img.onload = () => {
-		imageMap[src] = img;
+		imageMap[hash] = img;
 		if (src in loadingMap) {
-			loadingMap[src].forEach((cb) => {
+			loadingMap[hash].forEach((cb) => {
 				cb(img);
 			});
 		}
-		delete loadingMap[src];
+		delete loadingMap[hash];
 	};
 	if (img.loaded) {
-		imageMap[src] = img;
+		imageMap[hash] = img;
 		return img;
 	} else {
-		if (!(src in loadingMap)) {
-			loadingMap[src] = []
+		if (!(hash in loadingMap)) {
+			loadingMap[hash] = []
 		}
-		loadingMap[src].push(cb);
+		loadingMap[hash].push(cb);
 	}
 	img.style.display = 'none';
 	body.append(img);
@@ -168,6 +169,20 @@ function loadPattern(src, context, cb) {
 	if (patternMap[hash]) {
 		return patternMap[hash];
 	}
+
+	const image = loadImage(src, (img) => {
+		const pattern = context.createPattern(img, 'repeat');
+		patternMap[hash] = pattern;
+		patternLoadingMap[hash].forEach((cb) => {
+			cb(img);
+		});
+	});
+
+	if (image) {
+		const pattern = context.createPattern(image, 'repeat');
+		patternMap[hash] = pattern;
+		return image;
+	}
 	
 	if (!patternLoadingMap[hash]) {
 		patternLoadingMap[hash] = [];
@@ -179,14 +194,6 @@ function loadPattern(src, context, cb) {
 	
 	patternLoadingMap[hash].push(cb);
 
-	loadImage(src, (img) => {
-		const pattern = context.createPattern(img, 'repeat');
-		patternMap[hash] = pattern;
-		patternLoadingMap[hash].forEach((cb) => {
-			cb(img);
-		});
-	});
-	
 	return null;
 }
 
