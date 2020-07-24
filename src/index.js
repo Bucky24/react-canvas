@@ -140,8 +140,15 @@ function loadImage(src, cb) {
 	img.onload = () => {
 		imageMap[hash] = img;
 		if (hash in loadingMap) {
-			loadingMap[hash].forEach((cb) => {
+			const list = loadingMap[hash];
+			// this has to be done first, because we need to
+			// finish this function call. Otherwise, if the cb
+			// causes the image to be loaded again, this loops
+			// forever.
+			setTimeout(() => {
+			  list.forEach((cb) => {
 				cb(img);
+			  });
 			});
 		}
 		delete loadingMap[hash];
