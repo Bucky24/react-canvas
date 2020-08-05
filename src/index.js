@@ -147,7 +147,7 @@ function loadImage(src, cb) {
 			// forever.
 			setTimeout(() => {
 			  list.forEach((cb) => {
-				cb(img);
+				cb(src, img);
 			  });
 			});
 		}
@@ -177,11 +177,11 @@ function loadPattern(src, context, cb) {
 		return patternMap[hash];
 	}
 
-	const image = loadImage(src, (img) => {
+	const image = loadImage(src, (src, img) => {
 		const pattern = context.createPattern(img, 'repeat');
 		patternMap[hash] = pattern;
 		patternLoadingMap[hash].forEach((cb) => {
-			cb(img);
+			cb(src);
 		});
 	});
 
@@ -709,14 +709,10 @@ const Image = ({
 			if (!context) {
 				return null;
 			}
+
+			const loadFn = onLoad || forceRerender;
 			
-			const img = getImage(src, () => {
-				if (onLoad) {
-					onLoad(src);
-				} else {
-					forceRerender();
-				}
-			});
+			const img = getImage(src, loadFn);
 			
 			if (!img) {
 				return null;
@@ -787,14 +783,10 @@ const Images = ({ images, onLoad }) => {
 			
 			for (const image of images) {
 				const { src, x, y, width, height, clip, rot } = image;
+
+				const loadFn = onLoad || forceRerender;
 				
-				const img = getImage(src, () => {
-					if (onLoad) {
-						onLoad(src);
-					} else {
-						forceRerender();
-					}
-				});
+				const img = getImage(src, loadFn);
 
 				context.save();
 				
