@@ -102,6 +102,7 @@ const CanvasContext = React.createContext({
 	triggerRender: null,
 	getImage: null,
 	loadPattern: null,
+	forceRenderCount: null,
 });
 
 const canvasProps = {
@@ -279,6 +280,9 @@ class Canvas extends React.Component {
 		
 		// map of event to array of function callbacks
 		this.listeners = {};
+
+		// count of how many times we've force-rendered (generally used to determine if the only reason we're rendering is because an image loaded)
+		this.forceRenderCount = 0;
 	}
 	registerListener(event, fn) {
 		if (!this.listeners[event]) {
@@ -297,6 +301,7 @@ class Canvas extends React.Component {
 		this.listeners[event].splice(index, 1);
 	}
 	forceRerender() {
+		this.forceRenderCount += 1;
 		this.forceUpdate();
 	}
 	getMyContext() {
@@ -308,6 +313,7 @@ class Canvas extends React.Component {
 			triggerRender: this.triggerRender,
 			getImage: loadImage,
 			loadPattern: loadPattern,
+			forceRenderCount: this.forceRenderCount,
 		};
 	}
 	componentDidUpdate() {

@@ -634,6 +634,7 @@ The following properties are available from the CanvasContext:
 | unregisterListener | Function for event handling. See above for usage |
 | loadImage | Function that takes in a src and a cb function. If the image is already loaded, it will return the img object. If not, the cb function is called when the image is loaded |
 | loadPattern | Function that takes in a src and a cb function. If the pattern is already loaded, it will return the canvas pattern object. If not, the cb function is called when the pattern is loaded |
+| forceRenderCount | This is the number of times the forceRerender function has been called. This can be used to determine if a render is taking place because an image has loaded (as image loads call forceRerender by default) |
 
 ##### Example
 

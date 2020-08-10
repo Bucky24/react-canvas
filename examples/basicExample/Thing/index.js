@@ -1,8 +1,11 @@
-import React from 'react';
-import { Container, Text, Shape } from 'react-canvas';
+import React, { useContext } from 'react';
+import { CanvasContext, Text, Shape } from 'react-canvas';
 
 const Thing = () => {
 	const foo = 'bar';
+	const { forceRenderCount } = useContext(CanvasContext);
+
+	console.log(forceRenderCount);
 	return (<>
 		<Shape
             x={200}
