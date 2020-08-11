@@ -156,6 +156,7 @@ function loadImage(src, cb) {
 	};
 	if (img.loaded) {
 		imageMap[hash] = img;
+		delete loadingMap[hash];
 		return img;
 	} else {
 		if (!(hash in loadingMap)) {
@@ -693,7 +694,10 @@ const Rect = ({ x, y, x2, y2, color, fill}) => {
 }
 
 const imagePropTypes = {
-	src: PropTypes.string.isRequired,
+	src: PropTypes.oneOfType([
+		PropTypes.instanceOf(Element),
+		PropTypes.string,
+	]).isRequired,
 	x: PropTypes.number.isRequired,
 	y: PropTypes.number.isRequired,
 	width: PropTypes.number.isRequired,
@@ -716,9 +720,22 @@ const Image = ({
 				return null;
 			}
 
-			const loadFn = onLoad || forceRerender;
+			const isElement = src instanceof Element || src instanceof HTMLDocument;
+
+			let img;
+
+			if (isElement) {
+				if (src.nodeName !== "CANVAS") {
+					throw new Error("A DOM element was passed as a src to Image, but the element was not a canvas.");
+				}
+				img = src;
+			} else if (src instanceof Object) {
+				throw new Error("An object was passed as a src to Image, but it was not a DOM element");
+			} else {
+				const loadFn = onLoad || forceRerender;
 			
-			const img = getImage(src, loadFn);
+				img = getImage(src, loadFn);
+			}
 			
 			if (!img) {
 				return null;
@@ -1054,7 +1071,7 @@ class CanvasComponent extends React.Component {
 
 CanvasComponent.contextType = CanvasContext;
 
-function renderToImage(elements, width=300, height=300) {
+function renderToCanvas(elements, width=300, height=300) {
 	const canvas = document.createElement("canvas");
 	canvas.width = width;
 	canvas.height = height;
@@ -1077,6 +1094,12 @@ function renderToImage(elements, width=300, height=300) {
 		});
 	}
 
+	return canvas;
+}
+
+function renderToImage(elements, width=300, height=300) {
+	const canvas = renderToCanvas(elements, width, height);
+
 	const image = canvas.toDataURL("image/png");
 	return image;
 }
@@ -1098,4 +1121,5 @@ export {
 	Pattern,
 	Clip,
 	renderToImage,
+	renderToCanvas,
 };

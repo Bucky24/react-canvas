@@ -3,6 +3,7 @@ import {
 	Canvas,
     Line,
     renderToImage,
+    renderToCanvas,
     Image
 } from 'react-canvas';
 
@@ -23,6 +24,7 @@ class App extends React.Component {
         super(props);
         this.state = {
             image: null,
+            canvas: null,
             x: [10, 10, 10, 10, 10, 10, 10],
         };
     }
@@ -81,20 +83,36 @@ class App extends React.Component {
 
         return (<div className={styles.appRoot}>
             Canvas:<br/>
-            <Canvas
-                width={width}
-                height={height}
-                customRender={true}
-                doubleBuffer={true}
-            >
-                { components }
-            </Canvas>
+            <div style={{display: 'flex'}}>
+                <Canvas
+                    width={width}
+                    height={height}
+                    customRender={true}
+                    doubleBuffer={true}
+                >
+                    { components }
+                </Canvas>
+                <Canvas
+                    width={width}
+                    height={height}
+                >
+                    {this.state.canvas && <Image
+                        src={this.state.canvas}
+                        x={width/4}
+                        y={width/4}
+                        width={width/2}
+                        height={height/2}
+                    />}
+                </Canvas>
+            </div>
             <br/>
             <input type="button" value="Capture Image" onClick={() => {
                 const newImage = renderToImage(components, width, height);
+                const newCanvas = renderToCanvas(components, width, height);
 
                 this.setState({
-                    image: newImage
+                    image: newImage,
+                    canvas: newCanvas,
                 });
             }}/><br/>
             Image:<br/>
