@@ -774,3 +774,11 @@ const App() {
 
 export default App;
 ```
+
+## renderToCanvas (Experimental)
+
+React Canvas exports a method, `renderToCanvas`, that does basically the same thing as `renderToImage`, but instead of a base-64 data string, returns a canvas dom element that has had the given elements rendered to it.
+
+This canvas can be passed into the `src` attribute of an Image element to render it.
+
+Like the above method, this bypasses React rendering, so it may not work as expected for some situations.
