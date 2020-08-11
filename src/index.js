@@ -1071,11 +1071,11 @@ class CanvasComponent extends React.Component {
 
 CanvasComponent.contextType = CanvasContext;
 
-function renderToCanvas(elements, width=300, height=300) {
+function renderToCanvas(elements, width=300, height=300, context = {}) {
 	const canvas = document.createElement("canvas");
 	canvas.width = width;
 	canvas.height = height;
-	const context = canvas.getContext("2d");
+	const canvasContext = canvas.getContext("2d");
 
 	let resolvedElements = elements;
 	if (!Array.isArray(resolvedElements)) {
@@ -1084,21 +1084,23 @@ function renderToCanvas(elements, width=300, height=300) {
 
 	for (const element of resolvedElements) {
 		doRender(element, {
-			context,
 			getImage: loadImage,
 			loadPattern: loadPattern,
 			registerListener: () => {},
 			unregisterListener: () => {},
 			forceRerender: () => {},
 			triggerRender: () => {},
+			// if we got a context from the outside, use that instead of defaults
+			...context,
+			context: canvasContext,
 		});
 	}
 
 	return canvas;
 }
 
-function renderToImage(elements, width=300, height=300) {
-	const canvas = renderToCanvas(elements, width, height);
+function renderToImage(elements, width=300, height=300, context = {}) {
+	const canvas = renderToCanvas(elements, width, height, context);
 
 	const image = canvas.toDataURL("image/png");
 	return image;

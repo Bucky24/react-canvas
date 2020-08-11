@@ -89,6 +89,9 @@ class App extends React.Component {
                     height={height}
                     customRender={true}
                     doubleBuffer={true}
+                    ref={(c) => {
+                        this.canvas = c;
+                    }}
                 >
                     { components }
                 </Canvas>
@@ -107,8 +110,8 @@ class App extends React.Component {
             </div>
             <br/>
             <input type="button" value="Capture Image" onClick={() => {
-                const newImage = renderToImage(components, width, height);
-                const newCanvas = renderToCanvas(components, width, height);
+                const newImage = renderToImage(components, width, height, this.canvas.getMyContext());
+                const newCanvas = renderToCanvas(components, width, height, this.canvas.getMyContext());
 
                 this.setState({
                     image: newImage,

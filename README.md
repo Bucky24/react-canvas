@@ -737,6 +737,8 @@ This bypasses React rendering, so it may not work as expected for some situation
 
 However, because of this, `renderToImage` does not need to be called from inside a component's render method.
 
+`context` is not a required parameter, but it is recommended to pass in the context of the parent Cavas if possible. If you are trying to get the context from a top level component that exports the Canvas element, you can use a ref to the Canvas and call `getMyContext` to get the context object.
+
 ```
 import React from 'react';
 import {
@@ -777,7 +779,7 @@ export default App;
 
 ## renderToCanvas (Experimental)
 
-React Canvas exports a method, `renderToCanvas`, that does basically the same thing as `renderToImage`, but instead of a base-64 data string, returns a canvas dom element that has had the given elements rendered to it.
+React Canvas exports a method, `renderToCanvas`, that does basically the same thing as `renderToImage` (and takes the same parameters), but instead of a base-64 data string, returns a canvas dom element that has had the given elements rendered to it.
 
 This canvas can be passed into the `src` attribute of an Image element to render it.
 
