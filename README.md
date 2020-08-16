@@ -413,11 +413,11 @@ That's where the Raw component comes in. It takes in a single prop, which is a c
 
 Clip takes in parameters that define a rectangle, and a list of children. It will use the canvas context clip method to ensure that any part of those children that falls outside the rectangle is not drawn. This is different from the clip in Image, which determines the section of the source image to display.
 
-Clip will only work on elements that return a CanvasContext.Consumer. This is because, due to the way canvas clipping and React work, this component bypasses React's render method for its children. This is because the children have to finish rendering before Clip finishes rendering. React can do this, but if any OTHER component renders during that time it will also be clipped, which we don't want.
+Clip will only work on elements that return a CanvasContext.Consumer, or on elements that return a single child that then returns a CanvasContext.Consumer. This is because, due to the way canvas clipping and React work, this component bypasses React's render method for its children. This is because the children have to finish rendering before Clip finishes rendering. React can do this, but if any OTHER component renders during that time it will also be clipped, which we don't want.
 
 ##### Children
 
-Takes multiple children, must be ReactCanvas elements that are functional only and return CanvasContext.Consumer (this should include custom elements that are setup this way)
+Takes multiple children, must be ReactCanvas elements that are functional only and return as described above (this should include custom elements that are setup this way)
 
 ##### Parameters
 
