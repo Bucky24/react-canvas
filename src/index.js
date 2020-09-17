@@ -970,16 +970,25 @@ const Clip = ({ x, y, width, height, children }) =>{
 					continue;
 				}
 				let result = type(props);
-				if (result.type instanceof Function) {
-					result = result.type(result.props);
+				if (!Array.isArray(result)) {
+					result = [result];
 				}
-				if (result.type._context) {
-					if (!result.props.children || !(result.props.children instanceof Function)) {
-						throw new Error("Child of Clip did not return a CanvasContext.consumer as expected. Clip can currently only handle bottom level React Canvas components");
+
+				for (const resultInst of result) {
+					if (!resultInst) {
+						continue;
 					}
-					result.props.children(canvasContext);
-				} else {
-					throw new Error("Child of Clip did not return a CanvasContext.consumer as expected. Clip can currently only handle bottom level React Canvas components");
+					if (resultInst.type instanceof Function) {
+						resultInst = resultInst.type(resultInst.props);
+					}
+					if (resultInst.type._context) {
+						if (!resultInst.props.children || !(resultInst.props.children instanceof Function)) {
+							throw new Error("Child of Clip did not return a CanvasContext.consumer as expected. Clip can currently only handle bottom level React Canvas components or arrays of the same.");
+						}
+						resultInst.props.children(canvasContext);
+					} else {
+						throw new Error("Child of Clip did not return a CanvasContext.consumer as expected. Clip can currently only handle bottom level React Canvas components or arrays of the same.");
+					}
 				}
 			}
 
