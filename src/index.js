@@ -324,25 +324,19 @@ class Canvas extends React.Component {
 		this.processChanges();
 	}
 	processChanges() {
-		if (this.props.width !== this.canvas.width) {
-			this.canvas.width = this.props.width;
-			if (this.secondCanvas) {
-				this.secondCanvas.width = this.props.width;
-			}
-		}
-		if (this.props.height !== this.canvas.height) {
-			this.canvas.height = this.props.height;
-			if (this.secondCanvas) {
-				this.secondCanvas.height = this.props.height;
-			}
-		}
-
 		if (this.props.doubleBuffer && !this.secondCanvas) {
 			this.secondCanvas = document.createElement("canvas");
 		} else if (!this.props.doubleBuffer) {
 			// should auto-delete the canvas element because of
 			// garbage collector
 			this.secondCanvas = null;
+		}
+
+		if (this.secondCanvas) {
+			this.secondCanvas.width = this.props.width;
+		}
+		if (this.secondCanvas) {
+			this.secondCanvas.height = this.props.height;
 		}
 	}
 	componentWillUnmount() {
@@ -591,16 +585,20 @@ class Canvas extends React.Component {
 		}
 
 		this.lastChildren = newChildren;
-
 		if (this.props.customRender) {
 			return <canvas
+				width={this.props.width}
+				height={this.props.height}
 				ref={refFunc}
 			/>
 		}
 
+		console.log('done rendering index')
 		return <CanvasContext.Provider value={this.getMyContext()}>		
 			<canvas
 				ref={refFunc}
+				width={this.props.width}
+				height={this.props.height}
 			>
 				{newChildren}
 			</canvas>
