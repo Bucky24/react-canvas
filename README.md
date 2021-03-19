@@ -10,7 +10,7 @@ With NPM
 
 With Yarn
 
-    yarn install @bucky24/react-canvas
+    yarn add @bucky24/react-canvas
 
 ReactCanvas has a peer dependency on `react` and `prop-types` but should be able to use whatever you have installed for your main project. It does require the use of the child context apis, so React 16 is recommended at minimum.
 
@@ -34,7 +34,7 @@ The root level element. This will actually create a &lt;canvas&gt; canvas tag on
 | ----------- | ----------- |
 | width  | The width, in pixels, of the resulting canvas  |
 | height   | The height, in pixels, of the resulting canvas  |
-| captureAllKeyEvents | If this is set to false, any events not originating from the body (which is the default when no input field is selected) will be ignored. If this is set to true or not given, all key events will be captured. You should set this to true if you have any dom elements outside of the canvas that need to handle key events.
+| captureAllKeyEvents | If this is set to false, any events not originating from the body (which is the default when no input field is selected) will be ignored. If this is set to true (default), all key events will be captured. You should set this to false if you have any dom elements outside of the canvas that need to handle key events.
 
 ##### Children
 
