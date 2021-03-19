@@ -8,6 +8,7 @@ import {
     Image,
     Container,
 } from 'react-canvas';
+import Elem from './Elem';
 
 const App = ({}) => {
     const lines = [
@@ -66,6 +67,7 @@ const App = ({}) => {
                     width={30}
                     height={30}
                 />
+				<Elem x={75} y={160} />
             </Clip>
             <Line
                 x={150}
