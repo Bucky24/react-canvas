@@ -46,13 +46,15 @@ const App = ({}) => {
                     >
                         Clipped text
                     </Text>
-                    <Line
-                        x={150}
-                        y={170}
-                        x2={300}
-                        y2={170}
-                        color="#f00"
-                    />
+                    <>
+                        <Line
+                            x={150}
+                            y={170}
+                            x2={300}
+                            y2={170}
+                            color="#f00"
+                        />
+                    </>
                     {false && <Text
                         x={200}
                         y={200}

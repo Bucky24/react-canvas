@@ -219,12 +219,13 @@ const doRender = (element,  context) => {
 	if (!element) {
 		return;
 	}
+    
 	let children = [];
 	if (Array.isArray(element)) {
 		children = element;
 	} else if (element.type.length === 1) {
 		children = element.type(element.props);
-	} else if (element.type._context) {
+	} else if (element.type._context || (element.type && typeof element.type.$$typeof === 'symbol' && element.type.$$typeof.toString() === 'Symbol(react.context)')) {
 		// in this case the only child is the function to call with context
 		children = element.props.children(context);
 	} else if (isClass(element.type)) {
