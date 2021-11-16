@@ -48,9 +48,9 @@ return (<div>
 		width={300}
 		height={300}
 	>
-	
+	    {reactCanvasElements}
 	</Canvas>
-</div>;
+</div>);
 ```
 
 ### Shape
@@ -63,10 +63,10 @@ The Shape element is simple-it draws a shape centered around a given point. Note
 | ----------- | ----------- |
 | x  | The origin x coord of the shape |
 | y   | The origin y coord of the shape  |
-| points | An array containing objects with x and y parameters. This will form the body of the shape. |
+| points | An array containing objects with x and y parameters. This will form the body of the shape. Note that all coords in this array are relative to the x and y given as top level params. |
 | color | A hex color code, which determines the color of the shape |
 | fill | a boolean value, which determines if the shape is drawn as an outline (false) or a filled in shape (true) |
-| close | A boolean value (default true) which determines if the shape's path is closed before drawing, or left empty |
+| close | A boolean value (default true) which determines if the shape's path is closed before drawing, or left empty. Closing the path means a line will be drawn from the last point to the first point. |
 
 ##### Example
 
@@ -134,7 +134,7 @@ Accepts a single child, which is the text to be displayed
 
 The Image element takes care of loading and displaying an image asset to the canvas.
 
-Images are cached after first load, so re-using the same src will not cause the image to be loaded from the server again.
+Images are cached after first load, so re-using the same src will not cause the image to be loaded a second time.
 
 ##### Parameters
 
@@ -375,7 +375,7 @@ Draws a semi-circle between two angles with a specific position and radius.
 		y={0}
 		radius={10}
 		startAngle={0}
-		endAngl={Math.PI}
+		endAngle={Math.PI}
 		color="#f00"
 		fill={false}
 		sector={false}
@@ -394,7 +394,7 @@ That's where the Raw component comes in. It takes in a single prop, which is a c
 
 | Parameter    | Description |
 | ----------- | ----------- |
-| drawFn | A callback that will be called on-render with a single param, which will be the context of the canvas. |
+| drawFn | A callback that will be called on-render with a single param, which will be the context of the canvas. Note this is not a React context object. but rather an instance of [CanvasRenderingContext2D](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D) |
 
 ##### Example
 
@@ -405,7 +405,7 @@ That's where the Raw component comes in. It takes in a single prop, which is a c
 >
 	<Raw drawFn={(context) => {
 		// do any low level canvas code here
-	}}
+	}} />
 </Canvas>
 ```
 
@@ -413,13 +413,13 @@ That's where the Raw component comes in. It takes in a single prop, which is a c
 
 Clip takes in parameters that define a rectangle, and a list of children. It will use the canvas context clip method to ensure that any part of those children that falls outside the rectangle is not drawn. This is different from the clip in Image, which determines the section of the source image to display.
 
-Clip will only work on elements that return a CanvasContext.Consumer, or on elements that return a single child that then returns a CanvasContext.Consumer. This is because, due to the way canvas clipping and React work, this component bypasses React's render method for its children. This is because the children have to finish rendering before Clip finishes rendering. React can do this, but if any OTHER component renders during that time it will also be clipped, which we don't want.
+Clip uses a render method that bypasses React's render system. This is because the children have to finish rendering before Clip finishes rendering. React can sortof do this, but if any OTHER component renders during that time it will also be clipped, which we don't want (and this happens pretty frequently).
 
-Clip should be able to handle anything a Canvas element can. This includes custom components. Because it uses the same custom rendering method that Canvas does when doing direct rendering, it is not recommended to use class components when using Clip.
+At this point, Clip should be able to handle anything a Canvas element can. This includes custom components. Because it uses the same custom rendering method that Canvas does when doing direct rendering, it is not recommended to use class components when using Clip (the direct rendering method does not handle them in a performant way). If you get any errors using Clip, then make a bug report-it's a bit fragile.
 
 ##### Children
 
-Takes multiple children, must be ReactCanvas elements that are functional only and return as described above (this should include custom elements that are setup this way)
+Takes multiple children, see above for limitations and notes on this.
 
 ##### Parameters
 
@@ -455,7 +455,9 @@ Takes multiple children, must be ReactCanvas elements that are functional only a
 
 ### Container
 
-The Container element acts as a collector. Some versions of React did not allow returning an array of elements from the `render` function. Because of this, always returning a singular &lt;div&gt; tag was a standard practice. Container takes the place of the div tag for ReactCanvas elements.
+The Container element acts as a collector. Older versions of React did not allow returning an array of elements from the `render` function. Because of this, always returning a singular &lt;div&gt; tag was a standard practice. Container takes the place of the div tag for ReactCanvas elements.
+
+For newer versions of React, returning an array or a React Fragment is perfectly acceptable and should work as expected. This component exists for backwards compatability only.
 
 ##### Children
 
@@ -504,9 +506,13 @@ The Pattern element allows drawing an image in a repeated pattern in a rectangle
 	width={300}
 	height={300}
 >
-	<Raw drawFn={(context) => {
-		// do any low level canvas code here
-	}}
+	<Pattern
+        x={100}
+        y={100}
+        width={200}
+        height={200}
+        src="https://website.com/path/to/image"
+    />
 </Canvas>
 ```
 
@@ -641,22 +647,20 @@ The following properties are available from the CanvasContext:
 ##### Example
 
 ```
-import React from 'react';
+import React, { useContext } from 'react';
 import { CanvasContext } from 'react-canvas';
 
 const MyElement = (props) => {
-	return <CanvasContext.Consumer>
-		{({ context }) => {
-			if (!context) {
-				return null;
-			}
-			context.save();
-	
-			// do context things here
-	
-			context.restore();
-		}}
-	</CanvasContext.Consumer>
+    const { context } = useContext(CanvasContext);
+			
+    if (!context) {
+		return null;
+	}
+	context.save();
+
+	// do context things here
+
+	context.restore();
 }
 
 export default MyElement;
@@ -781,7 +785,7 @@ export default App;
 
 ## renderToCanvas (Experimental)
 
-React Canvas exports a method, `renderToCanvas`, that does basically the same thing as `renderToImage` (and takes the same parameters), but instead of a base-64 data string, returns a canvas dom element that has had the given elements rendered to it.
+React Canvas exports a method, `renderToCanvas`, that does basically the same thing as `renderToImage` (and takes the same parameters), but instead of a base-64 data string, returns a canvas dom element that has had the given elements rendered to it. This is useful if you have images that are loaded from outside of your domain, as the browser will not allow these to be rendered to an image, but it will allow them to be rendered to a canvas.
 
 This canvas can be passed into the `src` attribute of an Image element to render it.
 
