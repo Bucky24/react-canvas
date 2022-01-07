@@ -518,15 +518,80 @@ The Pattern element allows drawing an image in a repeated pattern in a rectangle
 
 ## Events
 
+### Event List
+
+The following events are available:
+
+| Event | Params |
+|---|---|
+| onMouseMove | Coords |
+| onMouseDown | CoordsWithButton |
+| onMouseUp | CoordsWithButton |
+| onKeyDown | KeyData |
+| onKeyUp | KeyData |
+| onWheel | CoordsWithDirection |
+
+#### Coords
+
+Coords is simply an object containing x and y as integers.
+
+#### CoordsWithButton
+
+CoordsWithButton contains x and y coordinates, as well as a `button` field that is one of the following:
+
+| Type |
+| -- |
+| ButtonTypes.LEFT |
+| ButtonTypes.MIDDLE |
+| ButtonTypes.RIGHT |
+
+#### KeyData
+
+KeyData is an object containing `char` which is the character of the key pressed, and `code` which is the key code.
+
+#### CoordsWithDirection
+
+CoordsWithDirection contains x and y coordinates, as well as an `up` field, which indicates if the scroll wheel was moved up (true) or down (false)
+
+### Handling on the Canvas
+
+The quickest way to handle canvas events is via event handlers directly on the Canvas object. Any component containing a Canvas can listen for any events it emits via callbacks.
+
+```
+class MyComponent extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+	render() {
+		return (<div className={styles.appRoot}>
+			<Canvas
+				width={300}
+				height={300}
+				onMove={({ x, y, button }) => {
+					console.log("mouse moved to", data.x, data.y);
+				}}
+				onMouseDown={({ x, y, button }) => {
+				
+				}}
+				onMouseUp={({ x, y, button }) => {
+				
+				}}
+			>
+				{ /* some things here */ }
+			</Canvas>
+		</div>);
+	}
+};
+```
 ### CanvasComponent
 
-The easiest way to hook into canvas events is by having your components extend `CanvasComponent`. `CanvasComponent` is a class that extends `React.Component`, but also wraps the events from the `Canvas` parent, providing helpful React-like lifecycle functions instead.
+If your components extend `CanvasComponent` (see below sections), you can handle events as native functions inside the component as React lifecycle methods.
 
-If `bounds` is set on the child object (containing x, y, width, and height), the second parameter of the callback will be a boolean indicating if the operation took place within those bounds. If no bounds are set, then this boolean is always false.
+If `bounds` is set on the child object (containing x, y, width, and height), the second parameter of the callback for all mouse events will be a boolean indicating if the operation took place within those bounds. If no bounds are set, then this boolean is always false.
 
 Note that if you make a component a CanvasComponent but it is not nested inside a Canvas element, it will throw an error to your console because the child context doesn't exist.
 
-Another thing of note: CanvasComponent has event handling in `componentDidMount`. If you are using `componentDidMount` in your custom component, be sure to call `super.componentDidMount()` or else event handling will not work.
+Another thing of note: CanvasComponent consumes `componentDidMount` to do event handling. If you are using `componentDidMount` in your custom component, be sure to call `super.componentDidMount()` or else event handling will not work.
 
 ##### Example
 
@@ -571,17 +636,9 @@ class MyElement extends CanvasComponent {
 export default MyElement;
 ```
 
-Note in the above example, the button will be an instance of the ButtonTypes, shown below
-
-| Type |
-| -- |
-| ButtonTypes.LEFT |
-| ButtonTypes.MIDDLE |
-| ButtonTypes.RIGHT |
-
 ### Raw Event Handling
 
-It is possible to hook into canvas events for your component by using the `registerListener` and `unregisterListener` functions on the context.
+It is possible to hook into canvas events for your component by using the `registerListener` and `unregisterListener` functions on the Canvas context.
 
 Both `registerListener` and `unregisterListener` take in two parameters: an EventType, and a closure that will be passed a data object when the event is triggered.
 
@@ -595,37 +652,6 @@ It is recommended that your component call `registerListener` only once, and tha
 | EventTypes.KEY_DOWN | A key being pressed or repeated | An object containing the char value of the key and the key code |
 | EventTypes.KEY_UP | A key being released | An object containing the char value of the key and the key code |
 | EventTypes.WHEEL | The scroll wheel being spun | An object containing x and y of the mouse on the canvas, and a boolean "up" which indicates if the wheel is spinning up or down |
-
-### Handling on the Canvas
-
-Any component containing a Canvas object can listen for any events it emits via callbacks. The callbacks are given the same data as examples above.
-
-```
-class MyComponent extends React.Component {
-	constructor(props) {
-		super(props);
-	}
-	render() {
-		return (<div className={styles.appRoot}>
-			<Canvas
-				width={300}
-				height={300}
-				onMove={(data) => {
-					console.log("mouse moved to", data.x, data.y);
-				}}
-				onMouseDown={() => {
-				
-				}}
-				onMouseUp={() => {
-				
-				}}
-			>
-				{ /* some things here */ }
-			</Canvas>
-		</div>);
-	}
-};
-```
 
 ## Extending
 
@@ -643,6 +669,8 @@ The following properties are available from the CanvasContext:
 | loadImage | Function that takes in a src and a cb function. If the image is already loaded, it will return the img object. If not, the cb function is called when the image is loaded |
 | loadPattern | Function that takes in a src and a cb function. If the pattern is already loaded, it will return the canvas pattern object. If not, the cb function is called when the pattern is loaded |
 | forceRenderCount | This is the number of times the forceRerender function has been called. This can be used to determine if a render is taking place because an image has loaded (as image loads call forceRerender by default) |
+| width | The width of the Canvas |
+| height | The height of the Canvas |
 
 ##### Example
 

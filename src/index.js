@@ -316,6 +316,8 @@ class Canvas extends React.Component {
 			getImage: loadImage,
 			loadPattern: loadPattern,
 			forceRenderCount: this.forceRenderCount,
+            width: this.canvas ? this.canvas.width : this.props.width,
+            height: this.canvas ? this.canvas.height : this.props.height,
 		};
 	}
 	UNSAFE_componentWillUpdate(newProps) {
