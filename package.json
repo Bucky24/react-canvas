@@ -17,7 +17,7 @@
 		"publish": "npm run build"
 	},
 	"files": [
-		"/build"
+		"build"
 	],
 	"author": "Bucky24",
 	"license": "ISC",
