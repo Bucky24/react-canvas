@@ -818,3 +818,53 @@ React Canvas exports a method, `renderToCanvas`, that does basically the same th
 This canvas can be passed into the `src` attribute of an Image element to render it.
 
 Like the above method, this bypasses React rendering, so it may not work as expected for some situations.
+
+## blendImage
+
+The `blendImage` function allows an existing image to be manipulated on the fly, generating a new image (as a Canvas) that can be drawn.
+
+### Parameters
+
+| Name | Description
+| -- | -- |
+| src | The source (url or base64 string) to blend |
+| operations | An array of BlendOperations. If empty, the original src is returned |
+
+### Usage
+
+```
+blendImage(sampleImage, [
+    {
+        type: BLEND_TYPE.COLOR_SWAP,
+        from: '#ffffff',
+        to: '#0000ff',
+    },
+    {
+        type: BLEND_TYPE.COLOR_SWAP,
+        from: '#000000',
+        to: '#00ff00',
+    },
+]).then((newImg) => {
+    // newImg is a Canvas containing the rendered image, and can now be stored for drawing.
+});
+```
+
+### BlendOperation
+
+Represents an operation that can be performed on an image
+
+| Name | Type | Description
+| -- | -- | -- |
+| type | BLEND_TYPE | Describes what operation to perform |
+| * | * | Other params determined by BLEND_TYPE, see below |
+
+### BLEND_TYPE
+
+#### COLOR_SWAP
+
+`BLEND_TYPE.COLOR_SWAP` allows swapping one color in an image completely for another color. It expects the following parameers on the `BlendOperation`:
+
+| Name | Type | Description
+| -- | -- | -- |
+| from | Hex Color | A string containing the RGB hex code to look for |
+| to | Hex Color | A stirng containing the RGB hex code to use as a replacement

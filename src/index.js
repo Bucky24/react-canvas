@@ -170,6 +170,14 @@ function loadImage(src, cb) {
 	return null;
 }
 
+function loadImagePromise(src) {
+    return new Promise((resolve) => {
+        loadImage(src, (src, img) => {
+            resolve(img);
+        });
+    });
+}
+
 const patternMap = {};
 const patternLoadingMap = {};
 
@@ -724,8 +732,8 @@ const Image = ({
 			let img;
 
 			if (isElement) {
-				if (src.nodeName !== "CANVAS") {
-					throw new Error("A DOM element was passed as a src to Image, but the element was not a canvas.");
+				if (src.nodeName !== "CANVAS" && src.nodeName !== "IMG") {
+					throw new Error("A DOM element was passed as a src to Image, but the element was not a canvas or an img.");
 				}
 				img = src;
 			} else if (src instanceof Object) {
@@ -1093,6 +1101,93 @@ function renderToImage(elements, width=300, height=300, context = {}) {
 	return image;
 }
 
+async function blendImage(src, replacements = []) {
+    if (replacements.length === 0) {
+        // nothing to be done
+        return src;
+    }
+    const img = await loadImagePromise(src);
+    
+	const canvas = document.createElement("canvas");
+	canvas.width = img.width;
+	canvas.height = img.height;
+	const canvasContext = canvas.getContext("2d");
+    
+	canvasContext.drawImage(img, 0, 0);
+    
+    const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+    
+    const image = [];
+    
+    for (let i=0;i<imageData.width;i++) {
+        for (let j=0;j<imageData.height;j++) {
+            const index = i * (imageData.width * 4) + (j * 4);
+            const r = imageData.data[index];
+            const g = imageData.data[index+1];
+            const b = imageData.data[index+2];
+            
+            image.push({
+                red: r,
+                green: g,
+                blue: b,
+            });
+        }
+    }
+    
+    // manipulation here
+    for (let i=0;i<image.length;i++) {
+        const pixel = image[i];
+        const red = pixel.red.toString(16).padStart(2, '0');
+        const green = pixel.green.toString(16).padStart(2, '0');
+        const blue = pixel.blue.toString(16).padStart(2, '0');
+
+        const hexCode = "#" + red + green + blue;
+        for (const replacement of replacements) {
+            if (replacement.type === BLEND_TYPE.COLOR_SWAP) {
+                if (hexCode === replacement.from) {
+                    const newRed = replacement.to.substr(1, 2);
+                    const newGreen = replacement.to.substr(3, 2);
+                    const newBlue = replacement.to.substr(5, 2);
+                    
+                    const newRedNum = parseInt(newRed, 16);
+                    const newGreenNum = parseInt(newGreen, 16);
+                    const newBlueNum = parseInt(newBlue, 16);
+                    
+                    pixel.red = newRedNum;
+                    pixel.green = newGreenNum;
+                    pixel.blue = newBlueNum;
+                    // only run 1 modification on the pixel
+                    break;
+                }
+            }
+        }
+    }
+    
+    // writing back
+
+	const canvas2 = document.createElement("canvas");
+	canvas2.width = imageData.width;
+	canvas2.height = imageData.height;
+	const canvasContext2 = canvas2.getContext("2d");
+    const newImageData = canvasContext2.createImageData(imageData.width, imageData.height);
+    for (let i=0;i<image.length;i++) {
+        const index = i * 4;
+        const pixel = image[i];
+        newImageData.data[index] = pixel.red;
+        newImageData.data[index+1] = pixel.green;
+        newImageData.data[index+2] = pixel.blue;
+        newImageData.data[index+3] = 255;
+    }
+    
+    canvasContext2.putImageData(newImageData, 0, 0);
+    
+    return canvas2;
+}
+
+const BLEND_TYPE = {
+    COLOR_SWAP: 'blend_type/color_swap',
+};
+
 export {
 	Canvas,
 	Container,
@@ -1111,4 +1206,6 @@ export {
 	Clip,
 	renderToImage,
 	renderToCanvas,
+    blendImage,
+    BLEND_TYPE,
 };

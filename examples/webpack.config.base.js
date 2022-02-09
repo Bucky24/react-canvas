@@ -29,9 +29,13 @@ module.exports = (dirname) => {
 							],
 							plugins: [
                                 "@babel/plugin-proposal-class-properties",
-                            ]
-						}
-					}
+                                ["@babel/transform-runtime", {
+                                  "helpers": false,
+                                  "regenerator": true,
+                                }],
+                            ],
+						},
+					},
 				},
 				{
 					test: /\.css$/,
