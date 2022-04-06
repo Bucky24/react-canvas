@@ -1,6 +1,6 @@
 {
 	"name": "@bucky24/react-canvas",
-	"version": "1.8.0",
+	"version": "1.9.0",
 	"description": "A library of components that can be used to manipulate a canvas using JSX embedded in react.",
 	"main": "build/index.js",
 	"scripts": {
@@ -15,6 +15,7 @@
 		"clipExample": "webpack-dev-server --config ./examples/clipExample/webpack.config.js",
 		"renderExample": "webpack-dev-server --config ./examples/renderExample/webpack.config.js",
 		"blendExample": "webpack-dev-server --config ./examples/blendExample/webpack.config.js",
+		"compoundExample": "webpack-dev-server --config ./examples/compoundExample/webpack.config.js",
 		"prepublishOnly": "npm run build"
 	},
 	"files": [
@@ -36,13 +37,14 @@
 		"css-loader": "6.5.1",
 		"file-loader": "6.2.0",
 		"html-webpack-plugin": "5.5.0",
-		"image-webpack-loader": "8.0.1",
+		"image-webpack-loader": "8.1.0",
 		"react": "17.0.2",
 		"react-dom": "17.0.2",
 		"style-loader": "3.3.1",
 		"webpack": "5.65.0",
 		"webpack-cli": "4.9.1",
-		"webpack-dev-server": "4.7.2"
+		"webpack-dev-server": "4.8.1",
+		"prop-types": "15.7.2"
 	},
 	"keywords": [
 		"react",
@@ -52,6 +54,10 @@
 		"html5"
 	],
 	"dependencies": {
-		"prop-types": "15.7.2"
+		"react-fast-compare": "3.2.0"
+	},
+	"peerDependencies": {
+		"prop-types": "15.7.2",
+		"react": "17.x.x"
 	}
 }

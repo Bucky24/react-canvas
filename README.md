@@ -516,6 +516,42 @@ The Pattern element allows drawing an image in a repeated pattern in a rectangle
 </Canvas>
 ```
 
+### CompoundElement
+
+The `CompoundElement` is an attempt to improve rendering when there are a lot of objects on the screen. What it does is detect any time its children change. When this happens, it pre-renders its entire child list (using `renderToCanvas`) and then draws that rendered image moving forward. It can be given an x and y offset to move the drawn image around the screen. This component is very useful when you have a lot of objects all moving in the same direction that don't change very often (such as a background layer of a map).
+
+Another note is that currently this does not do any sort of automatic scaling based on content, so make sure whatever width and height you pass encompass all your elements or they will be cut off. In the future, I would like to have this detected automatically, and not even require a width and height.
+
+Lastely, this component is not well named and the name may change in the future.
+##### Children
+
+Takes multiple children, must be ReactCanvas elements. I have not tested it with many rendering scenarios but it uses the same rendering system under the hood that `Clip` does, so anything that works with `Clip` should work here.
+##### Parameters
+
+| Parameter    | Description |
+| ----------- | ----------- |
+| xOff | X position to offset the image draw at. Optional (defaults 0) |
+| yOff | Y position to offset the image draw at. Optional (defaults 0) |
+| width | Width of the rendering area |
+| height | Height of the rendering area |
+
+##### Example
+
+```
+<Canvas
+	width={300}
+	height={300}
+>
+	<CompoundElement}
+		width={400}
+		height={400}
+	>
+		{images.map((image) => {
+			return <Image src={sampleImage} x={image.x} y={image.y} width={50} height={50} />
+		})}
+	</CompoundElement>
+</Canvas>
+```
 ## Events
 
 ### Event List

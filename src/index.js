@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useContext, useRef } from 'react';
 import PropTypes from 'prop-types';
+import isEqual from 'react-fast-compare';
 
 export const EventTypes = {
 	MOVE: 'mousemove',
@@ -740,7 +741,7 @@ const Image = ({
 				throw new Error("An object was passed as a src to Image, but it was not a DOM element");
 			} else {
 				const loadFn = onLoad || forceRerender;
-			
+
 				img = getImage(src, loadFn);
 			}
 			
@@ -1188,6 +1189,79 @@ const BLEND_TYPE = {
     COLOR_SWAP: 'blend_type/color_swap',
 };
 
+const compoundPropTypes = {
+	xOff: PropTypes.number,
+	yOff: PropTypes.number,
+	width: PropTypes.number.isRequired,
+	height: PropTypes.number.isRequired,
+};
+
+const compoundDefaultProps = {
+	xOff: 0,
+	yOff: 0,
+};
+
+function getElementsForCompoundElement(children) {
+	if (!Array.isArray(children)) {
+		return [children];
+	}
+
+	const allResults = [];
+
+	for (const child of children) {
+		const recursedResult = getElementsForCompoundElement(child);
+		for (const result of recursedResult) {
+			allResults.push(result);
+		}
+	}
+
+	return allResults;
+}
+
+function CompoundElement({ children, yOff, xOff, width, height }) {
+	const canvasContext = useContext(CanvasContext);
+	const prevPropsRef = useRef({});
+	const imageRef = useRef(null);
+	const { context } = canvasContext;
+
+	if (!context) {
+		return null;
+	}
+
+	const checkProps = {
+		children,
+	};
+
+	if (!isEqual(prevPropsRef.current, checkProps)) {
+		//console.log('render difference detected');
+		prevPropsRef.current = checkProps;
+
+		// re-render our image
+		const elements = getElementsForCompoundElement(children);
+
+		const image = renderToCanvas(elements, width, height, {
+			...canvasContext,
+			forceRerender: () => {
+				// we want to know if this happens because it's probably due to an image loading
+				// in this case clear the previous props so the next time we render, we rebuild the image
+				prevPropsRef.current = {};
+				canvasContext.forceRerender();
+			},
+		});
+		imageRef.current = image;
+	}
+
+	if (!imageRef.current) {
+		return null;
+	}
+	return (
+		<Image src={imageRef.current} width={width} height={height} x={xOff} y={yOff} />
+	);
+}
+
+CompoundElement.propTypes = compoundPropTypes;
+CompoundElement.defaultProps = compoundDefaultProps;
+
 export {
 	Canvas,
 	Container,
@@ -1208,4 +1282,5 @@ export {
 	renderToCanvas,
     blendImage,
     BLEND_TYPE,
+	CompoundElement,
 };
