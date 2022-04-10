@@ -147,6 +147,8 @@ Images are cached after first load, so re-using the same src will not cause the 
 | height | The height to draw the image at |
 | clip | See Image Clipping below |
 | rot | Rotation angle in degrees |
+| flipX | Boolean, indicates if the image should be flipped on the X axis |
+| flipY | Boolean, indicates if the image should be flipped on the Y axis |
 | onLoad | Function that is called when the image loads. If the image is already loaded, the function will not be called (note, using this function can cause optimization issues) |
 
 ##### Example

@@ -716,11 +716,18 @@ const imagePropTypes = {
 		width: PropTypes.number.isRequired,
 		height: PropTypes.number.isRequired,
 	}),
+	flipX: PropTypes.bool,
+	flipY: PropTypes.bool,
 	onLoad: PropTypes.func,
-}
+};
+
+const imageDefaultProps = {
+	flipX: false,
+	flipY: false,
+};
 
 const Image = ({
-	src, x, y, width, height, clip, rot, onLoad,
+	src, x, y, width, height, clip, rot, onLoad, flipY, flipX,
 }) => {
 	return <CanvasContext.Consumer>
 		{({ context, forceRerender, getImage }) => {
@@ -766,6 +773,9 @@ const Image = ({
 					const rotRad = rot * Math.PI/180;
 					context.rotate(rotRad);
 				}
+				if (flipX || flipY) {
+					context.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+				}
 				context.translate(-x-width/2, -y-height/2);
 				context.drawImage(img, finalX, finalY, sw * rw, sh * rh, x, y, width, height);
 			} else {
@@ -773,6 +783,9 @@ const Image = ({
 				if (rot) {
 					const rotRad = rot * Math.PI/180;
 					context.rotate(rotRad);
+				}
+				if (flipX || flipY) {
+					context.scale(flipX ? -1 : 1, flipY ? -1 : 1);
 				}
 				context.translate(-x-width/2, -y-height/2);
 				context.drawImage(img, x, y, width, height);
@@ -786,6 +799,7 @@ const Image = ({
 };
 
 Image.propTypes = imagePropTypes;
+Image.defaultProps = imageDefaultProps;
 
 const imagesPropTypes = {
 	images: PropTypes.arrayOf(PropTypes.shape({
