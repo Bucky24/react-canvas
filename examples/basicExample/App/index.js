@@ -115,7 +115,6 @@ const App = ({}) => {
 				fill={false}
 				startAngle={120*Math.PI/180}
 				endAngle={240*Math.PI/180}
-				fill={true}
 				sector={false}
 			/>
 			<Arc
@@ -123,7 +122,6 @@ const App = ({}) => {
 				y={70}
 				radius={20}
 				color="#0f0"
-				fill={false}
 				startAngle={0}
 				endAngle={120*Math.PI/180}
 				fill={true}

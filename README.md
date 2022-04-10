@@ -35,6 +35,7 @@ The root level element. This will actually create a &lt;canvas&gt; canvas tag on
 | width  | The width, in pixels, of the resulting canvas  |
 | height   | The height, in pixels, of the resulting canvas  |
 | captureAllKeyEvents | If this is set to false, any events not originating from the body (which is the default when no input field is selected) will be ignored. If this is set to true (default), all key events will be captured. You should set this to false if you have any dom elements outside of the canvas that need to handle key events.
+| enable3d | If true, the canvas is configured as a webgl canvas, with a webgl context. Not all components will work in this mode. Default false. |
 
 ##### Children
 
@@ -671,6 +672,7 @@ The following properties are available from the CanvasContext:
 | forceRenderCount | This is the number of times the forceRerender function has been called. This can be used to determine if a render is taking place because an image has loaded (as image loads call forceRerender by default) |
 | width | The width of the Canvas |
 | height | The height of the Canvas |
+| is3d | Boolean, indicate if the Canvas was configured for webgl |
 
 ##### Example
 

@@ -15,6 +15,7 @@
 		"clipExample": "webpack-dev-server --config ./examples/clipExample/webpack.config.js",
 		"renderExample": "webpack-dev-server --config ./examples/renderExample/webpack.config.js",
 		"blendExample": "webpack-dev-server --config ./examples/blendExample/webpack.config.js",
+		"3dExample": "webpack-dev-server --config ./examples/3dExample/webpack.config.js",
 		"prepublishOnly": "npm run build"
 	},
 	"files": [

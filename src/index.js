@@ -105,16 +105,6 @@ const CanvasContext = React.createContext({
 	forceRenderCount: null,
 });
 
-const canvasProps = {
-	width: PropTypes.number.isRequired,
-	height: PropTypes.number.isRequired,
-	captureAllKeyEvents: PropTypes.bool
-}
-
-const canvasDefaultProps = {
-	captureAllKeyEvents: true
-}
-
 const loadingMap = {};
 const imageMap = {};
 
@@ -248,7 +238,6 @@ const doRender = (element,  context) => {
 		// this is the react <> thing
 		children = element.props.children;
 	} else {
-		console.log(element.type.valueOf(), element.type.valueOf() == "react.fragment")
 		console.error("No idea how to handle", element);
 		return;	
 	}
@@ -263,6 +252,18 @@ const doRender = (element,  context) => {
 		}
 		doRender(child, context);
 	});
+}
+
+const canvasProps = {
+	width: PropTypes.number.isRequired,
+	height: PropTypes.number.isRequired,
+	captureAllKeyEvents: PropTypes.bool,
+	enable3d: PropTypes.bool,
+}
+
+const canvasDefaultProps = {
+	captureAllKeyEvents: true,
+	enable3d: false,
 }
 
 class Canvas extends React.Component {
@@ -326,6 +327,7 @@ class Canvas extends React.Component {
 			forceRenderCount: this.forceRenderCount,
             width: this.canvas ? this.canvas.width : this.props.width,
             height: this.canvas ? this.canvas.height : this.props.height,
+			is3d: this.props.enable3d,
 		};
 	}
 	UNSAFE_componentWillUpdate(newProps) {
@@ -583,7 +585,7 @@ class Canvas extends React.Component {
 
 		const refFunc = (c) => {
 			if (c) {
-				const newContext = c.getContext('2d');
+				const newContext = this.props.enable3d ? c.getContext('webgl') : c.getContext('2d');
 				if (this.state.context !== newContext) {
 					this.canvas = c;
 					this.setState({
