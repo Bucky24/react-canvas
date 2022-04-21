@@ -106,16 +106,6 @@ const CanvasContext = React.createContext({
 	forceRenderCount: null,
 });
 
-const canvasProps = {
-	width: PropTypes.number.isRequired,
-	height: PropTypes.number.isRequired,
-	captureAllKeyEvents: PropTypes.bool
-}
-
-const canvasDefaultProps = {
-	captureAllKeyEvents: true
-}
-
 const loadingMap = {};
 const imageMap = {};
 
@@ -266,6 +256,20 @@ const doRender = (element,  context) => {
 	});
 }
 
+const canvasProps = {
+	width: PropTypes.number.isRequired,
+	height: PropTypes.number.isRequired,
+	captureAllKeyEvents: PropTypes.bool,
+	drawWidth: PropTypes.number,
+	drawHeight: PropTypes.number,
+}
+
+const canvasDefaultProps = {
+	captureAllKeyEvents: true,
+	drawWidth: undefined,
+	drawHeight: undefined,
+}
+
 class Canvas extends React.Component {
 	constructor(props) {
 		super(props);
@@ -316,6 +320,14 @@ class Canvas extends React.Component {
 		this.forceUpdate();
 	}
 	getMyContext() {
+		let width = this.props.drawWidth;
+		if (!width) {
+			width = this.canvas ? this.canvas.width : this.props.width;
+		}
+		let height = this.props.drawHeight;
+		if (!height) {
+			height = this.canvas ? this.canvas.height : this.props.height;
+		}
 	    return {
 			context: this.state.context,
 			registerListener: this.registerListener,
@@ -325,8 +337,8 @@ class Canvas extends React.Component {
 			getImage: loadImage,
 			loadPattern: loadPattern,
 			forceRenderCount: this.forceRenderCount,
-            width: this.canvas ? this.canvas.width : this.props.width,
-            height: this.canvas ? this.canvas.height : this.props.height,
+            width,
+            height,
 		};
 	}
 	UNSAFE_componentWillUpdate(newProps) {
@@ -341,17 +353,31 @@ class Canvas extends React.Component {
 			this.secondCanvas = null;
 		}
 
-		if (props.width !== this.canvas.width) {
-			this.canvas.width = props.width;
+		const useWidth = props.drawWidth || props.width;
+		const useHeight = props.drawHeight || props.height;
+
+		if (useWidth !== this.canvas.width) {
+			this.canvas.width = useWidth;
 		}
-		if (props.height !== this.canvas.height) {
-			this.canvas.height = props.height;
+		if (useHeight !== this.canvas.height) {
+			this.canvas.height = useHeight;
+		}
+		if (props.drawWidth !== props.width) {
+			this.canvas.style.width = `${props.width}px`;
+		}
+		if (props.drawHeight !== props.height) {
+			this.canvas.style.height = `${props.height}px`;
 		}
 		if (this.secondCanvas) {
-			this.secondCanvas.width = this.props.width;
-		}
-		if (this.secondCanvas) {
-			this.secondCanvas.height = this.props.height;
+			this.secondCanvas.width = useWidth;
+			this.secondCanvas.height = useHeight;
+
+			if (props.drawWidth !== props.width) {
+				this.secondCanvas.style.width = `${props.width}px`;
+			}
+			if (props.drawHeight !== props.height) {
+				this.secondCanvas.style.height = `${props.height}px`;
+			}
 		}
 	}
 	componentWillUnmount() {

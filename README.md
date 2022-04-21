@@ -35,6 +35,8 @@ The root level element. This will actually create a &lt;canvas&gt; canvas tag on
 | width  | The width, in pixels, of the resulting canvas  |
 | height   | The height, in pixels, of the resulting canvas  |
 | captureAllKeyEvents | If this is set to false, any events not originating from the body (which is the default when no input field is selected) will be ignored. If this is set to true (default), all key events will be captured. You should set this to false if you have any dom elements outside of the canvas that need to handle key events.
+| drawWidth | The width, in pixels, that the canvas should use when drawing. Defaults to `width` |
+| drawHeight | The height, in pixels, that the canvas should use when drawing. Defaults to `height` |
 
 ##### Children
 
