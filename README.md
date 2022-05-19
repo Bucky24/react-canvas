@@ -711,6 +711,7 @@ The following properties are available from the CanvasContext:
 | forceRenderCount | This is the number of times the forceRerender function has been called. This can be used to determine if a render is taking place because an image has loaded (as image loads call forceRerender by default) |
 | width | The width of the Canvas |
 | height | The height of the Canvas |
+| forceRerender | Forces the entire canvas to re-render |
 
 ##### Example
 
