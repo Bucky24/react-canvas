@@ -36,6 +36,8 @@ The root level element. This will actually create a &lt;canvas&gt; canvas tag on
 | height   | The height, in pixels, of the resulting canvas  |
 | captureAllKeyEvents | If this is set to false, any events not originating from the body (which is the default when no input field is selected) will be ignored. If this is set to true (default), all key events will be captured. You should set this to false if you have any dom elements outside of the canvas that need to handle key events.
 | enable3d | If true, the canvas is configured as a webgl canvas, with a webgl context. Not all components will work in this mode. Default false. |
+| drawWidth | The width, in pixels, that the canvas should use when drawing. Defaults to `width` |
+| drawHeight | The height, in pixels, that the canvas should use when drawing. Defaults to `height` |
 
 ##### Children
 
@@ -148,6 +150,8 @@ Images are cached after first load, so re-using the same src will not cause the 
 | height | The height to draw the image at |
 | clip | See Image Clipping below |
 | rot | Rotation angle in degrees |
+| flipX | Boolean, indicates if the image should be flipped on the X axis |
+| flipY | Boolean, indicates if the image should be flipped on the Y axis |
 | onLoad | Function that is called when the image loads. If the image is already loaded, the function will not be called (note, using this function can cause optimization issues) |
 
 ##### Example
@@ -517,6 +521,42 @@ The Pattern element allows drawing an image in a repeated pattern in a rectangle
 </Canvas>
 ```
 
+### CompoundElement
+
+The `CompoundElement` is an attempt to improve rendering when there are a lot of objects on the screen. What it does is detect any time its children change. When this happens, it pre-renders its entire child list (using `renderToCanvas`) and then draws that rendered image moving forward. It can be given an x and y offset to move the drawn image around the screen. This component is very useful when you have a lot of objects all moving in the same direction that don't change very often (such as a background layer of a map).
+
+Another note is that currently this does not do any sort of automatic scaling based on content, so make sure whatever width and height you pass encompass all your elements or they will be cut off. In the future, I would like to have this detected automatically, and not even require a width and height.
+
+Lastely, this component is not well named and the name may change in the future.
+##### Children
+
+Takes multiple children, must be ReactCanvas elements. I have not tested it with many rendering scenarios but it uses the same rendering system under the hood that `Clip` does, so anything that works with `Clip` should work here.
+##### Parameters
+
+| Parameter    | Description |
+| ----------- | ----------- |
+| xOff | X position to offset the image draw at. Optional (defaults 0) |
+| yOff | Y position to offset the image draw at. Optional (defaults 0) |
+| width | Width of the rendering area |
+| height | Height of the rendering area |
+
+##### Example
+
+```
+<Canvas
+	width={300}
+	height={300}
+>
+	<CompoundElement}
+		width={400}
+		height={400}
+	>
+		{images.map((image) => {
+			return <Image src={sampleImage} x={image.x} y={image.y} width={50} height={50} />
+		})}
+	</CompoundElement>
+</Canvas>
+```
 ## Events
 
 ### Event List
@@ -673,6 +713,7 @@ The following properties are available from the CanvasContext:
 | width | The width of the Canvas |
 | height | The height of the Canvas |
 | is3d | Boolean, indicate if the Canvas was configured for webgl |
+| forceRerender | Forces the entire canvas to re-render |
 
 ##### Example
 

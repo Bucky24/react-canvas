@@ -27,6 +27,8 @@ class App extends React.Component {
 			<Canvas
 				width={this.state.width}
 				height={300}
+				drawWidth={100}
+				drawHeight={400}
 			>
 				<Shape
 					x={40}

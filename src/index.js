@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useContext, useRef } from 'react';
 import PropTypes from 'prop-types';
+import isEqual from 'react-fast-compare';
 
 export const EventTypes = {
 	MOVE: 'mousemove',
@@ -258,12 +259,14 @@ const canvasProps = {
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
 	captureAllKeyEvents: PropTypes.bool,
-	enable3d: PropTypes.bool,
+	drawWidth: PropTypes.number,
+	drawHeight: PropTypes.number,
 }
 
 const canvasDefaultProps = {
 	captureAllKeyEvents: true,
-	enable3d: false,
+	drawWidth: undefined,
+	drawHeight: undefined,
 }
 
 class Canvas extends React.Component {
@@ -316,6 +319,14 @@ class Canvas extends React.Component {
 		this.forceUpdate();
 	}
 	getMyContext() {
+		let width = this.props.drawWidth;
+		if (!width) {
+			width = this.canvas ? this.canvas.width : this.props.width;
+		}
+		let height = this.props.drawHeight;
+		if (!height) {
+			height = this.canvas ? this.canvas.height : this.props.height;
+		}
 	    return {
 			context: this.state.context,
 			registerListener: this.registerListener,
@@ -325,9 +336,9 @@ class Canvas extends React.Component {
 			getImage: loadImage,
 			loadPattern: loadPattern,
 			forceRenderCount: this.forceRenderCount,
-            width: this.canvas ? this.canvas.width : this.props.width,
-            height: this.canvas ? this.canvas.height : this.props.height,
 			is3d: this.props.enable3d,
+            width,
+            height,
 		};
 	}
 	UNSAFE_componentWillUpdate(newProps) {
@@ -342,17 +353,31 @@ class Canvas extends React.Component {
 			this.secondCanvas = null;
 		}
 
-		if (props.width !== this.canvas.width) {
-			this.canvas.width = props.width;
+		const useWidth = props.drawWidth || props.width;
+		const useHeight = props.drawHeight || props.height;
+
+		if (useWidth !== this.canvas.width) {
+			this.canvas.width = useWidth;
 		}
-		if (props.height !== this.canvas.height) {
-			this.canvas.height = props.height;
+		if (useHeight !== this.canvas.height) {
+			this.canvas.height = useHeight;
+		}
+		if (props.drawWidth !== props.width) {
+			this.canvas.style.width = `${props.width}px`;
+		}
+		if (props.drawHeight !== props.height) {
+			this.canvas.style.height = `${props.height}px`;
 		}
 		if (this.secondCanvas) {
-			this.secondCanvas.width = this.props.width;
-		}
-		if (this.secondCanvas) {
-			this.secondCanvas.height = this.props.height;
+			this.secondCanvas.width = useWidth;
+			this.secondCanvas.height = useHeight;
+
+			if (props.drawWidth !== props.width) {
+				this.secondCanvas.style.width = `${props.width}px`;
+			}
+			if (props.drawHeight !== props.height) {
+				this.secondCanvas.style.height = `${props.height}px`;
+			}
 		}
 	}
 	componentWillUnmount() {
@@ -717,11 +742,18 @@ const imagePropTypes = {
 		width: PropTypes.number.isRequired,
 		height: PropTypes.number.isRequired,
 	}),
+	flipX: PropTypes.bool,
+	flipY: PropTypes.bool,
 	onLoad: PropTypes.func,
-}
+};
+
+const imageDefaultProps = {
+	flipX: false,
+	flipY: false,
+};
 
 const Image = ({
-	src, x, y, width, height, clip, rot, onLoad,
+	src, x, y, width, height, clip, rot, onLoad, flipY, flipX,
 }) => {
 	return <CanvasContext.Consumer>
 		{({ context, forceRerender, getImage }) => {
@@ -742,7 +774,7 @@ const Image = ({
 				throw new Error("An object was passed as a src to Image, but it was not a DOM element");
 			} else {
 				const loadFn = onLoad || forceRerender;
-			
+
 				img = getImage(src, loadFn);
 			}
 			
@@ -767,6 +799,9 @@ const Image = ({
 					const rotRad = rot * Math.PI/180;
 					context.rotate(rotRad);
 				}
+				if (flipX || flipY) {
+					context.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+				}
 				context.translate(-x-width/2, -y-height/2);
 				context.drawImage(img, finalX, finalY, sw * rw, sh * rh, x, y, width, height);
 			} else {
@@ -774,6 +809,9 @@ const Image = ({
 				if (rot) {
 					const rotRad = rot * Math.PI/180;
 					context.rotate(rotRad);
+				}
+				if (flipX || flipY) {
+					context.scale(flipX ? -1 : 1, flipY ? -1 : 1);
 				}
 				context.translate(-x-width/2, -y-height/2);
 				context.drawImage(img, x, y, width, height);
@@ -787,6 +825,7 @@ const Image = ({
 };
 
 Image.propTypes = imagePropTypes;
+Image.defaultProps = imageDefaultProps;
 
 const imagesPropTypes = {
 	images: PropTypes.arrayOf(PropTypes.shape({
@@ -1190,6 +1229,79 @@ const BLEND_TYPE = {
     COLOR_SWAP: 'blend_type/color_swap',
 };
 
+const compoundPropTypes = {
+	xOff: PropTypes.number,
+	yOff: PropTypes.number,
+	width: PropTypes.number.isRequired,
+	height: PropTypes.number.isRequired,
+};
+
+const compoundDefaultProps = {
+	xOff: 0,
+	yOff: 0,
+};
+
+function getElementsForCompoundElement(children) {
+	if (!Array.isArray(children)) {
+		return [children];
+	}
+
+	const allResults = [];
+
+	for (const child of children) {
+		const recursedResult = getElementsForCompoundElement(child);
+		for (const result of recursedResult) {
+			allResults.push(result);
+		}
+	}
+
+	return allResults;
+}
+
+function CompoundElement({ children, yOff, xOff, width, height }) {
+	const canvasContext = useContext(CanvasContext);
+	const prevPropsRef = useRef({});
+	const imageRef = useRef(null);
+	const { context } = canvasContext;
+
+	if (!context) {
+		return null;
+	}
+
+	const checkProps = {
+		children,
+	};
+
+	if (!isEqual(prevPropsRef.current, checkProps)) {
+		//console.log('render difference detected');
+		prevPropsRef.current = checkProps;
+
+		// re-render our image
+		const elements = getElementsForCompoundElement(children);
+
+		const image = renderToCanvas(elements, width, height, {
+			...canvasContext,
+			forceRerender: () => {
+				// we want to know if this happens because it's probably due to an image loading
+				// in this case clear the previous props so the next time we render, we rebuild the image
+				prevPropsRef.current = {};
+				canvasContext.forceRerender();
+			},
+		});
+		imageRef.current = image;
+	}
+
+	if (!imageRef.current) {
+		return null;
+	}
+	return (
+		<Image src={imageRef.current} width={width} height={height} x={xOff} y={yOff} />
+	);
+}
+
+CompoundElement.propTypes = compoundPropTypes;
+CompoundElement.defaultProps = compoundDefaultProps;
+
 export {
 	Canvas,
 	Container,
@@ -1210,4 +1322,5 @@ export {
 	renderToCanvas,
     blendImage,
     BLEND_TYPE,
+	CompoundElement,
 };

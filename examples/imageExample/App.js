@@ -33,7 +33,7 @@ const App = ({}) => {
 
 	return (<div>
 		<Canvas
-			width={600}
+			width={800}
 			height={400}
 		>
 			<Image
@@ -43,6 +43,15 @@ const App = ({}) => {
 				width={200}
 				height={200}
 				rot={rot}
+			/>
+			<Image
+				src={sampleImage}
+				x={400}
+				y={200}
+				width={200}
+				height={200}
+				flipX={true}
+				flipY={true}
 			/>
 			<Image
 				src={sampleImage}
@@ -59,7 +68,7 @@ const App = ({}) => {
 			/>
 			<Image
 				src={sampleImage}
-				x={400}
+				x={600}
 				y={200}
 				width={200}
 				height={200}
