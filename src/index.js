@@ -255,6 +255,26 @@ const doRender = (element,  context) => {
 	});
 }
 
+// handles turning children into a flat array that can be render with doRender
+const processChildren = (children) => {
+	const childList = [];
+	if (!Array.isArray(children)) {
+		childList.push(children);
+	} else {
+		children.forEach((child) => {
+			if (Array.isArray(child)) {
+				child.forEach((subChild) => {
+					childList.push(subChild);
+				})
+			} else {
+				childList.push(child);
+			}
+		})
+	}
+
+	return childList;
+}
+
 const canvasProps = {
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
@@ -541,7 +561,7 @@ class Canvas extends React.Component {
 		const context = this.getMyContext();
 		const primaryContext = context.context;
 		if (this.props.doubleBuffer) {
-			context.context = this.secondCanvas.getContext("2d");
+			context.context = this.props.enable3d ? this.secondCanvas.getContext('webgl') : this.secondCanvas.getContext('2d');
 		}
 
 		if (reRender) {
@@ -627,9 +647,11 @@ class Canvas extends React.Component {
 
 		this.lastChildren = newChildren;
 		if (this.props.customRender) {
-			return <canvas
-				ref={refFunc}
-			/>
+			return <CanvasContext.Provider value={this.getMyContext()}>	
+				<canvas
+					ref={refFunc}
+				/>
+			</CanvasContext.Provider>;
 		}
 
 		return <CanvasContext.Provider value={this.getMyContext()}>		
@@ -994,20 +1016,7 @@ const Clip = ({ x, y, width, height, children }) =>{
 			context.rect(x, y, width, height);
 			context.clip();
 
-			const childList = [];
-			if (!Array.isArray(children)) {
-				childList.push(children);
-			} else {
-				children.forEach((child) => {
-					if (Array.isArray(child)) {
-						child.forEach((subChild) => {
-							childList.push(subChild);
-						})
-					} else {
-						childList.push(child);
-					}
-				})
-			}
+			const childList = processChildren(children);
 
 			for (const child of childList) {
 				if (!child) {
@@ -1302,6 +1311,45 @@ function CompoundElement({ children, yOff, xOff, width, height }) {
 CompoundElement.propTypes = compoundPropTypes;
 CompoundElement.defaultProps = compoundDefaultProps;
 
+function Camera({ children, x, y, z, lookX, lookY, lookZ }) {
+	const canvasContext = useContext(CanvasContext);
+	const { context, is3d } = canvasContext;
+
+	if (!context || !is3d) {
+		return null;
+	}
+
+	context.clearColor(0.0, 0.0, 0.0, 1.0);
+	context.clear(context.COLOR_BUFFER_BIT);
+
+	const childList = processChildren(children);
+
+	for (const child of childList) {
+		if (!child) {
+			continue;
+		}
+		doRender(child, canvasContext);
+	}
+
+	return null;
+}
+
+function Shape3D({ triangles }) {
+	return <CanvasContext.Consumer>
+		{(canvasContext) => {
+			const { context, is3d } = canvasContext;
+
+			if (!context || !is3d) {
+				return null;
+			}
+
+			
+
+			return null;
+		}}
+	</CanvasContext.Consumer>;
+}
+
 export {
 	Canvas,
 	Container,
@@ -1323,4 +1371,6 @@ export {
     blendImage,
     BLEND_TYPE,
 	CompoundElement,
+	Camera,
+	Shape3D,
 };
