@@ -87,7 +87,7 @@ class App extends React.Component {
                 <Canvas
                     width={width}
                     height={height}
-                    customRender={true}
+                    customRender={false}
                     doubleBuffer={true}
                     ref={(c) => {
                         this.canvas = c;
