@@ -1,11 +1,11 @@
 import React from 'react';
-import { Container, Text, Shape, CanvasComponent } from 'react-canvas';
+import { Text, Shape, CanvasComponent } from 'react-canvas';
 
 class Thing2 extends CanvasComponent {
     render() {
         const { x, y } = this.props;
 
-        return (<Container>
+        return (<>
             <Shape
                 x={0}
                 y={0}
@@ -23,7 +23,7 @@ class Thing2 extends CanvasComponent {
             >
                 Blah blah
             </Text>
-        </Container>);
+        </>);
     }
 };
 

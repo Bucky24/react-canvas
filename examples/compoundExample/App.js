@@ -47,8 +47,8 @@ const App = ({}) => {
 				width={400}
 				height={400}
 			>
-				{images.map((image) => {
-					return <Image src={sampleImage} x={image.x} y={image.y} width={50} height={50} />
+				{images.map((image, index) => {
+					return <Image key={index} src={sampleImage} x={image.x} y={image.y} width={50} height={50} />
 				})}
 			</CompoundElement>
 		</Canvas>

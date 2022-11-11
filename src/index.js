@@ -1,6 +1,8 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext, useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import isEqual from 'react-fast-compare';
+import ReactDOM from 'react-dom';
+import ReactDOMClient from 'react-dom/client';
 
 export const EventTypes = {
 	MOVE: 'mousemove',
@@ -104,6 +106,10 @@ const CanvasContext = React.createContext({
 	getImage: null,
 	loadPattern: null,
 	forceRenderCount: null,
+});
+
+const CanvasClipContext = React.createContext({
+	data: null,
 });
 
 const loadingMap = {};
@@ -214,48 +220,6 @@ function isClass(func) {
 	return funcStr.includes("_classCallCheck");
 }
 
-const doRender = (element,  context) => {
-	if (!element) {
-		return;
-	}
-    
-	let children = [];
-	if (Array.isArray(element)) {
-		children = element;
-	} else if (element.type.length === 1) {
-		children = element.type(element.props);
-	} else if (element.type._context || (element.type && typeof element.type.$$typeof === 'symbol' && element.type.$$typeof.toString() === 'Symbol(react.context)')) {
-		// in this case the only child is the function to call with context
-		children = element.props.children(context);
-	} else if (isClass(element.type)) {
-		// we've got a class component
-		// this is kinda awful for a variety of reasons
-		// and I imagine will cause a lot of bugs.
-		const inst = new element.type(element.props);
-		children = inst.render();
-	} else if (element.type instanceof Function) {
-		children = element.type(element.props);
-	} else if (typeof element.type === "symbol") {
-		// this is the react <> thing
-		children = element.props.children;
-	} else {
-		console.log(element.type.valueOf(), element.type.valueOf() == "react.fragment")
-		console.error("No idea how to handle", element);
-		return;	
-	}
-
-	if (!Array.isArray(children)) {
-		children = [children];
-	}
-	
-	children.forEach((child) => {
-		if (!child) {
-			return;
-		}
-		doRender(child, context);
-	});
-}
-
 const canvasProps = {
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
@@ -291,7 +255,6 @@ class Canvas extends React.Component {
 		this.registerListener = this.registerListener.bind(this);
 		this.unregisterListener = this.unregisterListener.bind(this);
 		this.forceRerender = this.forceRerender.bind(this);
-		this.triggerRender = this.triggerRender.bind(this);
 		
 		// map of event to array of function callbacks
 		this.listeners = {};
@@ -345,14 +308,6 @@ class Canvas extends React.Component {
 		this.processChanges(newProps);
 	}
 	processChanges(props) {
-		if (props.doubleBuffer && !this.secondCanvas) {
-			this.secondCanvas = document.createElement("canvas");
-		} else if (!props.doubleBuffer) {
-			// should auto-delete the canvas element because of
-			// garbage collector
-			this.secondCanvas = null;
-		}
-
 		const useWidth = props.drawWidth || props.width;
 		const useHeight = props.drawHeight || props.height;
 
@@ -367,17 +322,6 @@ class Canvas extends React.Component {
 		}
 		if (props.drawHeight !== props.height) {
 			this.canvas.style.height = `${props.height}px`;
-		}
-		if (this.secondCanvas) {
-			this.secondCanvas.width = useWidth;
-			this.secondCanvas.height = useHeight;
-
-			if (props.drawWidth !== props.width) {
-				this.secondCanvas.style.width = `${props.width}px`;
-			}
-			if (props.drawHeight !== props.height) {
-				this.secondCanvas.style.height = `${props.height}px`;
-			}
 		}
 	}
 	componentWillUnmount() {
@@ -522,90 +466,13 @@ class Canvas extends React.Component {
 			}
 		}
 	}
-	triggerRender(component) {
-		if (!component || !component.props || component.props.zIndex === undefined) {
-			return;
-		}
-		const zIndex = component.props.zIndex;
-		
-		for (let i=zIndex+1;i<this.indexList.length;i++) {
-			const list = this.indexList[i];
-			if (!list) {
-				// this can happen if we have a gap in the zindex
-				continue;
-			}
-			this.handleRender(list);
-		}
-	}
-	handleRender(elements, reRender=true) {
-		const context = this.getMyContext();
-		const primaryContext = context.context;
-		if (this.props.doubleBuffer) {
-			context.context = this.secondCanvas.getContext("2d");
-		}
-
-		if (reRender) {
-			elements.forEach((element) => {
-				doRender(element, context);
-			});
-		}
-
-		if (this.props.doubleBuffer) {
-			primaryContext.save();
-			primaryContext.fillStyle = "#fff";
-			primaryContext.beginPath();
-			primaryContext.rect(0, 0, this.canvas.width, this.canvas.height);
-			primaryContext.fill();
-			primaryContext.restore();
-			primaryContext.drawImage(
-				this.secondCanvas,
-				0,
-				0,
-			);
-		}
-	}
 	render() {
 		this.indexList = [];
 		
 		let newChildren = this.props.children;
 
-		if (this.props.enableExperimental) {
-			const handleChild = (child) => {
-	       	 	if (!child || typeof child !== "object" || Array.isArray(child)) {
-					return child;
-				}
-				const props = child.props || {};
-				const workingIndex = props.zIndex === undefined ? 1 : props.zIndex;
-				const newProps = {
-					...props,
-					zIndex: workingIndex,
-				};
-				if (!this.indexList[workingIndex]) {
-					this.indexList[workingIndex] = [];
-				}
-				this.indexList[workingIndex].push(child);
-				return React.cloneElement(child, newProps);
-			}
-		
-			newChildren = this.props.children.map((child) => {
-				if (Array.isArray(child)) {
-					return child.map((innerChild) => {
-						return handleChild(innerChild);
-					});
-				}
-			
-				return handleChild(child);
-			});
-		}
-
 		if (!Array.isArray(newChildren)) {
 			newChildren = [newChildren];
-		}
-
-		const finishRender = () => {
-			if (this.props.customRender) {
-				this.handleRender(newChildren);
-			}
 		}
 
 		const refFunc = (c) => {
@@ -617,19 +484,9 @@ class Canvas extends React.Component {
 						context: newContext
 					}, () => {
 						this.reattachListeners();
-						finishRender();
 					});
-				} else {
-					finishRender();
 				}
 			}
-		}
-
-		this.lastChildren = newChildren;
-		if (this.props.customRender) {
-			return <canvas
-				ref={refFunc}
-			/>
 		}
 
 		return <CanvasContext.Provider value={this.getMyContext()}>		
@@ -645,69 +502,53 @@ class Canvas extends React.Component {
 Canvas.propTypes = canvasProps;
 Canvas.defaultProps = canvasDefaultProps;
 
-const Container = ({ children }) => {
-	if (Array.isArray(children)) {
-		return [...children];
-	} else {
-		return children;
-	}
-}
-
 const Text = ({ children, x, y, color, font }) => {
-	return <CanvasContext.Consumer>
-		{({ context }) => {
-			if (!context) {
-				return null;
-			}
-			if (!color) {
-				color = "#000";
-			}
-			if (!font) {
-				font = "12px Arial";
-			}
-			context.save();
-			context.font = font;
-			context.fillStyle = color;
-			if (!Array.isArray(children)) {
-				children = [children];
-			}
-			context.fillText(children.join(''), x, y);
-			context.restore();
-		}}
-	</CanvasContext.Consumer>;
+	const withContext = useWithContext();
+
+	return withContext((context) => {
+		if (!color) {
+			color = "#000";
+		}
+		if (!font) {
+			font = "12px Arial";
+		}
+		context.save();
+		context.font = font;
+		context.fillStyle = color;
+		if (!Array.isArray(children)) {
+			children = [children];
+		}
+		context.fillText(children.join(''), x, y);
+		context.restore();
+	});
 }
 
 const Line = ({ x, y, x2, y2, color }) => {
-	return <CanvasContext.Consumer>
-		{({ context }) => {
-			if (!context) {
-				return null;
-			}
-			context.save();
-			context.strokeStyle = color;
-			context.beginPath();
-			context.moveTo(x, y);
-			context.lineTo(x2, y2);
-			context.closePath();
-			context.stroke();
-			context.restore();
-		}}
-	</CanvasContext.Consumer>;
+	const withContext = useWithContext();
+
+	return withContext((context) => {
+		console.log('line done');
+		context.save();
+		context.strokeStyle = color;
+		context.beginPath();
+		context.moveTo(x, y);
+		context.lineTo(x2, y2);
+		context.closePath();
+		context.stroke();
+		context.restore();
+	});
 }
 
 const Shape = ({ x, y, points, color, fill, close }) => {
-	if (close === undefined) {
-		close = true;
-	}
-	return <CanvasContext.Consumer>
-		{({ context }) => {
-			if (!context) {
-				return null;
-			}
+	const withContext = useWithContext();
 
-			drawShape(x, y, context, points, color, fill, close);
-		}}
-	</CanvasContext.Consumer>;
+	return withContext((context) => {
+		if (close === undefined) {
+			close = true;
+		}
+
+		drawShape(x, y, context, points, color, fill, close);
+	});
 }
 
 const Rect = ({ x, y, x2, y2, color, fill}) => {
@@ -755,73 +596,68 @@ const imageDefaultProps = {
 const Image = ({
 	src, x, y, width, height, clip, rot, onLoad, flipY, flipX,
 }) => {
-	return <CanvasContext.Consumer>
-		{({ context, forceRerender, getImage }) => {
-			if (!context) {
-				return null;
+	const { forceRerender, getImage } = useContext(CanvasContext);
+	const withContext = useWithContext();
+
+	return withContext((context) => {
+		const isElement = src instanceof Element || src instanceof HTMLDocument;
+
+		let img;
+
+		if (isElement) {
+			if (src.nodeName !== "CANVAS" && src.nodeName !== "IMG") {
+				throw new Error("A DOM element was passed as a src to Image, but the element was not a canvas or an img.");
 			}
+			img = src;
+		} else if (src instanceof Object) {
+			throw new Error("An object was passed as a src to Image, but it was not a DOM element");
+		} else {
+			const loadFn = onLoad || forceRerender;
 
-			const isElement = src instanceof Element || src instanceof HTMLDocument;
-
-			let img;
-
-			if (isElement) {
-				if (src.nodeName !== "CANVAS" && src.nodeName !== "IMG") {
-					throw new Error("A DOM element was passed as a src to Image, but the element was not a canvas or an img.");
-				}
-				img = src;
-			} else if (src instanceof Object) {
-				throw new Error("An object was passed as a src to Image, but it was not a DOM element");
-			} else {
-				const loadFn = onLoad || forceRerender;
-
-				img = getImage(src, loadFn);
-			}
-			
-			if (!img) {
-				return null;
-			}
-
-			context.save();
-			
-			if (clip) {
-				const { x: sx, y: sy, width: sw, height: sh } = clip;
-				const iw = img.width;
-				const ih = img.height;
-				
-				// basically convert the clip coords from draw space to image space
-				const rw = iw / width;
-				const rh = ih / height;
-				const finalX = sx * rw;
-				const finalY = sy * rh;
-				context.translate(x+width/2, y+height/2);
-				if (rot) {
-					const rotRad = rot * Math.PI/180;
-					context.rotate(rotRad);
-				}
-				if (flipX || flipY) {
-					context.scale(flipX ? -1 : 1, flipY ? -1 : 1);
-				}
-				context.translate(-x-width/2, -y-height/2);
-				context.drawImage(img, finalX, finalY, sw * rw, sh * rh, x, y, width, height);
-			} else {
-				context.translate(x+width/2, y+height/2);
-				if (rot) {
-					const rotRad = rot * Math.PI/180;
-					context.rotate(rotRad);
-				}
-				if (flipX || flipY) {
-					context.scale(flipX ? -1 : 1, flipY ? -1 : 1);
-				}
-				context.translate(-x-width/2, -y-height/2);
-				context.drawImage(img, x, y, width, height);
-			}
-
-			context.restore();
-			
+			img = getImage(src, loadFn);
+		}
+		
+		if (!img) {
 			return null;
-		}}
-	</CanvasContext.Consumer>
+		}
+
+		context.save();
+		
+		if (clip) {
+			const { x: sx, y: sy, width: sw, height: sh } = clip;
+			const iw = img.width;
+			const ih = img.height;
+			
+			// basically convert the clip coords from draw space to image space
+			const rw = iw / width;
+			const rh = ih / height;
+			const finalX = sx * rw;
+			const finalY = sy * rh;
+			context.translate(x+width/2, y+height/2);
+			if (rot) {
+				const rotRad = rot * Math.PI/180;
+				context.rotate(rotRad);
+			}
+			if (flipX || flipY) {
+				context.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+			}
+			context.translate(-x-width/2, -y-height/2);
+			context.drawImage(img, finalX, finalY, sw * rw, sh * rh, x, y, width, height);
+		} else {
+			context.translate(x+width/2, y+height/2);
+			if (rot) {
+				const rotRad = rot * Math.PI/180;
+				context.rotate(rotRad);
+			}
+			if (flipX || flipY) {
+				context.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+			}
+			context.translate(-x-width/2, -y-height/2);
+			context.drawImage(img, x, y, width, height);
+		}
+
+		context.restore();
+	});
 };
 
 Image.propTypes = imagePropTypes;
@@ -846,92 +682,83 @@ const imagesPropTypes = {
 }
 
 const Images = ({ images, onLoad }) => {
-	return <CanvasContext.Consumer>
-		{({ context, forceRerender, getImage }) => {
-			if (!context) {
-				return null;
+	const { forceRerender, getImage } = useContext(CanvasContext);
+	const withContext = useWithContext();
+	
+	return withContext((context) => {
+		for (const image of images) {
+			const { src, x, y, width, height, clip, rot } = image;
+
+			const loadFn = onLoad || forceRerender;
+			
+			const img = getImage(src, loadFn);
+
+			context.save();
+			
+			if (!img) {
+				continue;
 			}
 			
-			for (const image of images) {
-				const { src, x, y, width, height, clip, rot } = image;
-
-				const loadFn = onLoad || forceRerender;
+			if (clip) {
+				const { x: sx, y: sy, width: sw, height: sh } = clip;
+				const iw = img.width;
+				const ih = img.height;
 				
-				const img = getImage(src, loadFn);
-
-				context.save();
-				
-				if (!img) {
-					continue;
+				// basically convert the clip coords from draw space to image space
+				const rw = iw / width;
+				const rh = ih / height;
+				const finalX = sx * rw;
+				const finalY = sy * rh;
+				context.translate(x+width/2, y+height/2);
+				if (rot) {
+					const rotRad = rot * Math.PI/180;
+					context.rotate(rotRad);
 				}
-				
-				if (clip) {
-					const { x: sx, y: sy, width: sw, height: sh } = clip;
-					const iw = img.width;
-					const ih = img.height;
-					
-					// basically convert the clip coords from draw space to image space
-					const rw = iw / width;
-					const rh = ih / height;
-					const finalX = sx * rw;
-					const finalY = sy * rh;
-					context.translate(x+width/2, y+height/2);
-					if (rot) {
-						const rotRad = rot * Math.PI/180;
-						context.rotate(rotRad);
-					}
-					context.translate(-x-width/2, -y-height/2);
-					context.drawImage(img, finalX, finalY, sw * rw, sh * rh, x, y, width, height);
-				} else {
-					context.translate(x+width/2, y+height/2);
-					if (rot) {
-						const rotRad = rot * Math.PI/180;
-						context.rotate(rotRad);
-					}
-					context.translate(-x-width/2, -y-height/2);
-					context.drawImage(img, x, y, width, height);
+				context.translate(-x-width/2, -y-height/2);
+				context.drawImage(img, finalX, finalY, sw * rw, sh * rh, x, y, width, height);
+			} else {
+				context.translate(x+width/2, y+height/2);
+				if (rot) {
+					const rotRad = rot * Math.PI/180;
+					context.rotate(rotRad);
 				}
-
-				context.restore();
-				
+				context.translate(-x-width/2, -y-height/2);
+				context.drawImage(img, x, y, width, height);
 			}
 
-			return null;
-		}}
-	</CanvasContext.Consumer>
+			context.restore();
+			
+		}
+	});
 };
 
 Images.propTypes = imagesPropTypes;
 
 const Arc = ({ x, y, radius, startAngle, endAngle, color, fill, sector, closed }) => {
-	return <CanvasContext.Consumer>
-		{({ context }) => {
-			if (!context) {
-				return null;
-			}
+	const withContext = useWithContext();
 
-			context.save();
-			context.strokeStyle = color;
-			context.fillStyle = color;
-			context.beginPath();
-			if (sector) {
-				context.moveTo(x, y);
-			}
-			context.arc(x, y, radius, startAngle, endAngle);
-			if (sector) {
-				context.moveTo(x, y);
-			}
-			if (closed) {
-				context.closePath();
-			}
-			if (!fill) {
-				context.stroke();
-			} else {
-				context.fill();
-			}
-			context.restore();
-		}}
-	</CanvasContext.Consumer>;
+	return withContext((context) => {
+		context.save();
+		context.strokeStyle = color;
+		context.fillStyle = color;
+		context.beginPath();
+		if (sector) {
+			context.moveTo(x, y);
+		}
+		context.arc(x, y, radius, startAngle, endAngle);
+		if (sector) {
+			context.moveTo(x, y);
+		}
+		if (closed) {
+			context.closePath();
+		}
+		if (!fill) {
+			context.stroke();
+		} else {
+			context.fill();
+		}
+		context.restore();
+	});
 }
 
 const Circle = ({ x, y, radius, color, fill }) => {
@@ -947,79 +774,65 @@ const Circle = ({ x, y, radius, color, fill }) => {
 }
 
 const Raw = ({ drawFn }) => {
-	return <CanvasContext.Consumer>
-		{({ context }) => {
-			if (!context) {
-				return null;
-			}
-
-			context.save();
-			drawFn(context);
-			context.restore();
-		}}
-	</CanvasContext.Consumer>;
+	const withContext = useWithContext();
+	return withContext((context) => {
+		context.save();
+		drawFn(context);
+		context.restore();
+	});
 }
 
 const Pattern = ({ x, y, width, height, src }) => {
-	return <CanvasContext.Consumer>
-		{({ context, forceRerender }) => {
-			if (!context) {
-				return null;
-			}
-			
-			const pattern = loadPattern(src, context, forceRerender);
-			
-			if (!pattern) {
-				return null;
-			}
-			
-			context.save();
-			context.fillStyle = pattern;
-			context.fillRect(x, y, width, height);
-			context.restore();
-		}}
-	</CanvasContext.Consumer>;
+	const { forceRerender } = useContext(CanvasContext);
+	const withContext = useWithContext();
+
+	return withContext((context) => {
+		const pattern = loadPattern(src, context, forceRerender);
+		
+		if (!pattern) {
+			return null;
+		}
+		
+		context.save();
+		context.fillStyle = pattern;
+		context.fillRect(x, y, width, height);
+		context.restore();
+	});
 }
 
-const Clip = ({ x, y, width, height, children }) =>{
-	return <CanvasContext.Consumer>
-		{(canvasContext) => {
-			const { context } = canvasContext;
-			if (!context) {
-				return null;
-			}
-			
-			context.save();
-			context.beginPath();
-			context.rect(x, y, width, height);
-			context.clip();
+function useWithContext() {
+	const { context } = useContext(CanvasContext);
+	const clipContext = useContext(CanvasClipContext);
 
-			const childList = [];
-			if (!Array.isArray(children)) {
-				childList.push(children);
-			} else {
-				children.forEach((child) => {
-					if (Array.isArray(child)) {
-						child.forEach((subChild) => {
-							childList.push(subChild);
-						})
-					} else {
-						childList.push(child);
-					}
-				})
-			}
-
-			for (const child of childList) {
-				if (!child) {
-					continue;
-				}
-				doRender(child, canvasContext);
-			}
-
-			context.restore();
+	return (cb) => {
+		if (!context) {
 			return null;
-		}}
-	</CanvasContext.Consumer>;
+		}
+		context.save();
+		if (clipContext?.data) {
+			const { data } = clipContext;
+			context.beginPath();
+			context.rect(data.x, data.y, data.width, data.height);
+			context.clip();
+		}
+		cb(context);
+
+		context.restore();
+
+		return null;
+	}
+}
+
+const Clip = ({ x, y, width, height, children }) => {
+	const { context } = useContext(CanvasContext);
+
+	if (!context) {
+		return null;
+	}
+
+	return <CanvasClipContext.Provider value={{ data: { x, y, width, height }}}>
+		{children}
+	</CanvasClipContext.Provider>
 }
 
 class CanvasComponent extends React.Component {
@@ -1095,42 +908,39 @@ class CanvasComponent extends React.Component {
 	onKeyDown() {}
 	onKeyUp() {}
 	onWheel() {}
-	
-	render() {
-		if (this.context.triggerRender) {
-			setTimeout(() => {
-				this.context.triggerRender(this);
-			},0);
-		}
-	}
 }
 
 CanvasComponent.contextType = CanvasContext;
 
 function renderToCanvas(elements, width=300, height=300, context = {}) {
+	const holderDiv = document.createElement("holderDiv");
 	const canvas = document.createElement("canvas");
 	canvas.width = width;
 	canvas.height = height;
 	const canvasContext = canvas.getContext("2d");
 
-	let resolvedElements = elements;
-	if (!Array.isArray(resolvedElements)) {
-		resolvedElements = [resolvedElements];
-	}
+	const value = {
+		getImage: loadImage,
+		loadPattern: loadPattern,
+		registerListener: () => {},
+		unregisterListener: () => {},
+		forceRerender: () => {},
+		triggerRender: () => {},
+		// if we got a context from the outside, use that instead of defaults
+		...context,
+		context: canvasContext,
+	};
 
-	for (const element of resolvedElements) {
-		doRender(element, {
-			getImage: loadImage,
-			loadPattern: loadPattern,
-			registerListener: () => {},
-			unregisterListener: () => {},
-			forceRerender: () => {},
-			triggerRender: () => {},
-			// if we got a context from the outside, use that instead of defaults
-			...context,
-			context: canvasContext,
-		});
-	}
+	const root = ReactDOMClient.createRoot(holderDiv);
+
+	ReactDOM.flushSync(() => {
+		root.render(ReactDOM.createPortal(
+			<CanvasContext.Provider value={value}>
+				{elements}
+			</CanvasContext.Provider>,
+			canvas,
+		));
+	});
 
 	return canvas;
 }
@@ -1275,20 +1085,24 @@ function CompoundElement({ children, yOff, xOff, width, height }) {
 	if (!isEqual(prevPropsRef.current, checkProps)) {
 		//console.log('render difference detected');
 		prevPropsRef.current = checkProps;
+		imageRef.current = null;
 
 		// re-render our image
 		const elements = getElementsForCompoundElement(children);
 
-		const image = renderToCanvas(elements, width, height, {
-			...canvasContext,
-			forceRerender: () => {
-				// we want to know if this happens because it's probably due to an image loading
-				// in this case clear the previous props so the next time we render, we rebuild the image
-				prevPropsRef.current = {};
-				canvasContext.forceRerender();
-			},
-		});
-		imageRef.current = image;
+		setTimeout(() => {
+			const image = renderToCanvas(elements, width, height, {
+				...canvasContext,
+				forceRerender: () => {
+					// we want to know if this happens because it's probably due to an image loading
+					// in this case clear the previous props so the next time we render, we rebuild the image
+					prevPropsRef.current = {};
+					canvasContext.forceRerender();
+				},
+			});
+			imageRef.current = image;
+			canvasContext.forceRerender();
+		}, 1);
 	}
 
 	if (!imageRef.current) {
@@ -1304,7 +1118,6 @@ CompoundElement.defaultProps = compoundDefaultProps;
 
 export {
 	Canvas,
-	Container,
 	Text,
 	Shape,
 	Image,
@@ -1323,4 +1136,5 @@ export {
     blendImage,
     BLEND_TYPE,
 	CompoundElement,
+	useWithContext,
 };

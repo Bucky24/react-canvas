@@ -1,4 +1,4 @@
-import { CanvasComponent, Container, Text, Shape } from 'react-canvas';
+import { CanvasComponent, Text, Shape } from 'react-canvas';
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -31,23 +31,23 @@ class MyText extends CanvasComponent {
 		}
 	}
 	render() {
-		return (<Container>
-		<Shape
-			x={this.props.x}
-			y={this.props.y-10}
-			points={[
-				{ x: 0, y: 0 },
-				{ x: 400, y: 0 },
-				{ x: 400, y: 20 },
-				{ x: 0, y: 20 }
-			]}
-			color="#fff"
-			fill={true}
-		/>
+		return (<>
+			<Shape
+				x={this.props.x}
+				y={this.props.y-10}
+				points={[
+					{ x: 0, y: 0 },
+					{ x: 400, y: 0 },
+					{ x: 400, y: 20 },
+					{ x: 0, y: 20 }
+				]}
+				color="#fff"
+				fill={true}
+			/>
 			<Text x={this.props.x} y={this.props.y}>
 				{ this.state.text }
 			</Text>
-		</Container>);
+		</>);
 	}
 };
 

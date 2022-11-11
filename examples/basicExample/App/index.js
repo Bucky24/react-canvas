@@ -6,7 +6,6 @@ import {
 	Image,
 	Line,
 	Rect,
-	Container,
 	Circle,
 	Arc,
 	Raw,
@@ -27,7 +26,7 @@ const App = ({}) => {
 				console.log('wheel', x, y);
 			}}
 		>
-			<Container>
+			<>
 				<Shape
 					x={40}
 					y={0}
@@ -57,7 +56,7 @@ const App = ({}) => {
 				>
 					Some text here
 				</Text>
-			</Container>
+			</>
 			<Text
 				x={5}
 				y={80}
@@ -112,7 +111,6 @@ const App = ({}) => {
 				y={70}
 				radius={20}
 				color="#0f0"
-				fill={false}
 				startAngle={120*Math.PI/180}
 				endAngle={240*Math.PI/180}
 				fill={true}
@@ -123,7 +121,6 @@ const App = ({}) => {
 				y={70}
 				radius={20}
 				color="#0f0"
-				fill={false}
 				startAngle={0}
 				endAngle={120*Math.PI/180}
 				fill={true}
