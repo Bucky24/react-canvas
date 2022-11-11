@@ -220,48 +220,6 @@ function isClass(func) {
 	return funcStr.includes("_classCallCheck");
 }
 
-const doRender = (element,  context) => {
-	if (!element) {
-		return;
-	}
-    
-	let children = [];
-	if (Array.isArray(element)) {
-		children = element;
-	} else if (element.type.length === 1) {
-		children = element.type(element.props);
-	} else if (element.type._context || (element.type && typeof element.type.$$typeof === 'symbol' && element.type.$$typeof.toString() === 'Symbol(react.context)')) {
-		// in this case the only child is the function to call with context
-		children = element.props.children(context);
-	} else if (isClass(element.type)) {
-		// we've got a class component
-		// this is kinda awful for a variety of reasons
-		// and I imagine will cause a lot of bugs.
-		const inst = new element.type(element.props);
-		children = inst.render();
-	} else if (element.type instanceof Function) {
-		children = element.type(element.props);
-	} else if (typeof element.type === "symbol") {
-		// this is the react <> thing
-		children = element.props.children;
-	} else {
-		console.log(element.type.valueOf(), element.type.valueOf() == "react.fragment")
-		console.error("No idea how to handle", element);
-		return;	
-	}
-
-	if (!Array.isArray(children)) {
-		children = [children];
-	}
-	
-	children.forEach((child) => {
-		if (!child) {
-			return;
-		}
-		doRender(child, context);
-	});
-}
-
 const canvasProps = {
 	width: PropTypes.number.isRequired,
 	height: PropTypes.number.isRequired,
@@ -297,7 +255,6 @@ class Canvas extends React.Component {
 		this.registerListener = this.registerListener.bind(this);
 		this.unregisterListener = this.unregisterListener.bind(this);
 		this.forceRerender = this.forceRerender.bind(this);
-		this.triggerRender = this.triggerRender.bind(this);
 		
 		// map of event to array of function callbacks
 		this.listeners = {};
@@ -351,14 +308,6 @@ class Canvas extends React.Component {
 		this.processChanges(newProps);
 	}
 	processChanges(props) {
-		if (props.doubleBuffer && !this.secondCanvas) {
-			this.secondCanvas = document.createElement("canvas");
-		} else if (!props.doubleBuffer) {
-			// should auto-delete the canvas element because of
-			// garbage collector
-			this.secondCanvas = null;
-		}
-
 		const useWidth = props.drawWidth || props.width;
 		const useHeight = props.drawHeight || props.height;
 
@@ -373,17 +322,6 @@ class Canvas extends React.Component {
 		}
 		if (props.drawHeight !== props.height) {
 			this.canvas.style.height = `${props.height}px`;
-		}
-		if (this.secondCanvas) {
-			this.secondCanvas.width = useWidth;
-			this.secondCanvas.height = useHeight;
-
-			if (props.drawWidth !== props.width) {
-				this.secondCanvas.style.width = `${props.width}px`;
-			}
-			if (props.drawHeight !== props.height) {
-				this.secondCanvas.style.height = `${props.height}px`;
-			}
 		}
 	}
 	componentWillUnmount() {
@@ -528,90 +466,13 @@ class Canvas extends React.Component {
 			}
 		}
 	}
-	triggerRender(component) {
-		if (!component || !component.props || component.props.zIndex === undefined) {
-			return;
-		}
-		const zIndex = component.props.zIndex;
-		
-		for (let i=zIndex+1;i<this.indexList.length;i++) {
-			const list = this.indexList[i];
-			if (!list) {
-				// this can happen if we have a gap in the zindex
-				continue;
-			}
-			this.handleRender(list);
-		}
-	}
-	handleRender(elements, reRender=true) {
-		const context = this.getMyContext();
-		const primaryContext = context.context;
-		if (this.props.doubleBuffer) {
-			context.context = this.secondCanvas.getContext("2d");
-		}
-
-		if (reRender) {
-			elements.forEach((element) => {
-				doRender(element, context);
-			});
-		}
-
-		if (this.props.doubleBuffer) {
-			primaryContext.save();
-			primaryContext.fillStyle = "#fff";
-			primaryContext.beginPath();
-			primaryContext.rect(0, 0, this.canvas.width, this.canvas.height);
-			primaryContext.fill();
-			primaryContext.restore();
-			primaryContext.drawImage(
-				this.secondCanvas,
-				0,
-				0,
-			);
-		}
-	}
 	render() {
 		this.indexList = [];
 		
 		let newChildren = this.props.children;
 
-		if (this.props.enableExperimental) {
-			const handleChild = (child) => {
-	       	 	if (!child || typeof child !== "object" || Array.isArray(child)) {
-					return child;
-				}
-				const props = child.props || {};
-				const workingIndex = props.zIndex === undefined ? 1 : props.zIndex;
-				const newProps = {
-					...props,
-					zIndex: workingIndex,
-				};
-				if (!this.indexList[workingIndex]) {
-					this.indexList[workingIndex] = [];
-				}
-				this.indexList[workingIndex].push(child);
-				return React.cloneElement(child, newProps);
-			}
-		
-			newChildren = this.props.children.map((child) => {
-				if (Array.isArray(child)) {
-					return child.map((innerChild) => {
-						return handleChild(innerChild);
-					});
-				}
-			
-				return handleChild(child);
-			});
-		}
-
 		if (!Array.isArray(newChildren)) {
 			newChildren = [newChildren];
-		}
-
-		const finishRender = () => {
-			if (this.props.customRender) {
-				this.handleRender(newChildren);
-			}
 		}
 
 		const refFunc = (c) => {
@@ -623,19 +484,9 @@ class Canvas extends React.Component {
 						context: newContext
 					}, () => {
 						this.reattachListeners();
-						finishRender();
 					});
-				} else {
-					finishRender();
 				}
 			}
-		}
-
-		this.lastChildren = newChildren;
-		if (this.props.customRender) {
-			return <canvas
-				ref={refFunc}
-			/>
 		}
 
 		return <CanvasContext.Provider value={this.getMyContext()}>		
@@ -651,19 +502,10 @@ class Canvas extends React.Component {
 Canvas.propTypes = canvasProps;
 Canvas.defaultProps = canvasDefaultProps;
 
-const Container = ({ children }) => {
-	if (Array.isArray(children)) {
-		return [...children];
-	} else {
-		return children;
-	}
-}
-
 const Text = ({ children, x, y, color, font }) => {
 	const withContext = useWithContext();
 
 	return withContext((context) => {
-		console.log("here we are with text", children);
 		if (!color) {
 			color = "#000";
 		}
@@ -685,6 +527,7 @@ const Line = ({ x, y, x2, y2, color }) => {
 	const withContext = useWithContext();
 
 	return withContext((context) => {
+		console.log('line done');
 		context.save();
 		context.strokeStyle = color;
 		context.beginPath();
@@ -968,7 +811,7 @@ function useWithContext() {
 		context.save();
 		if (clipContext?.data) {
 			const { data } = clipContext;
-			console.log(clipContext);
+			context.beginPath();
 			context.rect(data.x, data.y, data.width, data.height);
 			context.clip();
 		}
@@ -1065,14 +908,6 @@ class CanvasComponent extends React.Component {
 	onKeyDown() {}
 	onKeyUp() {}
 	onWheel() {}
-	
-	render() {
-		if (this.context.triggerRender) {
-			setTimeout(() => {
-				this.context.triggerRender(this);
-			},0);
-		}
-	}
 }
 
 CanvasComponent.contextType = CanvasContext;
@@ -1098,12 +933,14 @@ function renderToCanvas(elements, width=300, height=300, context = {}) {
 
 	const root = ReactDOMClient.createRoot(holderDiv);
 
-	root.render(ReactDOM.createPortal(
-		<CanvasContext.Provider value={value}>
-			{elements}
-		</CanvasContext.Provider>,
-		canvas,
-	));
+	ReactDOM.flushSync(() => {
+		root.render(ReactDOM.createPortal(
+			<CanvasContext.Provider value={value}>
+				{elements}
+			</CanvasContext.Provider>,
+			canvas,
+		));
+	});
 
 	return canvas;
 }
@@ -1281,7 +1118,6 @@ CompoundElement.defaultProps = compoundDefaultProps;
 
 export {
 	Canvas,
-	Container,
 	Text,
 	Shape,
 	Image,
