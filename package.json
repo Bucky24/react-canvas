@@ -1,6 +1,6 @@
 {
 	"name": "@bucky24/react-canvas",
-	"version": "2.0.0",
+	"version": "2.1.0",
 	"description": "A library of components that can be used to manipulate a canvas using JSX embedded in react.",
 	"main": "build/index.js",
 	"scripts": {
@@ -16,6 +16,7 @@
 		"renderExample": "webpack-dev-server --config ./examples/renderExample/webpack.config.js",
 		"blendExample": "webpack-dev-server --config ./examples/blendExample/webpack.config.js",
 		"compoundExample": "webpack-dev-server --config ./examples/compoundExample/webpack.config.js",
+		"animationExample": "webpack-dev-server --config ./examples/animationExample/webpack.config.js",
 		"prepublishOnly": "npm run build"
 	},
 	"files": [

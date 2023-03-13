@@ -511,7 +511,7 @@ Takes multiple children, must be ReactCanvas elements.
 	width={300}
 	height={300}
 >
-	<CompoundElement}
+	<CompoundElement
 		width={400}
 		height={400}
 	>
@@ -521,6 +521,139 @@ Takes multiple children, must be ReactCanvas elements.
 	</CompoundElement>
 </Canvas>
 ```
+
+### ImageStrip
+
+The `ImageStrip` component is meant to be able to display certain portions of a sprite-sheet, one frame at a time.
+
+##### Parameters
+
+| Parameter    | Description |
+| ----------- | ----------- |
+| src | The image to use as the spritesheet |
+| x | The x coord of where to draw on the canvas |
+| y | The y coord of where to draw on the canvas |
+| width | How wide the resulting image should be on the canvas |
+| height | How tall the resulting image shoudl be on the canvas |
+| cellX | The x coord of the sprite on the spritesheet to draw |
+| cellY | The y coord of the sprite on the spritesheet to draw |
+| cellWidth | How wide each sprite in the sheet is |
+| cellHeight | How tall each sprite in the sheet is |
+
+##### Example
+
+This example renders the second sprite of the sheet, assuming a sheet with 75x75 px sprites. It renders the image at 100x100 at 50x50 resolution.
+
+```
+<Canvas
+	width={300}
+	height={300}
+>
+	<ImageStrip
+		src={sampleImage}
+		x={100}
+		y={100}
+		width={50}
+		height={50}
+		cellX={1}
+		cellY={0}
+		cellWidth={75}
+		cellHeight={75}
+	/>
+</Canvas>
+```
+
+### Animate
+
+The `Animate` is meant to be able to automatically display the correct frame of a spritesheet, based on a global frame ticker.
+
+The Animate component must be wrapped in an `AnimationProvider` to function.
+
+##### Parameters
+
+The following parameters are required but are the same as `ImageStripe` above:
+src, x, y, width, height, cellWidth, cellHeight
+
+| Parameter    | Description |
+| ----------- | ----------- |
+| startX | The starting cellX on the sprite sheet |
+| startY | The starting cellY on the sprit sheet |
+| frameCount | The total number of frames in the animation |
+| rowWidth | The number of spritesheet frames per row |
+
+##### Example
+
+This example renders the animation
+
+```
+<Canvas
+	width={300}
+	height={300}
+>
+	<Animate
+		src={sampleImage}
+		x={100}
+		y={100}
+		width={50}
+		height={50}
+		startX={1}
+		startY={0}
+		cellWidth={75}
+		cellHeight={75}
+		frameCount={20}
+		rowWidth={5}
+	/>
+</Canvas>
+```
+
+### AnimationContext/AnimationProvider
+
+The `AnimationContext` provides a way for the animation system to sychronize the animations as well as for your application to advance them.
+
+The following values are exported by the context
+
+| Value    | Description |
+| ----------- | ----------- |
+| frame | The current animation frame. This continuously increases. |
+| tick | This is a function. Call this function when you want the animation frames to move forward |
+
+##### Example
+
+```
+import React, { useContext, useEffect } from 'react';
+import { AnimationContext } from '@bucky24/react-canvas';
+
+import SampleImage from '../assets/sampleSpriteSheet.png';
+
+export default function App() {
+	const { tick } = useContext(AnimationContext);
+
+	useEffect(() => {
+		const interval = setInterval(tick, 100);
+
+		return () => {
+			clearInterval(interval);
+		}
+	});
+
+	return <Canvas width={300} height={300}>
+		<Animate
+			src={SampleImage}
+			x={100}
+			y={100}
+			width={50}
+			height={50}
+			startX={1}
+			startY={0}
+			cellWidth={75}
+			cellHeight={75}
+			frameCount={20}
+			rowWidth={5}
+		/>
+	</Canvas>;
+}
+```
+
 ## Events
 
 ### Event List
