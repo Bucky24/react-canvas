@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom';
 import ReactDOMClient from 'react-dom/client';
 
 import { AnimationProvider } from './contexts/AnimationContext';
+import { RenderProvider } from './contexts/RenderContext';
 
 export const EventTypes = {
 	MOVE: 'mousemove',
@@ -916,7 +917,7 @@ class CanvasComponent extends React.Component {
 
 CanvasComponent.contextType = CanvasContext;
 
-function renderToCanvas(elements, width=300, height=300, context = {}) {
+function renderToCanvas(elements, width=300, height=300, context = {}, extraContextData = null) {
 	const holderDiv = document.createElement("holderDiv");
 	const canvas = document.createElement("canvas");
 	canvas.width = width;
@@ -940,7 +941,9 @@ function renderToCanvas(elements, width=300, height=300, context = {}) {
 	ReactDOM.flushSync(() => {
 		root.render(ReactDOM.createPortal(
 			<CanvasContext.Provider value={value}>
-				{elements}
+				<RenderProvider data={extraContextData}>
+					{elements}
+				</RenderProvider>
 			</CanvasContext.Provider>,
 			canvas,
 		));
@@ -1072,7 +1075,7 @@ function getElementsForCompoundElement(children) {
 	return allResults;
 }
 
-function CompoundElement({ children, yOff, xOff, width, height }) {
+function CompoundElement({ children, yOff, xOff, width, height, extraData }) {
 	const canvasContext = useContext(CanvasContext);
 	const prevPropsRef = useRef({});
 	const imageRef = useRef(null);
@@ -1103,7 +1106,7 @@ function CompoundElement({ children, yOff, xOff, width, height }) {
 					prevPropsRef.current = {};
 					canvasContext.forceRerender();
 				},
-			});
+			}, extraData);
 			imageRef.current = image;
 			canvasContext.forceRerender();
 		}, 1);

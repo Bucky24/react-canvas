@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Canvas, CompoundElement, Image, Rect } from 'react-canvas';
 
 import sampleImage from './sampleImage.png';
+import Component from './Component';
 
 function useRender() {
 	const [count, setCount] = useState(0);
@@ -46,10 +47,12 @@ const App = ({}) => {
 				yOff={yOffRef.current}
 				width={400}
 				height={400}
+				extraData={'foo'}
 			>
 				{images.map((image, index) => {
 					return <Image key={index} src={sampleImage} x={image.x} y={image.y} width={50} height={50} />
 				})}
+				<Component x={50} y={50} />
 			</CompoundElement>
 		</Canvas>
 		<br/>

@@ -503,6 +503,7 @@ Takes multiple children, must be ReactCanvas elements.
 | yOff | Y position to offset the image draw at. Optional (defaults 0) |
 | width | Width of the rendering area |
 | height | Height of the rendering area |
+| extraData | Any extra data that gets passed into renderToCanvas. Use this when you need to pass context data to children |
 
 ##### Example
 
@@ -889,6 +890,12 @@ export default App;
 React Canvas exports a method, `renderToCanvas`, that does basically the same thing as `renderToImage` (and takes the same parameters), but instead of a base-64 data string, returns a canvas dom element that has had the given elements rendered to it. This is useful if you have images that are loaded from outside of your domain, as the browser will not allow these to be rendered to an image, but it will allow them to be rendered to a canvas.
 
 This canvas can be passed into the `src` attribute of an Image element to render it.
+
+This method does take the following additional properties:
+
+| -- | -- | -- |
+| Property | Type | Description |
+| extraData | mixed | Used in case of a need to pass any sort of context data to rendered components. renderToCanvas breaks context chains. Any data passed in this method will be available in the RenderContext |
 
 ## blendImage
 
