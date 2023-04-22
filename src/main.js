@@ -532,7 +532,6 @@ const Line = ({ x, y, x2, y2, color }) => {
 	const withContext = useWithContext();
 
 	return withContext((context) => {
-		console.log('line done');
 		context.save();
 		context.strokeStyle = color;
 		context.beginPath();
@@ -820,11 +819,11 @@ function useWithContext() {
 			context.rect(data.x, data.y, data.width, data.height);
 			context.clip();
 		}
-		cb(context);
+		const result = cb(context);
 
 		context.restore();
 
-		return null;
+		return result;
 	}
 }
 
@@ -1079,51 +1078,53 @@ function CompoundElement({ children, yOff, xOff, width, height, extraData }) {
 	const canvasContext = useContext(CanvasContext);
 	const prevPropsRef = useRef({});
 	const imageRef = useRef(null);
-	const { context } = canvasContext;
 
-	if (!context) {
-		return null;
-	}
+	const withContext = useWithContext();
 
-	const checkProps = {
-		children,
-		extraData: {
-			...extraData,
-			forceRenderCount: null,
-			xOff: null,
-			yOff: null,
-		  },
-	};
+	return withContext((context) => {
+		if (!context) {
+			return null;
+		}
 
-	if (!isEqual(prevPropsRef.current, checkProps)) {
-		//console.log('render difference detected');
-		prevPropsRef.current = checkProps;
-		imageRef.current = null;
-
-		// re-render our image
-		const elements = getElementsForCompoundElement(children);
-
-		setTimeout(() => {
-			const image = renderToCanvas(elements, width, height, {
-				...canvasContext,
-				forceRerender: () => {
-					// we want to know if this happens because it's probably due to an image loading
-					// in this case clear the previous props so the next time we render, we rebuild the image
-					prevPropsRef.current = {};
-					canvasContext.forceRerender();
-				},
-			}, extraData);
-			imageRef.current = image;
-			canvasContext.forceRerender();
-		}, 1);
-	}
-
-	if (!imageRef.current) {
-		return null;
-	}
-	return (
-		<Image src={imageRef.current} width={width} height={height} x={xOff} y={yOff} />
-	);
+		const checkProps = {
+			children,
+			extraData: {
+				...extraData,
+				forceRenderCount: null,
+				xOff: null,
+				yOff: null,
+			  },
+		};
+	
+		if (!isEqual(prevPropsRef.current, checkProps)) {
+			prevPropsRef.current = checkProps;
+			imageRef.current = null;
+	
+			// re-render our image
+			const elements = getElementsForCompoundElement(children);
+	
+			setTimeout(() => {
+				const image = renderToCanvas(elements, width, height, {
+					...canvasContext,
+					forceRerender: () => {
+						// we want to know if this happens because it's probably due to an image loading
+						// in this case clear the previous props so the next time we render, we rebuild the image
+						prevPropsRef.current = {};
+						canvasContext.forceRerender();
+					},
+				}, extraData);
+				imageRef.current = image;
+				canvasContext.forceRerender();
+			}, 1);
+		}
+	
+		if (!imageRef.current) {
+			return null;
+		}
+		return (
+			<Image src={imageRef.current} width={width} height={height} x={xOff} y={yOff} />
+		);
+	});
 }
 
 CompoundElement.propTypes = compoundPropTypes;

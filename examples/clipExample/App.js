@@ -6,6 +6,7 @@ import {
     Clip,
     Rect,
     Image,
+    CompoundElement,
 } from 'react-canvas';
 import Elem from './Elem';
 
@@ -69,6 +70,9 @@ const App = ({}) => {
                     height={30}
                 />
 				<Elem x={75} y={160} />
+                <CompoundElement xOff={90} yOff={75} width={100} height={100}>
+                    <Rect x={20} y={20} x2={40} y2={40} color="#00f" fill={true} />
+                </CompoundElement>
             </Clip>
             <Line
                 x={150}
