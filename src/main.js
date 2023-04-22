@@ -1087,6 +1087,12 @@ function CompoundElement({ children, yOff, xOff, width, height, extraData }) {
 
 	const checkProps = {
 		children,
+		extraData: {
+			...extraData,
+			forceRenderCount: null,
+			xOff: null,
+			yOff: null,
+		  },
 	};
 
 	if (!isEqual(prevPropsRef.current, checkProps)) {
