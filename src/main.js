@@ -971,6 +971,8 @@ function renderToCanvas(elements, context = {}, extraContextData = null) {
 		closePath: () => {},
 		fill: () => {},
 		stroke: () => {},
+		rotate: () => {},
+		scale: () => {},
 
 		translate: (...args) => { },
 		moveTo: (...args) => {
@@ -1032,8 +1034,9 @@ function renderToCanvas(elements, context = {}, extraContextData = null) {
 	// calculate real width and height and re-render
 	const width = (useMaxX - useMinX);
 	const height = (useMaxY - useMinY);
-	canvas.width = width;
-	canvas.height = height;
+	// the +1 prevents the "image of size zero" issue if there aren't any children
+	canvas.width = width + 1;
+	canvas.height = height + 1;
 	// use the old context since we don't need the hooks anymore
 	value.context = old;
 
