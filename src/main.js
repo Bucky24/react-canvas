@@ -93,7 +93,7 @@ function getCode({ code }) {
 	return code;
 }
 const handlerToProps = {
-	[EventTypes.MOVE]: 'onMove',
+	[EventTypes.MOVE]: 'onMouseMove',
 	[EventTypes.MOUSE_DOWN]: 'onMouseDown',
 	[EventTypes.MOUSE_UP]: 'onMouseUp',
 	[EventTypes.KEY_DOWN]: 'onKeyDown',
@@ -212,15 +212,6 @@ function loadPattern(src, context, cb) {
 	patternLoadingMap[hash].push(cb);
 
 	return null;
-}
-
-function isClass(func) {
-	if (typeof func !== 'function') {
-		return false;
-	}
-	const funcStr = Function.prototype.toString.call(func);
-	// not sure if this is best, but classes seem to have this
-	return funcStr.includes("_classCallCheck");
 }
 
 const canvasProps = {
@@ -916,12 +907,14 @@ class CanvasComponent extends React.Component {
 
 CanvasComponent.contextType = CanvasContext;
 
-function renderToCanvas(elements, width=300, height=300, context = {}, extraContextData = null) {
-	const holderDiv = document.createElement("holderDiv");
+function renderToCanvas(elements, context = {}, extraContextData = null) {
+	let holderDiv = document.createElement("div");
 	const canvas = document.createElement("canvas");
-	canvas.width = width;
-	canvas.height = height;
 	const canvasContext = canvas.getContext("2d");
+	const textHolder = document.createElement("div");
+	// don't stretch past content
+	textHolder.style.display = "inline-block";
+	document.body.appendChild(textHolder);
 
 	const value = {
 		getImage: loadImage,
@@ -935,8 +928,96 @@ function renderToCanvas(elements, width=300, height=300, context = {}, extraCont
 		context: canvasContext,
 	};
 
-	const root = ReactDOMClient.createRoot(holderDiv);
+	const old = canvasContext;
 
+	let useMinX = null;
+	let useMaxX = null;
+	let useMinY = null;
+	let useMaxY = null;
+
+	const checkX = (x) => {
+		if (x === null) {
+			console.error(x);
+		}
+		if (useMinX === null) {
+			useMinX = x;
+		} else {
+			useMinX = Math.min(x, useMinX);
+		}
+		if (useMaxX === null) {
+			useMaxX = x;
+		} else {
+			useMaxX = Math.max(x, useMaxX);
+		}
+	}
+
+	const checkY = (y) => {
+		if (useMinY === null) {
+			useMinY = y;
+		} else {
+			useMinY = Math.min(y, useMinY);
+		}
+		if (useMaxY === null) {
+			useMaxY = y;
+		} else {
+			useMaxY = Math.max(y, useMaxY);
+		}
+	}
+
+	value.context = {
+		save: () => {},
+		restore: () => {},
+		beginPath: () => {},
+		closePath: () => {},
+		fill: () => {},
+		stroke: () => {},
+
+		translate: (...args) => { },
+		moveTo: (...args) => {
+			checkX(args[0]);
+			checkY(args[1]);
+		},
+		lineTo: (...args) => {
+			checkX(args[0]);
+			checkY(args[1]);
+		},
+		drawImage: (...args) => {
+			if (args.length === 5) {
+				checkX(args[1]);
+				checkY(args[2]);
+				// x + width
+				checkX(args[1] + args[3]);
+				// y + height
+				checkY(args[2] + args[4]);
+			} else {
+				throw new Error("renderCanvas drawImage hook got unexpected count of arguments: " + args.length);
+			}
+		},
+		arc: (...args) => {
+			// the -1 and +1 is so the line fully shows up
+			checkX(args[0] - args[2] - 1);
+			checkY(args[1] - args[2] - 1);
+
+			checkX(args[0] + args[2] + 1);
+			checkY(args[1] + args[2] + 1);
+		},
+		fillText: (...args) => {
+			const font = value.context.font;
+			const [size, family] = font.split(" ");
+			textHolder.style['font-size'] = size;
+			textHolder.style['font-family'] = family;
+			textHolder.innerText = args[0];
+			const rect = textHolder.getBoundingClientRect();
+			const { width, height } = rect;
+
+			checkX(args[1]);
+			checkX(args[1] + width);
+			checkY(args[2]);
+			checkY(args[2] + height);
+		}
+	};
+
+	let root = ReactDOMClient.createRoot(holderDiv);
 	ReactDOM.flushSync(() => {
 		root.render(ReactDOM.createPortal(
 			<CanvasContext.Provider value={value}>
@@ -948,11 +1029,50 @@ function renderToCanvas(elements, width=300, height=300, context = {}, extraCont
 		));
 	});
 
-	return canvas;
+	// calculate real width and height and re-render
+	const width = (useMaxX - useMinX);
+	const height = (useMaxY - useMinY);
+	canvas.width = width;
+	canvas.height = height;
+	// use the old context since we don't need the hooks anymore
+	value.context = old;
+
+	canvasContext.save();
+	// if negative, shifts camvas over so the negative is 0,0
+	// if positive, does the same
+	canvasContext.translate(-useMinX, -useMinY);
+
+	holderDiv = document.createElement("div");
+	root = ReactDOMClient.createRoot(holderDiv);
+	ReactDOM.flushSync(() => {
+		root.render(ReactDOM.createPortal(
+			<CanvasContext.Provider value={value}>
+				<RenderProvider data={extraContextData}>
+					{elements}
+				</RenderProvider>
+			</CanvasContext.Provider>,
+			canvas,
+		));
+	});
+	
+	canvasContext.restore();
+	
+	// cleanup
+	textHolder.parentElement.removeChild(textHolder);
+
+	return {
+		canvas,
+		dims: {
+			x: useMinX,
+			y: useMinY,
+			width,
+			height,
+		},
+	};
 }
 
-function renderToImage(elements, width=300, height=300, context = {}) {
-	const canvas = renderToCanvas(elements, width, height, context);
+function renderToImage(elements, context = {}) {
+	const { canvas } = renderToCanvas(elements, context);
 
 	const image = canvas.toDataURL("image/png");
 	return image;
@@ -1048,8 +1168,6 @@ const BLEND_TYPE = {
 const compoundPropTypes = {
 	xOff: PropTypes.number,
 	yOff: PropTypes.number,
-	width: PropTypes.number.isRequired,
-	height: PropTypes.number.isRequired,
 };
 
 const compoundDefaultProps = {
@@ -1074,10 +1192,10 @@ function getElementsForCompoundElement(children) {
 	return allResults;
 }
 
-function CompoundElement({ children, yOff, xOff, width, height, extraData }) {
+function CompoundElement({ children, yOff, xOff, extraData }) {
 	const canvasContext = useContext(CanvasContext);
 	const prevPropsRef = useRef({});
-	const imageRef = useRef(null);
+	const renderRef = useRef(null);
 
 	const withContext = useWithContext();
 
@@ -1093,18 +1211,18 @@ function CompoundElement({ children, yOff, xOff, width, height, extraData }) {
 				forceRenderCount: null,
 				xOff: null,
 				yOff: null,
-			  },
+			},
 		};
 	
 		if (!isEqual(prevPropsRef.current, checkProps)) {
 			prevPropsRef.current = checkProps;
-			imageRef.current = null;
+			renderRef.current = null;
 	
 			// re-render our image
 			const elements = getElementsForCompoundElement(children);
 	
 			setTimeout(() => {
-				const image = renderToCanvas(elements, width, height, {
+				const render = renderToCanvas(elements, {
 					...canvasContext,
 					forceRerender: () => {
 						// we want to know if this happens because it's probably due to an image loading
@@ -1113,16 +1231,22 @@ function CompoundElement({ children, yOff, xOff, width, height, extraData }) {
 						canvasContext.forceRerender();
 					},
 				}, extraData);
-				imageRef.current = image;
+				renderRef.current = render;
 				canvasContext.forceRerender();
 			}, 1);
 		}
 	
-		if (!imageRef.current) {
+		if (!renderRef.current) {
 			return null;
 		}
 		return (
-			<Image src={imageRef.current} width={width} height={height} x={xOff} y={yOff} />
+			<Image
+				src={renderRef.current.canvas}
+				width={renderRef.current.dims.width}
+				height={renderRef.current.dims.height}
+				x={xOff+renderRef.current.dims.x}
+				y={yOff+renderRef.current.dims.y}
+			/>
 		);
 	});
 }

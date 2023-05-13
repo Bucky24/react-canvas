@@ -488,7 +488,7 @@ The Pattern element allows drawing an image in a repeated pattern in a rectangle
 
 The `CompoundElement` is an attempt to improve rendering when there are a lot of objects on the screen. What it does is detect any time its children change. When this happens, it pre-renders its entire child list (using `renderToCanvas`) and then draws that rendered image moving forward. It can be given an x and y offset to move the drawn image around the screen. This component is very useful when you have a lot of objects all moving in the same direction that don't change very often (such as a background layer of a map).
 
-Another note is that currently this does not do any sort of automatic scaling based on content, so make sure whatever width and height you pass encompass all your elements or they will be cut off. In the future, I would like to have this detected automatically, and not even require a width and height.
+Note that this component auto-detects the dimensions of its content. This requires two passes with the render which can be expensive. This also does not correctly handle every possible draw operation, and should be considered experimental.
 
 Lastely, this component is not well named and the name may change in the future.
 ##### Children
@@ -501,8 +501,6 @@ Takes multiple children, must be ReactCanvas elements.
 | ----------- | ----------- |
 | xOff | X position to offset the image draw at. Optional (defaults 0) |
 | yOff | Y position to offset the image draw at. Optional (defaults 0) |
-| width | Width of the rendering area |
-| height | Height of the rendering area |
 | extraData | Any extra data that gets passed into renderToCanvas. Use this when you need to pass context data to children |
 
 ##### Example
@@ -888,6 +886,13 @@ export default App;
 ## renderToCanvas
 
 React Canvas exports a method, `renderToCanvas`, that does basically the same thing as `renderToImage` (and takes the same parameters), but instead of a base-64 data string, returns a canvas dom element that has had the given elements rendered to it. This is useful if you have images that are loaded from outside of your domain, as the browser will not allow these to be rendered to an image, but it will allow them to be rendered to a canvas.
+
+The method returns an object containing the following properties:
+
+| -- | -- | -- |
+| Property | Type | Description |
+| canvas | canvas | The canvas object |
+| dims | Rect | Contains x, y, width, and height |
 
 This canvas can be passed into the `src` attribute of an Image element to render it.
 

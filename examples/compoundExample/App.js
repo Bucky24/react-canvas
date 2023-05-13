@@ -45,10 +45,9 @@ const App = ({}) => {
 			<Rect x={0} y={0} x2={600} y2={400} color="#fff" fill={true} />
 			<CompoundElement
 				yOff={yOffRef.current}
-				width={400}
-				height={400}
 				extraData={'foo'}
 			>
+				<Rect x={-50} y={0} x2={0} y2={50} color="#f00" fill={true} />
 				{images.map((image, index) => {
 					return <Image key={index} src={sampleImage} x={image.x} y={image.y} width={50} height={50} />
 				})}

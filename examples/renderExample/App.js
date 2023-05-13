@@ -115,7 +115,7 @@ class App extends React.Component {
 
                 this.setState({
                     image: newImage,
-                    canvas: newCanvas,
+                    canvas: newCanvas.canvas,
                 });
             }}/><br/>
             Image:<br/>
