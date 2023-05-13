@@ -1014,8 +1014,9 @@ function renderToCanvas(elements, context = {}, extraContextData = null) {
 
 			checkX(args[1]);
 			checkX(args[1] + width);
+			// text renders this way for some reason, from -height to 0
+			checkY(args[2] - height);
 			checkY(args[2]);
-			checkY(args[2] + height);
 		}
 	};
 
