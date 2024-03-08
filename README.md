@@ -501,7 +501,21 @@ Takes multiple children, must be ReactCanvas elements.
 | ----------- | ----------- |
 | xOff | X position to offset the image draw at. Optional (defaults 0) |
 | yOff | Y position to offset the image draw at. Optional (defaults 0) |
-| extraData | Any extra data that gets passed into renderToCanvas. Use this when you need to pass context data to children |
+| extraData | Any extra data that gets passed into renderToCanvas. Use this when you need to pass context data to children. Note that any change to extraData _will_ cause the element to re-render |
+| zoom | Current zoom level for the element. Optional (defaults 1) |
+| maxZoom | The highest zoom level your component can go. Optional (defaults 1) |
+
+##### Zoom
+
+Zooming in and out of a component can be confused to not cause a re-render, similar to how the offset works. In the case of zooming, both `zoom` and `maxZoom` are treated such that a value of `1` is 100%, normal zoom level.
+
+If you change the `zoom` parameter, the `CompoundElement` will not re-render its children, but rather will draw the pre-rendered image larger or smaller, as appropriate.
+
+Because stretching images/text/etc tends to pixelate them, the `maxZoom` property can be used. When the `maxZoom` property is given, the resulting components are treated as if they were rendered at that level. This then allows the `CompoundElement` to only shrink the resulting image, and never expand it, which can improve pixelation.
+
+Text does not perform well with small zoom levels.
+
+*Important:* When using `maxZoom`, render all children of the CompoundElement as if that zoom was in effect. IE if a `Rect` is normally from (50,50) to (100,100), and your `maxZoom` is 2, render it from (100,100) to (200,200). The `CompoundElement` will take care of ensuring it draws the correct size.
 
 ##### Example
 

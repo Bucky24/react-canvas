@@ -1196,7 +1196,7 @@ function getElementsForCompoundElement(children) {
 	return allResults;
 }
 
-function CompoundElement({ children, yOff, xOff, extraData }) {
+function CompoundElement({ children, yOff, xOff, extraData, zoom, maxZoom }) {
 	const canvasContext = useContext(CanvasContext);
 	const prevPropsRef = useRef({});
 	const renderRef = useRef(null);
@@ -1215,6 +1215,7 @@ function CompoundElement({ children, yOff, xOff, extraData }) {
 				forceRenderCount: null,
 				xOff: null,
 				yOff: null,
+				zoom: maxZoom || 1,
 			},
 		};
 	
@@ -1243,13 +1244,20 @@ function CompoundElement({ children, yOff, xOff, extraData }) {
 		if (!renderRef.current) {
 			return null;
 		}
+		const zoomFactor = (maxZoom/1) || 1;
+		const currentZoom = (zoom / zoomFactor) || 1;
+
+		const width = renderRef.current.dims.width;
+		const height = renderRef.current.dims.height;
+		const drawX = renderRef.current.dims.x;
+		const drawY = renderRef.current.dims.y;
 		return (
 			<Image
 				src={renderRef.current.canvas}
-				width={renderRef.current.dims.width}
-				height={renderRef.current.dims.height}
-				x={xOff+renderRef.current.dims.x}
-				y={yOff+renderRef.current.dims.y}
+				width={width*currentZoom}
+				height={height*currentZoom}
+				x={(xOff+drawX)*currentZoom}
+				y={(yOff+drawY)*currentZoom}
 			/>
 		);
 	});

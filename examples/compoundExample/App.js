@@ -36,6 +36,8 @@ const App = ({}) => {
 	]);
 	const yOffRef = useRef(0);
 	const rerender = useRender();
+	const zoomRef = useRef(1);
+	const MAX_ZOOM = 2;
 
 	return (<div>
 		<Canvas
@@ -46,12 +48,14 @@ const App = ({}) => {
 			<CompoundElement
 				yOff={yOffRef.current}
 				extraData={'foo'}
+				zoom={zoomRef.current}
+				maxZoom={2}
 			>
-				<Rect x={-50} y={0} x2={0} y2={50} color="#f00" fill={true} />
+				<Rect x={-50*MAX_ZOOM} y={0} x2={0} y2={50*MAX_ZOOM} color="#f00" fill={true} />
 				{images.map((image, index) => {
-					return <Image key={index} src={sampleImage} x={image.x} y={image.y} width={50} height={50} />
+					return <Image key={index} src={sampleImage} x={image.x*MAX_ZOOM} y={image.y*MAX_ZOOM} width={50*MAX_ZOOM} height={50*MAX_ZOOM} />
 				})}
-				<Component x={50} y={50} />
+				<Component x={50*MAX_ZOOM} y={50*MAX_ZOOM} />
 			</CompoundElement>
 		</Canvas>
 		<br/>
@@ -94,6 +98,22 @@ const App = ({}) => {
 			}}
 			value={`Move Down (${yOffRef.current})`}
 		/>
+		<input type="button" onClick={() => {
+			zoomRef.current -= 0.1;
+
+			if (zoomRef.current < 0.2) {
+				zoomRef.current = 0.2;
+			}
+			rerender();
+		}} value="Zoom Out" />
+		<input type="button" onClick={() => {
+			zoomRef.current += 0.1;
+
+			if (zoomRef.current > 2) {
+				zoomRef.current = 2;
+			}
+			rerender();
+		}} value="Zoom In" />
 	</div>);
 };
 
