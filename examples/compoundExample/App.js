@@ -50,6 +50,7 @@ const App = ({}) => {
 				extraData={'foo'}
 				zoom={zoomRef.current}
 				maxZoom={2}
+				zoomAffectOffset={true}
 			>
 				<Rect x={-50*MAX_ZOOM} y={0} x2={0} y2={50*MAX_ZOOM} color="#f00" fill={true} />
 				{images.map((image, index) => {

@@ -504,6 +504,7 @@ Takes multiple children, must be ReactCanvas elements.
 | extraData | Any extra data that gets passed into renderToCanvas. Use this when you need to pass context data to children. Note that any change to extraData _will_ cause the element to re-render |
 | zoom | Current zoom level for the element. Optional (defaults 1) |
 | maxZoom | The highest zoom level your component can go. Optional (defaults 1) |
+| zoomAffectOffset | If true, offsets will also be affected by zoom level (defaults false) |
 
 ##### Zoom
 
