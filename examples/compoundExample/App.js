@@ -38,21 +38,25 @@ const App = ({}) => {
 	const rerender = useRender();
 	const zoomRef = useRef(1);
 	const MAX_ZOOM = 2;
+	const [pos, setPos] = useState({x: 0, y: 0});
 
 	return (<div>
 		<Canvas
 			width={600}
 			height={400}
+			onMouseUp={({ x, y }) => {
+				setPos({ x: x/zoomRef.current,  y: y/zoomRef.current });
+			}}
 		>
 			<Rect x={0} y={0} x2={600} y2={400} color="#fff" fill={true} />
 			<CompoundElement
 				yOff={yOffRef.current}
 				extraData={'foo'}
 				zoom={zoomRef.current}
-				maxZoom={2}
-				zoomAffectOffset={true}
+				maxZoom={MAX_ZOOM}
+				noAffectPosition
 			>
-				<Rect x={-50*MAX_ZOOM} y={0} x2={0} y2={50*MAX_ZOOM} color="#f00" fill={true} />
+				<Rect x={pos.x*MAX_ZOOM} y={pos.y*MAX_ZOOM} x2={(pos.x+100)*MAX_ZOOM} y2={(pos.y+50)*MAX_ZOOM} color="#f00" fill={true} />
 				{images.map((image, index) => {
 					return <Image key={index} src={sampleImage} x={image.x*MAX_ZOOM} y={image.y*MAX_ZOOM} width={50*MAX_ZOOM} height={50*MAX_ZOOM} />
 				})}

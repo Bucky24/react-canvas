@@ -505,7 +505,9 @@ Takes multiple children, must be ReactCanvas elements.
 | zoom | Current zoom level for the element. Optional (defaults 1) |
 | maxZoom | The highest zoom level your component can go. Optional (defaults 1) |
 | zoomAffectOffset | If true, offsets will also be affected by zoom level (defaults false) |
-| noZoomPosition | If true, position will not be affected by zoom level (defaults false) |s
+| noZoomPosition | If true, position will not be affected by zoom level (defaults false) |
+| zoomXOff | X Offset to not zoom (see zoom below) |
+| zoomYOff | Y Offset to not zoom (see zoom below) |
 
 ##### Zoom
 
@@ -518,6 +520,8 @@ Because stretching images/text/etc tends to pixelate them, the `maxZoom` propert
 Text does not perform well with small zoom levels.
 
 *Important:* When using `maxZoom`, render all children of the CompoundElement as if that zoom was in effect. IE if a `Rect` is normally from (50,50) to (100,100), and your `maxZoom` is 2, render it from (100,100) to (200,200). The `CompoundElement` will take care of ensuring it draws the correct size.
+
+Sometimes it becomes important to only zoom a portion of the image. For example, let's say you have a frame starting at (100, 100), and a rectangle at (125, 125) inside that frame. If you only want to zoom what is inside that frame, you don't want to have the zoom apply to the entire 125 of the rectangle's position, as that could cause it to move more than expected. That is what `zoomXOff` and `zoomYOff` are for. In this case you would set them to the coordinates of the frame, and only the last 25 of the rectangle would be subject to the zoom.
 
 ##### Example
 
@@ -905,8 +909,8 @@ React Canvas exports a method, `renderToCanvas`, that does basically the same th
 
 The method returns an object containing the following properties:
 
-| -- | -- | -- |
 | Property | Type | Description |
+| -- | -- | -- |
 | canvas | canvas | The canvas object |
 | dims | Rect | Contains x, y, width, and height |
 
@@ -914,8 +918,8 @@ This canvas can be passed into the `src` attribute of an Image element to render
 
 This method does take the following additional properties:
 
-| -- | -- | -- |
 | Property | Type | Description |
+| -- | -- | -- |
 | extraData | mixed | Used in case of a need to pass any sort of context data to rendered components. renderToCanvas breaks context chains. Any data passed in this method will be available in the RenderContext |
 
 ## blendImage
