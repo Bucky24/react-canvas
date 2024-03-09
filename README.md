@@ -505,6 +505,7 @@ Takes multiple children, must be ReactCanvas elements.
 | zoom | Current zoom level for the element. Optional (defaults 1) |
 | maxZoom | The highest zoom level your component can go. Optional (defaults 1) |
 | zoomAffectOffset | If true, offsets will also be affected by zoom level (defaults false) |
+| noZoomPosition | If true, position will not be affected by zoom level (defaults false) |s
 
 ##### Zoom
 
