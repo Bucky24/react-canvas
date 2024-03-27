@@ -1224,7 +1224,6 @@ function CompoundElement({ children, yOff, xOff, extraData, zoom, maxZoom, zoomA
 	
 		if (!isEqual(prevPropsRef.current, checkProps)) {
 			prevPropsRef.current = checkProps;
-			renderRef.current = null;
 	
 			// re-render our image
 			const elements = getElementsForCompoundElement(children);
@@ -1269,7 +1268,6 @@ function CompoundElement({ children, yOff, xOff, extraData, zoom, maxZoom, zoomA
 		if (!noZoomPosition) {
 			const zoomableX = useX - (zoomXOff || 0);
 			const zoomableY = useY - (zoomYOff || 0);
-			console.log(zoomableX, zoomableY, zoomXOff, zoomYOff, useX, useY);
 			useX = zoomableX * currentZoom + (useX - zoomableX);
 			useY = zoomableY * currentZoom + (useY - zoomableY);
 		}
