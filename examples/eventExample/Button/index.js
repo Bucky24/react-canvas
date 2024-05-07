@@ -1,4 +1,4 @@
-import { CanvasComponent, Container, Text, Shape } from 'react-canvas';
+import { CanvasComponent, Text, Shape } from 'react-canvas';
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -40,7 +40,7 @@ class Button extends CanvasComponent {
 	}
 	render() {
 		const color = this.state.mouseOver ? '#0f0' : '#f00';
-		return (<Container>
+		return (<>
 			<Shape
 				x={this.props.x}
 				y={this.props.y}
@@ -56,7 +56,7 @@ class Button extends CanvasComponent {
 			<Text x={this.props.x + 10} y={this.props.y + 20}>
 				Button
 			</Text>
-		</Container>);
+		</>);
 	}
 };
 

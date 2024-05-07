@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Canvas, CompoundElement, Image, Rect } from 'react-canvas';
 
 import sampleImage from './sampleImage.png';
+import Component from './Component';
 
 function useRender() {
 	const [count, setCount] = useState(0);
@@ -35,21 +36,31 @@ const App = ({}) => {
 	]);
 	const yOffRef = useRef(0);
 	const rerender = useRender();
+	const zoomRef = useRef(1);
+	const MAX_ZOOM = 2;
+	const [pos, setPos] = useState({x: 0, y: 0});
 
 	return (<div>
 		<Canvas
 			width={600}
 			height={400}
+			onMouseUp={({ x, y }) => {
+				setPos({ x: x/zoomRef.current,  y: y/zoomRef.current });
+			}}
 		>
 			<Rect x={0} y={0} x2={600} y2={400} color="#fff" fill={true} />
 			<CompoundElement
 				yOff={yOffRef.current}
-				width={400}
-				height={400}
+				extraData={'foo'}
+				zoom={zoomRef.current}
+				maxZoom={MAX_ZOOM}
+				noAffectPosition
 			>
-				{images.map((image) => {
-					return <Image src={sampleImage} x={image.x} y={image.y} width={50} height={50} />
+				<Rect x={pos.x*MAX_ZOOM} y={pos.y*MAX_ZOOM} x2={(pos.x+100)*MAX_ZOOM} y2={(pos.y+50)*MAX_ZOOM} color="#f00" fill={true} />
+				{images.map((image, index) => {
+					return <Image key={index} src={sampleImage} x={image.x*MAX_ZOOM} y={image.y*MAX_ZOOM} width={50*MAX_ZOOM} height={50*MAX_ZOOM} />
 				})}
+				<Component x={50*MAX_ZOOM} y={50*MAX_ZOOM} />
 			</CompoundElement>
 		</Canvas>
 		<br/>
@@ -92,6 +103,22 @@ const App = ({}) => {
 			}}
 			value={`Move Down (${yOffRef.current})`}
 		/>
+		<input type="button" onClick={() => {
+			zoomRef.current -= 0.1;
+
+			if (zoomRef.current < 0.2) {
+				zoomRef.current = 0.2;
+			}
+			rerender();
+		}} value="Zoom Out" />
+		<input type="button" onClick={() => {
+			zoomRef.current += 0.1;
+
+			if (zoomRef.current > 2) {
+				zoomRef.current = 2;
+			}
+			rerender();
+		}} value="Zoom In" />
 	</div>);
 };
 

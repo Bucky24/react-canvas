@@ -6,7 +6,7 @@ import {
     Clip,
     Rect,
     Image,
-    Container,
+    CompoundElement,
 } from 'react-canvas';
 import Elem from './Elem';
 
@@ -39,7 +39,7 @@ const App = ({}) => {
                 height={100}
             >
                 { lines }
-                <Container>
+                <>
                     <Text
                         x={150}
                         y={130}
@@ -61,7 +61,7 @@ const App = ({}) => {
                     >
                         Other text
                     </Text>}
-                </Container>
+                </>
                 <Image
                     src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Right-pointing_white_arrow_in_blue_rounded_square.svg/1024px-Right-pointing_white_arrow_in_blue_rounded_square.svg.png"
                     x={90}
@@ -70,6 +70,9 @@ const App = ({}) => {
                     height={30}
                 />
 				<Elem x={75} y={160} />
+                <CompoundElement xOff={90} yOff={75} width={100} height={100}>
+                    <Rect x={20} y={20} x2={40} y2={40} color="#00f" fill={true} />
+                </CompoundElement>
             </Clip>
             <Line
                 x={150}

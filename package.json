@@ -1,6 +1,6 @@
 {
 	"name": "@bucky24/react-canvas",
-	"version": "1.9.2",
+	"version": "3.1.4",
 	"description": "A library of components that can be used to manipulate a canvas using JSX embedded in react.",
 	"main": "build/index.js",
 	"scripts": {
@@ -17,6 +17,8 @@
 		"blendExample": "webpack-dev-server --config ./examples/blendExample/webpack.config.js",
 		"3dExample": "webpack-dev-server --config ./examples/3dExample/webpack.config.js",
 		"compoundExample": "webpack-dev-server --config ./examples/compoundExample/webpack.config.js",
+		"animationExample": "webpack-dev-server --config ./examples/animationExample/webpack.config.js",
+		"autoCompoundExample": "webpack-dev-server --config ./examples/autoCompoundExample/webpack.config.js",
 		"prepublishOnly": "npm run build"
 	},
 	"files": [
@@ -34,18 +36,16 @@
 		"@babel/preset-env": "7.3.1",
 		"@babel/preset-react": "7.0.0",
 		"@babel/runtime": "^7.17.2",
-		"babel-loader": "8.2.3",
+		"babel-loader": "8.3.0",
 		"css-loader": "6.5.1",
 		"file-loader": "6.2.0",
 		"html-webpack-plugin": "5.5.0",
 		"image-webpack-loader": "8.1.0",
-		"react": "17.0.2",
-		"react-dom": "17.0.2",
+		"react": "18.2.0",
 		"style-loader": "3.3.1",
-		"webpack": "5.65.0",
+		"webpack": "5.76.0",
 		"webpack-cli": "4.9.1",
-		"webpack-dev-server": "4.8.1",
-		"prop-types": "15.7.2"
+		"webpack-dev-server": "4.8.1"
 	},
 	"keywords": [
 		"react",
@@ -55,10 +55,11 @@
 		"html5"
 	],
 	"dependencies": {
+		"prop-types": "15.7.2",
+		"react-dom": "18.2.0",
 		"react-fast-compare": "3.2.0"
 	},
 	"peerDependencies": {
-		"prop-types": "15.7.2",
-		"react": "17.x.x"
+		"react": "18.x.x"
 	}
 }

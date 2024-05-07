@@ -12,7 +12,8 @@ module.exports = (dirname) => {
 		},
 		resolve: {
 			alias: {
-				'react-canvas': path.resolve(dirname, '../../src/index.js')
+				'react-canvas': path.resolve(dirname, '../../src/index.js'),
+				'@bucky24/react-canvas': path.resolve(dirname, '../../src/index.js'),
 			}
 		},
 		module: {

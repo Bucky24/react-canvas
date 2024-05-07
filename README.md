@@ -12,7 +12,7 @@ With Yarn
 
     yarn add @bucky24/react-canvas
 
-ReactCanvas has a peer dependency on `react` and `prop-types` but should be able to use whatever you have installed for your main project. It does require the use of the child context apis, so React 16 is recommended at minimum.
+ReactCanvas has a peer dependency on `react`. It requires version 18 at minimum.
 
 ## Usage
 
@@ -418,13 +418,9 @@ That's where the Raw component comes in. It takes in a single prop, which is a c
 
 Clip takes in parameters that define a rectangle, and a list of children. It will use the canvas context clip method to ensure that any part of those children that falls outside the rectangle is not drawn. This is different from the clip in Image, which determines the section of the source image to display.
 
-Clip uses a render method that bypasses React's render system. This is because the children have to finish rendering before Clip finishes rendering. React can sortof do this, but if any OTHER component renders during that time it will also be clipped, which we don't want (and this happens pretty frequently).
-
-At this point, Clip should be able to handle anything a Canvas element can. This includes custom components. Because it uses the same custom rendering method that Canvas does when doing direct rendering, it is not recommended to use class components when using Clip (the direct rendering method does not handle them in a performant way). If you get any errors using Clip, then make a bug report-it's a bit fragile.
-
 ##### Children
 
-Takes multiple children, see above for limitations and notes on this.
+Acts as a container, it can handle any ReactCanvas based children.
 
 ##### Parameters
 
@@ -456,38 +452,6 @@ Takes multiple children, see above for limitations and notes on this.
 		</Text>
     </Clip>
 </Canvas>
-```
-
-### Container
-
-The Container element acts as a collector. Older versions of React did not allow returning an array of elements from the `render` function. Because of this, always returning a singular &lt;div&gt; tag was a standard practice. Container takes the place of the div tag for ReactCanvas elements.
-
-For newer versions of React, returning an array or a React Fragment is perfectly acceptable and should work as expected. This component exists for backwards compatability only.
-
-##### Children
-
-Takes multiple children, must be ReactCanvas elements.
-
-##### Example
-
-```
-	return <Container>
-		<Text
-			x={5}
-			y={60}
-		>
-			Blah
-		</Text>
-		<Shape
-			points={[
-				{ x: 10, y: 10},
-				{ x: 100, y: 10 },
-				{ x: 10, y: 100}
-			]}
-			color="#f00"
-			fill={true}
-		/>
-	</Container>;
 ```
 
 ### Pattern
@@ -525,20 +489,40 @@ The Pattern element allows drawing an image in a repeated pattern in a rectangle
 
 The `CompoundElement` is an attempt to improve rendering when there are a lot of objects on the screen. What it does is detect any time its children change. When this happens, it pre-renders its entire child list (using `renderToCanvas`) and then draws that rendered image moving forward. It can be given an x and y offset to move the drawn image around the screen. This component is very useful when you have a lot of objects all moving in the same direction that don't change very often (such as a background layer of a map).
 
-Another note is that currently this does not do any sort of automatic scaling based on content, so make sure whatever width and height you pass encompass all your elements or they will be cut off. In the future, I would like to have this detected automatically, and not even require a width and height.
+Note that this component auto-detects the dimensions of its content. This requires two passes with the render which can be expensive. This also does not correctly handle every possible draw operation, and should be considered experimental.
 
 Lastely, this component is not well named and the name may change in the future.
 ##### Children
 
-Takes multiple children, must be ReactCanvas elements. I have not tested it with many rendering scenarios but it uses the same rendering system under the hood that `Clip` does, so anything that works with `Clip` should work here.
+Takes multiple children, must be ReactCanvas elements.
+
 ##### Parameters
 
 | Parameter    | Description |
 | ----------- | ----------- |
 | xOff | X position to offset the image draw at. Optional (defaults 0) |
 | yOff | Y position to offset the image draw at. Optional (defaults 0) |
-| width | Width of the rendering area |
-| height | Height of the rendering area |
+| extraData | Any extra data that gets passed into renderToCanvas. Use this when you need to pass context data to children. Note that any change to extraData _will_ cause the element to re-render |
+| zoom | Current zoom level for the element. Optional (defaults 1) |
+| maxZoom | The highest zoom level your component can go. Optional (defaults 1) |
+| zoomAffectOffset | If true, offsets will also be affected by zoom level (defaults false) |
+| noZoomPosition | If true, position will not be affected by zoom level (defaults false) |
+| zoomXOff | X Offset to not zoom (see zoom below) |
+| zoomYOff | Y Offset to not zoom (see zoom below) |
+
+##### Zoom
+
+Zooming in and out of a component can be confused to not cause a re-render, similar to how the offset works. In the case of zooming, both `zoom` and `maxZoom` are treated such that a value of `1` is 100%, normal zoom level.
+
+If you change the `zoom` parameter, the `CompoundElement` will not re-render its children, but rather will draw the pre-rendered image larger or smaller, as appropriate.
+
+Because stretching images/text/etc tends to pixelate them, the `maxZoom` property can be used. When the `maxZoom` property is given, the resulting components are treated as if they were rendered at that level. This then allows the `CompoundElement` to only shrink the resulting image, and never expand it, which can improve pixelation.
+
+Text does not perform well with small zoom levels.
+
+*Important:* When using `maxZoom`, render all children of the CompoundElement as if that zoom was in effect. IE if a `Rect` is normally from (50,50) to (100,100), and your `maxZoom` is 2, render it from (100,100) to (200,200). The `CompoundElement` will take care of ensuring it draws the correct size.
+
+Sometimes it becomes important to only zoom a portion of the image. For example, let's say you have a frame starting at (100, 100), and a rectangle at (125, 125) inside that frame. If you only want to zoom what is inside that frame, you don't want to have the zoom apply to the entire 125 of the rectangle's position, as that could cause it to move more than expected. That is what `zoomXOff` and `zoomYOff` are for. In this case you would set them to the coordinates of the frame, and only the last 25 of the rectangle would be subject to the zoom.
 
 ##### Example
 
@@ -547,21 +531,154 @@ Takes multiple children, must be ReactCanvas elements. I have not tested it with
 	width={300}
 	height={300}
 >
-	<CompoundElement}
+	<CompoundElement
 		width={400}
 		height={400}
 	>
-		{images.map((image) => {
-			return <Image src={sampleImage} x={image.x} y={image.y} width={50} height={50} />
+		{images.map((image, index) => {
+			return <Image key={index} src={sampleImage} x={image.x} y={image.y} width={50} height={50} />
 		})}
 	</CompoundElement>
 </Canvas>
 ```
+
+### ImageStrip
+
+The `ImageStrip` component is meant to be able to display certain portions of a sprite-sheet, one frame at a time.
+
+##### Parameters
+
+| Parameter    | Description |
+| ----------- | ----------- |
+| src | The image to use as the spritesheet |
+| x | The x coord of where to draw on the canvas |
+| y | The y coord of where to draw on the canvas |
+| width | How wide the resulting image should be on the canvas |
+| height | How tall the resulting image shoudl be on the canvas |
+| cellX | The x coord of the sprite on the spritesheet to draw |
+| cellY | The y coord of the sprite on the spritesheet to draw |
+| cellWidth | How wide each sprite in the sheet is |
+| cellHeight | How tall each sprite in the sheet is |
+
+##### Example
+
+This example renders the second sprite of the sheet, assuming a sheet with 75x75 px sprites. It renders the image at 100x100 at 50x50 resolution.
+
+```
+<Canvas
+	width={300}
+	height={300}
+>
+	<ImageStrip
+		src={sampleImage}
+		x={100}
+		y={100}
+		width={50}
+		height={50}
+		cellX={1}
+		cellY={0}
+		cellWidth={75}
+		cellHeight={75}
+	/>
+</Canvas>
+```
+
+### Animate
+
+The `Animate` is meant to be able to automatically display the correct frame of a spritesheet, based on a global frame ticker.
+
+The Animate component must be wrapped in an `AnimationProvider` to function.
+
+##### Parameters
+
+The following parameters are required but are the same as `ImageStripe` above:
+src, x, y, width, height, cellWidth, cellHeight
+
+| Parameter    | Description |
+| ----------- | ----------- |
+| startX | The starting cellX on the sprite sheet |
+| startY | The starting cellY on the sprit sheet |
+| frameCount | The total number of frames in the animation |
+| rowWidth | The number of spritesheet frames per row |
+
+##### Example
+
+This example renders the animation
+
+```
+<Canvas
+	width={300}
+	height={300}
+>
+	<Animate
+		src={sampleImage}
+		x={100}
+		y={100}
+		width={50}
+		height={50}
+		startX={1}
+		startY={0}
+		cellWidth={75}
+		cellHeight={75}
+		frameCount={20}
+		rowWidth={5}
+	/>
+</Canvas>
+```
+
+### AnimationContext/AnimationProvider
+
+The `AnimationContext` provides a way for the animation system to sychronize the animations as well as for your application to advance them.
+
+The following values are exported by the context
+
+| Value    | Description |
+| ----------- | ----------- |
+| frame | The current animation frame. This continuously increases. |
+| tick | This is a function. Call this function when you want the animation frames to move forward |
+
+##### Example
+
+```
+import React, { useContext, useEffect } from 'react';
+import { AnimationContext } from '@bucky24/react-canvas';
+
+import SampleImage from '../assets/sampleSpriteSheet.png';
+
+export default function App() {
+	const { tick } = useContext(AnimationContext);
+
+	useEffect(() => {
+		const interval = setInterval(tick, 100);
+
+		return () => {
+			clearInterval(interval);
+		}
+	});
+
+	return <Canvas width={300} height={300}>
+		<Animate
+			src={SampleImage}
+			x={100}
+			y={100}
+			width={50}
+			height={50}
+			startX={1}
+			startY={0}
+			cellWidth={75}
+			cellHeight={75}
+			frameCount={20}
+			rowWidth={5}
+		/>
+	</Canvas>;
+}
+```
+
 ## Events
 
 ### Event List
 
-The following events are available:
+The following events are available on the Canvas:
 
 | Event | Params |
 |---|---|
@@ -704,7 +821,7 @@ The following properties are available from the CanvasContext:
 
 | Name | Purpose |
 | ---- | --- |
-| context | The raw canvas context |
+| context | The raw canvas context. It is not recommend that you use this, see `useWithContext` below. |
 | registerListener | Function for event handling. See above for usage |
 | unregisterListener | Function for event handling. See above for usage |
 | loadImage | Function that takes in a src and a cb function. If the image is already loaded, it will return the img object. If not, the cb function is called when the image is loaded |
@@ -742,79 +859,13 @@ export default MyElement;
 
 The canvas context also provides a function `forceRerender` which will essentially call `this.forceUpdate()` on the top level canvas. This can be useful in some situations to force the canvas to redraw.
 
-## Direct Render (Experimental)
+## renderToImage
 
-In some cases, it's useful to completely bypass React's rendering (which, as described in the Z Index section, is not always great for Canvas). In order to do this, you can use the `customRender` flag on the Canvas object. This is experimental, and does not really work very well with Class components, but may be necessary for other experimental features.
+React Canvas exports a method, `renderToImage`, that can take in a series of React Canvas components, and a width and height, then return a data string that represents the image that would be the result of those components being rendered to a canvas.
 
-```
-	return <Canvas
-		width={300}
-		height={300}
-		customRender={true}
-	>
-		{ children }
-	</Canvas>;
-```
+`renderToImage` does not need to be called from inside a component's render method.
 
-## Z Index (Experimental)
-
-Sometimes you can run into the situation where some parts of your canvas will redraw and others will not. For example, let's say you're drawing a map, but drawing parts of the UI on top of it. If you have the map in a specific CanvasComponent and UI pieces in other components, when your map redraws, you may find that your UI components do not. This is because React is trying to ease the load on the browser by only updating dom elements that have changed. While this works really well for a dom, where making sure dom elements are rerendered properly is taken care of by the browser, we're dealing with a canvas, where this is not the case.
-
-In order to potentially fix this, you can use z-indexing on your components. What this will do is detect when a component has re-rendered, and at that point, force render every component with a higher z-index.
-
-This feature bypasses React rendering and as such is experimental and may not work as expected. Use at your own risk. Also the feature only pays attention to z-index on the element that caused the redraw and the direct children of the Canvas. So if you have a grandchild that is z-index 5, the child on the Canvas is z-index 2, and the element that triggered the redraw is z-index 4, then that grandchild will not be redrawn.
-
-To use, you must make two changes. First, add a z-index to the components to indicate which ones should be redrawn, as well as set the `enableExperimental` flag on the Canvas object.
-
-```
-	return <Canvas
-		width={300}
-		height={300}
-		enableExperimental={true}
-	>
-		<Text
-			x={5}
-			y={60}
-			zIndex={3}
-		>
-			Blah
-		</Text>
-		<Shape
-			zIndex={2}
-			points={[
-				{ x: 10, y: 10},
-				{ x: 100, y: 10 },
-				{ x: 10, y: 100}
-			]}
-			color="#f00"
-			fill={true}
-		/>
-	</Canvas>;
-```
-
-The following example sets up the Text to be redrawn whenever something with a z-index of less than 3 is redrawn, and the Shape to be redrawn whenever something with a z-index of less than 2 is redrawn. Note that the default z-index is 1
-
-The second thing you must do is indicate which components should trigger a redraw. This can be done on CanvasComponents by calling `super.render()` inside the render function, and also by calling `triggerRedraw` on the CanvasContext object, if you have one.
-
-See the `overlapExample` in the examples directory for more information on how to make this work.
-
-## Double Buffering (Experimental)
-
-Double Buffering is the process of rendering to an off-screen canvas, then drawing that canvas as an image onto the main screen.
-
-To use double buffering, pass the `doubleBuffer` flag to the Canvas object.
-
-Note: Direct Rendering must be enabled for double buffering to have any effect.
-
-## renderToImage (Experimental)
-
-React Canvas exports a method, `renderToImage`, that can take in a series of React Canvas components, and a width and height, then return a data string that represents the image from that canvas.
-
-This bypasses React rendering, so it may not work as expected for some situations.
-
-However, because of this, `renderToImage` does not need to be called from inside a component's render method.
-
-`context` is not a required parameter, but it is recommended to pass in the context of the parent Cavas if possible. If you are trying to get the context from a top level component that exports the Canvas element, you can use a ref to the Canvas and call `getMyContext` to get the context object.
+`context` is not a required parameter, but it is recommended to pass in the context of the parent Canvas if possible. If you are trying to get the context from a top level component that exports the Canvas element, you can use a ref to the Canvas and call `getMyContext` to get the context object.
 
 ```
 import React from 'react';
@@ -854,13 +905,24 @@ const App() {
 export default App;
 ```
 
-## renderToCanvas (Experimental)
+## renderToCanvas
 
 React Canvas exports a method, `renderToCanvas`, that does basically the same thing as `renderToImage` (and takes the same parameters), but instead of a base-64 data string, returns a canvas dom element that has had the given elements rendered to it. This is useful if you have images that are loaded from outside of your domain, as the browser will not allow these to be rendered to an image, but it will allow them to be rendered to a canvas.
 
+The method returns an object containing the following properties:
+
+| Property | Type | Description |
+| -- | -- | -- |
+| canvas | canvas | The canvas object |
+| dims | Rect | Contains x, y, width, and height |
+
 This canvas can be passed into the `src` attribute of an Image element to render it.
 
-Like the above method, this bypasses React rendering, so it may not work as expected for some situations.
+This method does take the following additional properties:
+
+| Property | Type | Description |
+| -- | -- | -- |
+| extraData | mixed | Used in case of a need to pass any sort of context data to rendered components. renderToCanvas breaks context chains. Any data passed in this method will be available in the RenderContext |
 
 ## blendImage
 
@@ -911,3 +973,21 @@ Represents an operation that can be performed on an image
 | -- | -- | -- |
 | from | Hex Color | A string containing the RGB hex code to look for |
 | to | Hex Color | A stirng containing the RGB hex code to use as a replacement
+
+## useWithContext
+
+The `useWithContext` hook is the safest way to actually access the raw canvas context. This is because it takes into account any `Clip` elements that your component might be inside. It also protects against the context being null, so you don't have to worry about checking that in your components. It also handles the appropriate return value so that React doesn't complain about your component returning nothing.
+
+### Usage:
+
+```
+const React from 'react';
+const { useWithContext } from '@bucky24/react-canvas';
+
+export default function MyComponent() {
+	const withContext = useWithContext();
+
+	return withContext((context) => {
+		// the context is now safe to use for raw drawing even if you're inside a clip region.
+	});
+}
