@@ -461,6 +461,7 @@ class Canvas extends React.Component {
 		}
 	}
 	render() {
+		const { enable3d } = this.props;
 		this.indexList = [];
 		
 		let newChildren = this.props.children;
@@ -471,7 +472,7 @@ class Canvas extends React.Component {
 
 		const refFunc = (c) => {
 			if (c) {
-				const newContext = c.getContext('2d');
+				const newContext = c.getContext(enable3d ? 'webgl' : '2d');
 				if (this.state.context !== newContext) {
 					this.canvas = c;
 					this.setState({

@@ -57,7 +57,8 @@
 	"dependencies": {
 		"prop-types": "15.7.2",
 		"react-dom": "18.2.0",
-		"react-fast-compare": "3.2.0"
+		"react-fast-compare": "3.2.0",
+		"twgl.js": "^5.5.4"
 	},
 	"peerDependencies": {
 		"react": "18.x.x"
