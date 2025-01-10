@@ -1,7 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Canvas, Camera, Shape3D } from 'react-canvas';
+import { FColors, FVertex } from './fdata';
 
 const App = ({}) => {
+	const [z, setZ] = useState(0);
+	const [y, setY] = useState(20);
+
+	useEffect(() => {
+		setInterval(() => {
+			setZ((z) => z + 0.0001);
+		}, 100);
+	}, []);
+
 	return (<div>
 		<Canvas
 			width={400}
@@ -10,16 +20,11 @@ const App = ({}) => {
 		>
 			<Camera x={10} y={10} z={10} lookX={0} lookY={0} lookZ={0}>
 				<Shape3D
-					triangles={
-						{
-							points: [
-								{x: 0, y: 0, z: 0 },
-								{x: 5, y: 5, z: 5 },
-								{x: 5, y: 0, z: 0 },
-							],
-							color: "#f00",
-						}
-					}
+					geometry={FVertex}
+					colors={FColors}
+					x={10}
+					y={y}
+					z={z}
 				/>
 			</Camera>
 		</Canvas>
