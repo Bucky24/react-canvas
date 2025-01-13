@@ -115,18 +115,6 @@ export default function Camera({ children }) {
         // Put geometry data into buffer
         setGeometry(context, geometry);
 
-        // Bind the position buffer.
-        context.bindBuffer(context.ARRAY_BUFFER, positionBuffer);
-
-        // Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
-        var size = 3;          // 3 components per iteration
-        var type = context.FLOAT;   // the data is 32bit floats
-        var normalize = false; // don't normalize the data
-        var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-        var offset = 0;        // start at the beginning of the buffer
-        context.vertexAttribPointer(
-            positionLocation, size, type, normalize, stride, offset);
-
         return positionBuffer;
     }
 
@@ -138,10 +126,27 @@ export default function Camera({ children }) {
         // Put geometry data into buffer
         setColors(context, colors);
 
-        // Turn on the color attribute
+        return colorBuffer;
+    }
+
+    const drawAtPosition = (geometry, colors, triangleCount, x, y, z) => {
+        if (!geometry || !colors) {
+            return;
+        }
+        context.bindBuffer(context.ARRAY_BUFFER, geometry);
+
+        // Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+        var size = 3;          // 3 components per iteration
+        var type = context.FLOAT;   // the data is 32bit floats
+        var normalize = false; // don't normalize the data
+        var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+        var offset = 0;        // start at the beginning of the buffer
+        context.vertexAttribPointer(
+            positionLocation, size, type, normalize, stride, offset);
+
         context.enableVertexAttribArray(colorLocation);
         // Bind the color buffer.
-        context.bindBuffer(context.ARRAY_BUFFER, colorBuffer);
+        context.bindBuffer(context.ARRAY_BUFFER, colors);
 
         // Tell the attribute how to get data out of colorBuffer (ARRAY_BUFFER)
         var size = 3;                 // 3 components per iteration
@@ -152,10 +157,6 @@ export default function Camera({ children }) {
         context.vertexAttribPointer(
             colorLocation, size, type, normalize, stride, offset);
 
-        return colorBuffer;
-    }
-
-    const drawAtPosition = (geometry, colors, x, y, z) => {
         // starting with the view projection matrix
         // compute a matrix for the F
         var matrix = m4.translate(viewProjectionMatrix, v3.create(x, z, y));
@@ -166,7 +167,8 @@ export default function Camera({ children }) {
         // Draw the geometry.
         var primitiveType = context.TRIANGLES;
         var offset = 0;
-        var count = 16 * 6;
+        var count = triangleCount * 6;
+
         context.drawArrays(primitiveType, offset, count);
     }
 
