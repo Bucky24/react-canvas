@@ -25,6 +25,7 @@ const App = ({}) => {
 			onWheel={({x, y}) => {
 				console.log('wheel', x, y);
 			}}
+			debug={true}
 		>
 			<>
 				<Shape

@@ -220,6 +220,7 @@ const canvasProps = {
 	captureAllKeyEvents: PropTypes.bool,
 	drawWidth: PropTypes.number,
 	drawHeight: PropTypes.number,
+	debug: PropTypes.bool,
 }
 
 const canvasDefaultProps = {
@@ -256,7 +257,15 @@ class Canvas extends React.Component {
 		// count of how many times we've force-rendered (generally used to determine if the only reason we're rendering is because an image loaded)
 		this.forceRenderCount = 0;
 	}
+
+	log(prefix, ...args) {
+		if (this.props.debug) {
+            console.log(prefix + ":", ...args);
+        }
+	}
+
 	registerListener(event, fn) {
+		this.log("Canvas", "Registering listener for event " + event);
 		if (!this.listeners[event]) {
 			this.listeners[event] = [];
 		}
@@ -266,6 +275,8 @@ class Canvas extends React.Component {
 		if (!this.listeners[event]) {
 			return;
 		}
+
+		this.log("Canvas", "Unregistering listener for event " + event);
 		
 		const index = this.listeners[event].indexOf(fn);
 		
@@ -273,6 +284,7 @@ class Canvas extends React.Component {
 		this.listeners[event].splice(index, 1);
 	}
 	forceRerender() {
+		this.log("Canvas", "forceRerender called");
 		this.forceRenderCount += 1;
 		this.forceUpdate();
 	}
@@ -296,6 +308,10 @@ class Canvas extends React.Component {
 			forceRenderCount: this.forceRenderCount,
             width,
             height,
+			debug: this.props.debug,
+			log: (...args) => {
+				this.log(...args);
+			},
 		};
 	}
 	UNSAFE_componentWillUpdate(newProps) {
@@ -469,10 +485,13 @@ class Canvas extends React.Component {
 			newChildren = [newChildren];
 		}
 
+		this.log("Canvas", "Rendering canvas");
+
 		const refFunc = (c) => {
 			if (c) {
 				const newContext = c.getContext('2d');
 				if (this.state.context !== newContext) {
+					this.log("Canvas", "Canvas context updated, likely new canvas created");
 					this.canvas = c;
 					this.setState({
 						context: newContext

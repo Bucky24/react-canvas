@@ -3,9 +3,9 @@ import { CanvasContext, Text, Shape } from 'react-canvas';
 
 const Thing = () => {
 	const foo = 'bar';
-	const { forceRenderCount } = useContext(CanvasContext);
+	const { forceRenderCount, log } = useContext(CanvasContext);
 
-	console.log(forceRenderCount);
+	log("Thing", forceRenderCount);
 	return (<>
 		<Shape
             x={200}
