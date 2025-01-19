@@ -47,6 +47,7 @@ const App = ({}) => {
 			onMouseUp={({ x, y }) => {
 				setPos({ x: x/zoomRef.current,  y: y/zoomRef.current });
 			}}
+			debug={true}
 		>
 			<Rect x={0} y={0} x2={600} y2={400} color="#fff" fill={true} />
 			<CompoundElement

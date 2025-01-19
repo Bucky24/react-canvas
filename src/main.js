@@ -1218,7 +1218,7 @@ function getElementsForCompoundElement(children) {
 	return allResults;
 }
 
-function CompoundElement({ children, yOff, xOff, extraData, zoom, maxZoom, zoomAffectOffset, noZoomPosition, zoomXOff, zoomYOff }) {
+function CompoundElement({ id, children, yOff, xOff, extraData, zoom, maxZoom, zoomAffectOffset, noZoomPosition, zoomXOff, zoomYOff }) {
 	const canvasContext = useContext(CanvasContext);
 	const prevPropsRef = useRef({});
 	const renderRef = useRef(null);
@@ -1242,6 +1242,10 @@ function CompoundElement({ children, yOff, xOff, extraData, zoom, maxZoom, zoomA
 		};
 	
 		if (!isEqual(prevPropsRef.current, checkProps)) {
+			if (canvasContext.debug) {
+				const childrenEqual = isEqual(prevPropsRef.current.children, children);
+				canvasContext.log("CompondElement " + (id || ''), "Rendering. Previous props did not equal check props", prevPropsRef.current, checkProps, "Children equal?", childrenEqual);
+			}
 			prevPropsRef.current = checkProps;
 	
 			// re-render our image
@@ -1253,6 +1257,7 @@ function CompoundElement({ children, yOff, xOff, extraData, zoom, maxZoom, zoomA
 					forceRerender: () => {
 						// we want to know if this happens because it's probably due to an image loading
 						// in this case clear the previous props so the next time we render, we rebuild the image
+						canvasContext.log("CompondElement " + (id || ''), "Render to canvas complete, re-rendering to display image");
 						prevPropsRef.current = {};
 						canvasContext.forceRerender();
 					},
