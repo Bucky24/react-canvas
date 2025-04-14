@@ -67,7 +67,7 @@ The Shape element is simple-it draws a shape centered around a given point. Note
 | x  | The origin x coord of the shape |
 | y   | The origin y coord of the shape  |
 | points | An array containing objects with x and y parameters. This will form the body of the shape. Note that all coords in this array are relative to the x and y given as top level params. |
-| color | A hex color code, which determines the color of the shape |
+| color | Any color code that can be read by the [strokeStyle](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/strokeStyle#examples) param, which determines the color of the shape. This can be a hex code, rgba values or the name of a color like `aliceblue` |
 | fill | a boolean value, which determines if the shape is drawn as an outline (false) or a filled in shape (true) |
 | close | A boolean value (default true) which determines if the shape's path is closed before drawing, or left empty. Closing the path means a line will be drawn from the last point to the first point. |
 
@@ -102,8 +102,8 @@ Draws text to the screen at the given coordinates.
 | ----------- | ----------- |
 | x  | The origin x coord of the text |
 | y   | The origin y coord of the text |
-| color | the color for the text (default black) |
-| font | the font for the text (default 12px Arial) |
+| color | Any color code that can be read by the [fillStyle](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fillStyle) which determines the color for the text (default `black` or `#000`). This can be a hex code, rgba values or the name of a color like `aliceblue` |
+| font | The font for the text (default 12px Arial) |
 
 ##### Children
 
@@ -267,7 +267,7 @@ The Line element draws a line of a specific color between two given points.
 | y | The origin y coord of the line  |
 | x2 | The destination x coord of the line |
 | y2 | The destination y coord of the line  |
-| color | A hex color code, which determines the color of the line |
+| color | Any color code that can be read by the [strokeStyle](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/strokeStyle#examples) param, which determines the color of the line. This can be a hex code, rgba values or the name of a color like `aliceblue` |
 
 ##### Example
 
@@ -298,7 +298,7 @@ The Rect element is just a wrapper around Shape that returns a rectangle drawn b
 | y | The second y coord of the rectangle |
 | x2 | The second x coord of the rectangle |
 | y2 | The second y coord of the rectangle |
-| color | A hex color code, which determines the color of the rectangle |
+| color | Any color code that can be read by the [strokeStyle](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/strokeStyle#examples) param, which determines the color of the rectangle. This can be a hex code, rgba values or the name of a color like `aliceblue` |
 | fill | Boolean, indicates if the rectangle should be filled or an outline |
 
 ##### Example
@@ -330,7 +330,7 @@ Draws a circle with a specific position and radius.
 | x | The x position of the circle center |
 | y | The y position of the circle center |
 | radius | The radius of the circle |
-| color | A hex color code, which determines the color of the circle |
+| color | Any color code that can be read by the [strokeStyle](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/strokeStyle#examples) param, which determines the color of the circle. This can be a hex code, rgba values or the name of a color like `aliceblue` |
 | fill | Boolean, indicates if the circle should be filled or an outline |
 
 ##### Example
@@ -364,7 +364,7 @@ Draws a semi-circle between two angles with a specific position and radius.
 | startAngle | The start angle in radians of the arc |
 | endAngle | The eng angle in radians of the arc |
 | sector | Boolean, indicates if the drawn shape should be a slice of pie (true) or just the outer part of the circle (false) |
-| color | A hex color code, which determines the color of the arc |
+| color | Any color code that can be read by the [strokeStyle](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/strokeStyle#examples) param, which determines the color of the arc. This can be a hex code, rgba values or the name of a color like `aliceblue`c |
 | fill | Boolean, indicates if the arc should be filled or an outline |
 | closed | Boolean, determines if the arc should close its path (draw a line back to the start) or not |
 
