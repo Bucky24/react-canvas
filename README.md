@@ -103,9 +103,10 @@ Draws text to the screen at the given coordinates.
 | x  | The origin x coord of the text |
 | y   | The origin y coord of the text |
 | color | Any color code that can be read by the [fillStyle](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fillStyle) which determines the color for the text (default `black` or `#000`). This can be a hex code, rgba values or the name of a color like `aliceblue` |
+| font | The font for the text (default 12px Arial) |
 | background | A boolean value to dictate whether the text should have a box background behind the text |
 | backgroundColor | Any color code that can be read by the [fillStyle](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fillStyle) which determines the color for background of the text if `background` is true. The default value is `rgba(255, 255, 255, 0.5)` to allow background elements to be seen. This can be a hex code, rgba values or the name of a color like `aliceblue` |
-| font | The font for the text (default 12px Arial) |
+| padding | A value in pixels of how far the edge of the background box will be away from the text |
 
 ##### Children
 

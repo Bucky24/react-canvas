@@ -545,17 +545,17 @@ const Text = ({ children, x, y, color, font, backgroundColor, padding, backgroun
 		const text = children.join('');
 
 		if (background) {
-			const metrics = context.measureText(text);
-			const textWidth = metrics.width;
+			const textWidth = context.measureText(text).width;
 			const textHeight = parseInt(font, 10); // crude estimate of height
 
 			// Draw background box
 			context.fillStyle = backgroundColor;
-			context.fillRect(x - padding, y - textHeight, textWidth + padding * 2, textHeight + padding * 2);
+			context.fillRect(x - padding / 2, y - padding / 2 - textHeight, textWidth + padding, textHeight + padding);
 		}
 
 		// Draw the text
 		context.fillStyle = color;
+		context.textBaseline = "bottom";
 		context.fillText(text, x, y);
 
 		context.restore();
