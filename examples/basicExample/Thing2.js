@@ -20,6 +20,7 @@ class Thing2 extends CanvasComponent {
             <Text
                 x={5 + x}
                 y={20 + y}
+                background
             >
                 Blah blah
             </Text>
