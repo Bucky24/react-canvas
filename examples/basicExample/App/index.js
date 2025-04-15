@@ -63,6 +63,8 @@ const App = ({}) => {
 				y={80}
 				font="24px Times New Roman"
 				color="#00f"
+				background={true}
+				backgroundColor="#FF0000"
 			>
 				Big Text
 			</Text>

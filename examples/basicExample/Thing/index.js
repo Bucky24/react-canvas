@@ -21,6 +21,10 @@ const Thing = () => {
 		<Text
 			x={205}
 			y={220}
+			color={"#FFF"}
+			background
+			backgroundColor="rgba(0,0,0,0.5)"
+			padding={50}
 		>
 			Blah {foo}
 		</Text>

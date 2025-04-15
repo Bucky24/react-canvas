@@ -517,7 +517,7 @@ class Canvas extends React.Component {
 Canvas.propTypes = canvasProps;
 Canvas.defaultProps = canvasDefaultProps;
 
-const Text = ({ children, x, y, color, font }) => {
+const Text = ({ children, x, y, color, font, backgroundColor, padding, background }) => {
 	const withContext = useWithContext();
 
 	return withContext((context) => {
@@ -527,13 +527,37 @@ const Text = ({ children, x, y, color, font }) => {
 		if (!font) {
 			font = "12px Arial";
 		}
-		context.save();
-		context.font = font;
-		context.fillStyle = color;
+		if (!padding) {
+			padding = 2;
+		}
+		if (!backgroundColor) {
+			backgroundColor = "rgba(255, 255, 255, 0.5)";
+		}
+		if (!background) { 
+			background = false;
+		}
 		if (!Array.isArray(children)) {
 			children = [children];
 		}
-		context.fillText(children.join(''), x, y);
+
+		context.save();
+		context.font = font;
+		const text = children.join('');
+
+		if (background) {
+			const textWidth = context.measureText(text).width;
+			const textHeight = parseInt(font, 10); // crude estimate of height
+
+			// Draw background box
+			context.fillStyle = backgroundColor;
+			context.fillRect(x - padding / 2, y - padding / 2 - textHeight, textWidth + padding, textHeight + padding);
+		}
+
+		// Draw the text
+		context.fillStyle = color;
+		context.textBaseline = "bottom";
+		context.fillText(text, x, y);
+
 		context.restore();
 	});
 }
