@@ -7,7 +7,7 @@ import {
     Image
 } from 'react-canvas';
 
-import styles from '../styles.css';
+import styles from '../styles.module.css';
 import { Rect } from '../../src';
 
 import SampleImage from "./sampleImage.png";

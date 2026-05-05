@@ -15,7 +15,7 @@ import Thing2 from '../Thing2';
 
 import sampleImage from '../sampleImage.png';
 
-import styles from './styles.css';
+import styles from './styles.module.css';
 
 const App = ({}) => {
 	return (<div className={styles.appRoot}>

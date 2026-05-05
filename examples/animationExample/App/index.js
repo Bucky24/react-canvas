@@ -6,7 +6,7 @@ import {
 	Rect,
 } from '@bucky24/react-canvas';
 
-import styles from './styles.css';
+import styles from './styles.module.css';
 
 import SpriteSheet from '../SpriteSheet.png';
 

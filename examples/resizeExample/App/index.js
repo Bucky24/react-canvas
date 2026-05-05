@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import { Canvas, Text, Shape, Image } from 'react-canvas';
 import Thing from '../Thing';
 
-import styles from './styles.css';
+import styles from './styles.module.css';
 
 class App extends React.Component {
 	constructor(props) {

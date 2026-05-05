@@ -3,7 +3,7 @@ import { Canvas } from 'react-canvas';
 import Button from '../Button';
 import MyText from '../Text';
 
-import styles from './styles.css';
+import styles from './styles.module.css';
 
 class App extends React.Component {
 	constructor(props) {
