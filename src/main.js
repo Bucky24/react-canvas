@@ -233,7 +233,8 @@ class Canvas extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			context: null
+			context: null,
+			touches: null,
 		};
 		
 		this.indexList = [];
@@ -405,20 +406,50 @@ class Canvas extends React.Component {
 		};
 	}
 	handleMouseMove(event) {
-		this.triggerEvent(EventTypes.MOVE, this.getRealCoords(event));
+		const coords = this.getRealCoords(event);
+		if (this.state.touches && coords.touches && coords.touches.length > 1 && this.state.touches.length > 1) {
+			const prevDist = Math.sqrt(Math.pow(this.state.touches[0].x - this.state.touches[1].x, 2) + Math.pow(this.state.touches[0].y - this.state.touches[1].y, 2));
+			const newDist = Math.sqrt(Math.pow(coords.touches[0].x - coords.touches[1].x, 2) + Math.pow(coords.touches[0].y - coords.touches[1].y, 2));
+			const diff = newDist - prevDist;
+			// convert to wheel coords, this assumes that 0.48 movement is similar to 120 wheel
+			const converted = Math.floor(diff * 250);
+			// don't trigger unless we've moved a lot
+			if (Math.abs(converted) > 800) {
+				console.log(converted, prevDist, newDist);
+				this.triggerEvent(EventTypes.WHEEL, {
+					...this.getRealCoords(event),
+					up: converted > 0,
+				});
+
+				this.setState({
+					touches: coords.touches,
+				});
+			}
+		}
+		this.triggerEvent(EventTypes.MOVE, coords);
 		event.preventDefault();
 	}
 	handleMouseDown(event) {
+		const coords = this.getRealCoords(event);
 		this.triggerEvent(EventTypes.MOUSE_DOWN, {
-			...this.getRealCoords(event),
+			...coords,
 			button: ButtonMap[event.button]
 		});
+
+		if (coords.touches && coords.touches.length > 0) {
+			this.setState({
+				touches: coords.touches,
+			});
+		}
 		event.preventDefault();
 	}
 	handleMouseUp(event) {
 		this.triggerEvent(EventTypes.MOUSE_UP, {
 			...this.getRealCoords(event),
 			button: ButtonMap[event.button]
+		});
+		this.setState({
+			touches: null,
 		});
 		event.preventDefault();
 	}
